@@ -5,12 +5,14 @@ import '../../../core/constants/app_sizes.dart';
 class CategoryCard extends StatelessWidget {
   final String title;
   final String imagePath;
+  final bool isNetworkImage;
   final VoidCallback onTap;
 
   const CategoryCard({
     super.key,
     required this.title,
     required this.imagePath,
+    this.isNetworkImage = false,
     required this.onTap,
   });
 
@@ -25,7 +27,9 @@ class CategoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppSize.width(0.04)),
           image: DecorationImage(
-            image: AssetImage(imagePath),
+            image: isNetworkImage 
+                ? NetworkImage(imagePath) as ImageProvider
+                : AssetImage(imagePath),
             fit: BoxFit.cover,
           ),
         ),

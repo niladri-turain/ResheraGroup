@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:resheragroup/core/constants/app_images_png.dart';
+import 'package:provider/provider.dart';
 import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:resheragroup/core/constants/app_sizes.dart';
 import 'package:resheragroup/features/dashboard/screen/dashboard_screen.dart';
-import 'package:resheragroup/features/quickPick/model/category_model.dart';
+import 'package:resheragroup/features/quickPick/provider/category_provider.dart';
 import 'package:resheragroup/features/quickPick/screen/subCategory/sub_category_screeen.dart';
 import 'package:resheragroup/features/quickPick/widgets/category_card_widget.dart';
 import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dart';
@@ -19,135 +19,14 @@ class QuickPickScreen extends StatefulWidget {
 }
 
 class _QuickPickScreenState extends State<QuickPickScreen> {
-  late final List<CategoryModel> categories;
   int selectedIndex = 1; // Category selected by default
 
   @override
   void initState() {
     super.initState();
-
-    categories = [
-      CategoryModel(
-        title: "Food & Beverages",
-        image: AppImagesPng.grocery,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Food & Beverages"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Construction & Hardware",
-        image: AppImagesPng.garments,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Construction & Hardware"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Home & Living",
-        image: AppImagesPng.restuarant,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Home & Living"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Fashion & Lifestyle",
-        image: AppImagesPng.electrical,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Fashion & Lifestyle"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Automobile",
-        image: AppImagesPng.electrical,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Automobile"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Education & Stationery",
-        image: AppImagesPng.pharmacy,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Education & Stationery"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Agriculture & Nature",
-        image: AppImagesPng.furniture,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Agriculture & Nature"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Retail & General",
-        image: AppImagesPng.toy,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Retail & General"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Health & Medical",
-        image: AppImagesPng.book,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Health & Medical"),
-            ),
-          );
-        },
-      ),
-      CategoryModel(
-        title: "Sports & Others",
-        image: AppImagesPng.book,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SubCategoryScreen(categoryTitle: "Sports & Others"),
-            ),
-          );
-        },
-      ),
-    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryProvider>().fetchCategories();
+    });
   }
 
   void _onNavTap(int index) {
@@ -223,25 +102,63 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                       ),
                     ),
                     SizedBox(height: AppSize.height(0.015)),
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics:
-                      const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
-                      crossAxisSpacing: AppSize.width(0.02),
-                      mainAxisSpacing: AppSize.height(0.015),
-                      childAspectRatio: 1,
-                      children: List.generate(
-                        categories.length,
-                            (index) {
-                          final item = categories[index];
-                          return CategoryCard(
-                            title: item.title,
-                            imagePath: item.image,
-                            onTap: item.onTap,
+                    Consumer<CategoryProvider>(
+                      builder: (context, provider, child) {
+                        if (provider.isLoading) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: CircularProgressIndicator(),
+                            ),
                           );
-                        },
-                      ),
+                        }
+
+                        if (provider.errorMessage != null) {
+                          return Center(
+                            child: Column(
+                              children: [
+                                Text("Error: ${provider.errorMessage}"),
+                                ElevatedButton(
+                                  onPressed: () => provider.fetchCategories(),
+                                  child: const Text("Retry"),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        if (provider.categories.isEmpty) {
+                          return const Center(child: Text("No categories found"));
+                        }
+
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: provider.categories.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: AppSize.width(0.02),
+                            mainAxisSpacing: AppSize.height(0.015),
+                            childAspectRatio: 1,
+                          ),
+                          itemBuilder: (context, index) {
+                            final category = provider.categories[index];
+                            return CategoryCard(
+                              title: category.name,
+                              imagePath: category.image,
+                              isNetworkImage: true,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SubCategoryScreen(categoryTitle: category.name),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),
