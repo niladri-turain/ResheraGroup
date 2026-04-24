@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../checkout/check_out_screen.dart';
 import 'groceryItemWidgets/custom_delivery_address_widget.dart';
 import 'groceryItemWidgets/fruits_row_wraper.dart';
 import 'groceryItemWidgets/product_grid_section.dart';
@@ -201,21 +202,31 @@ class _GroceryItemsScreensState extends State<GroceryItemsScreens> {
                 child: Center(
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.5, // 🔥 responsive width
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0XFF9333ea),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "View Cart ($totalItems items)",
-                            style: const TextStyle(color: Colors.white),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CheckOutScreen(),
                           ),
-                          const Icon(Icons.arrow_forward, color: Colors.white),
-                        ],
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0XFF9333ea),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "View Cart ($totalItems items)",
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            const Icon(Icons.arrow_forward, color: Colors.white),
+                          ],
+                        ),
                       ),
                     ),
                   ),

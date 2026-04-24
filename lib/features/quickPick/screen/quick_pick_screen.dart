@@ -29,7 +29,7 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
 
     categories = [
       CategoryModel(
-        title: "Grocery & Essentials",
+        title: "Food & Beverages",
         image: AppImagesPng.grocery,
         onTap: () {
           Navigator.push(
