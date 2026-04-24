@@ -4,8 +4,7 @@ import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:resheragroup/core/constants/app_sizes.dart';
 import 'package:resheragroup/features/dashboard/screen/dashboard_screen.dart';
 import 'package:resheragroup/features/quickPick/model/category_model.dart';
-import 'package:resheragroup/features/quickPick/screen/groceryItems/grocery_items_screens.dart';
-import 'package:resheragroup/features/quickPick/screen/restaurantItems/restaurant_items_screen.dart';
+import 'package:resheragroup/features/quickPick/screen/subCategory/sub_category_screeen.dart';
 import 'package:resheragroup/features/quickPick/widgets/category_card_widget.dart';
 import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dart';
 
@@ -35,24 +34,31 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const GroceryItemsScreens(),
+              builder: (_) => SubCategoryScreen(categoryTitle: "Food & Beverages"),
             ),
           );
         },
       ),
       CategoryModel(
-        title: "Construction & Hardware ",
+        title: "Construction & Hardware",
         image: AppImagesPng.garments,
-        onTap: () => debugPrint("Fashion"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SubCategoryScreen(categoryTitle: "Construction & Hardware"),
+            ),
+          );
+        },
       ),
       CategoryModel(
-        title: "Home & Living ",
+        title: "Home & Living",
         image: AppImagesPng.restuarant,
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const RestaurantItemsScreen(),
+              builder: (_) => SubCategoryScreen(categoryTitle: "Home & Living"),
             ),
           );
         },
@@ -60,37 +66,86 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
       CategoryModel(
         title: "Fashion & Lifestyle",
         image: AppImagesPng.electrical,
-        onTap: () => debugPrint("Electronics"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SubCategoryScreen(categoryTitle: "Fashion & Lifestyle"),
+            ),
+          );
+        },
       ),
       CategoryModel(
         title: "Automobile",
         image: AppImagesPng.electrical,
-        onTap: () => debugPrint("Electronics"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SubCategoryScreen(categoryTitle: "Automobile"),
+            ),
+          );
+        },
       ),
       CategoryModel(
         title: "Education & Stationery",
         image: AppImagesPng.pharmacy,
-        onTap: () => debugPrint("Health"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SubCategoryScreen(categoryTitle: "Education & Stationery"),
+            ),
+          );
+        },
       ),
       CategoryModel(
         title: "Agriculture & Nature",
         image: AppImagesPng.furniture,
-        onTap: () => debugPrint("Home"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SubCategoryScreen(categoryTitle: "Agriculture & Nature"),
+            ),
+          );
+        },
       ),
       CategoryModel(
         title: "Retail & General",
         image: AppImagesPng.toy,
-        onTap: () => debugPrint("Toys"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SubCategoryScreen(categoryTitle: "Retail & General"),
+            ),
+          );
+        },
       ),
       CategoryModel(
-        title: "Health & Medical ",
+        title: "Health & Medical",
         image: AppImagesPng.book,
-        onTap: () => debugPrint("Books"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SubCategoryScreen(categoryTitle: "Health & Medical"),
+            ),
+          );
+        },
       ),
       CategoryModel(
         title: "Sports & Others",
         image: AppImagesPng.book,
-        onTap: () => debugPrint("Books"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SubCategoryScreen(categoryTitle: "Sports & Others"),
+            ),
+          );
+        },
       ),
     ];
   }
