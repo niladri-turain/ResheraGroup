@@ -101,38 +101,38 @@ class CustomHeaderWidget extends StatelessWidget {
           SizedBox(height: AppSize.height(0.02)),
 
           /// 🔍 Search Bar
-          Container(
-            height: AppSize.height(0.055),
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSize.width(0.03),
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppSize.width(0.06)),
-            ),
-            child: TextField(
-              textAlignVertical: TextAlignVertical.center,
-
-              onChanged: onSearch,
-              style: TextStyle(
-                fontSize: AppSize.width(0.035),
-              ),
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
-                border: InputBorder.none,
-                hintText: 'Search "desired category"',
-                hintStyle: TextStyle(
-                  color: Colors.grey,
-                  fontSize: AppSize.width(0.032),
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  size: AppSize.width(0.05),
-                ),
-              ),
-            ),
-          ),
+          // Container(
+          //   height: AppSize.height(0.055),
+          //   padding: EdgeInsets.symmetric(
+          //     horizontal: AppSize.width(0.03),
+          //   ),
+          //   decoration: BoxDecoration(
+          //     color: Colors.white,
+          //     borderRadius: BorderRadius.circular(AppSize.width(0.06)),
+          //   ),
+          //   child: TextField(
+          //     textAlignVertical: TextAlignVertical.center,
+          //
+          //     onChanged: onSearch,
+          //     style: TextStyle(
+          //       fontSize: AppSize.width(0.035),
+          //     ),
+          //     decoration: InputDecoration(
+          //       isDense: true,
+          //       contentPadding: EdgeInsets.zero,
+          //       border: InputBorder.none,
+          //       hintText: 'Search "desired category"',
+          //       hintStyle: TextStyle(
+          //         color: Colors.grey,
+          //         fontSize: AppSize.width(0.032),
+          //       ),
+          //       prefixIcon: Icon(
+          //         Icons.search,
+          //         size: AppSize.width(0.05),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

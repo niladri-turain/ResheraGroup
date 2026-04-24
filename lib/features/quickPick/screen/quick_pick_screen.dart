@@ -41,12 +41,12 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
         },
       ),
       CategoryModel(
-        title: "Fashion & Apparel",
+        title: "Construction & Hardware ",
         image: AppImagesPng.garments,
         onTap: () => debugPrint("Fashion"),
       ),
       CategoryModel(
-        title: "Restaurant",
+        title: "Home & Living ",
         image: AppImagesPng.restuarant,
         onTap: () {
           Navigator.push(
@@ -58,27 +58,37 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
         },
       ),
       CategoryModel(
-        title: "Electronics & Gadgets",
+        title: "Fashion & Lifestyle",
         image: AppImagesPng.electrical,
         onTap: () => debugPrint("Electronics"),
       ),
       CategoryModel(
-        title: "Health & Pharmacy",
+        title: "Automobile",
+        image: AppImagesPng.electrical,
+        onTap: () => debugPrint("Electronics"),
+      ),
+      CategoryModel(
+        title: "Education & Stationery",
         image: AppImagesPng.pharmacy,
         onTap: () => debugPrint("Health"),
       ),
       CategoryModel(
-        title: "Home & Furniture",
+        title: "Agriculture & Nature",
         image: AppImagesPng.furniture,
         onTap: () => debugPrint("Home"),
       ),
       CategoryModel(
-        title: "Toys,Baby & Kids",
+        title: "Retail & General",
         image: AppImagesPng.toy,
         onTap: () => debugPrint("Toys"),
       ),
       CategoryModel(
-        title: "Books & Education",
+        title: "Health & Medical ",
+        image: AppImagesPng.book,
+        onTap: () => debugPrint("Books"),
+      ),
+      CategoryModel(
+        title: "Sports & Others",
         image: AppImagesPng.book,
         onTap: () => debugPrint("Books"),
       ),
