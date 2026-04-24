@@ -116,6 +116,7 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                         if (provider.errorMessage != null) {
                           return Center(
                             child: Column(
+
                               children: [
                                 Text("Error: ${provider.errorMessage}"),
                                 ElevatedButton(

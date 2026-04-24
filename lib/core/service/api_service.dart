@@ -27,7 +27,7 @@ class ApiService {
     } on SocketException {
       throw Exception('No Internet connection');
     } catch (e) {
-      throw Exception('GET Error: $e');
+      rethrow;
     }
   }
 
@@ -43,7 +43,7 @@ class ApiService {
     } on SocketException {
       throw Exception('No Internet connection');
     } catch (e) {
-      throw Exception('POST Error: $e');
+      rethrow;
     }
   }
 
@@ -59,7 +59,7 @@ class ApiService {
     } on SocketException {
       throw Exception('No Internet connection');
     } catch (e) {
-      throw Exception('PUT Error: $e');
+      rethrow;
     }
   }
 
@@ -74,7 +74,7 @@ class ApiService {
     } on SocketException {
       throw Exception('No Internet connection');
     } catch (e) {
-      throw Exception('DELETE Error: $e');
+      rethrow;
     }
   }
 
@@ -82,25 +82,21 @@ class ApiService {
   dynamic _processResponse(http.Response response) {
     final responseBody = response.body;
 
-    switch (response.statusCode) {
-      case 200:
-      case 201:
-        try {
-          return jsonDecode(responseBody);
-        } catch (e) {
-          throw Exception('Format Error: Invalid JSON response');
-        }
-      case 400:
-        throw Exception('Bad Request: $responseBody');
-      case 401:
-      case 403:
-        throw Exception('Unauthorized: $responseBody');
-      case 404:
-        throw Exception('Not Found: $responseBody');
-      case 500:
-        throw Exception('Internal Server Error: $responseBody');
-      default:
-        throw Exception('Error occurred with code: ${response.statusCode}');
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      try {
+        return jsonDecode(responseBody);
+      } catch (e) {
+        throw Exception('Invalid JSON response');
+      }
+    } else {
+      String errorMessage = 'Something went wrong';
+      try {
+        final Map<String, dynamic> errorData = jsonDecode(responseBody);
+        errorMessage = errorData['message'] ?? errorMessage;
+      } catch (_) {
+        errorMessage = 'Error ${response.statusCode}: $responseBody';
+      }
+      throw Exception(errorMessage);
     }
   }
 }

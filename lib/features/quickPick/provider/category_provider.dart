@@ -25,7 +25,7 @@ class CategoryProvider with ChangeNotifier {
       final businessCategoryResponse = BusinessCategoryResponse.fromJson(response);
       _categories = businessCategoryResponse.data;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {
       _isLoading = false;
       notifyListeners();
