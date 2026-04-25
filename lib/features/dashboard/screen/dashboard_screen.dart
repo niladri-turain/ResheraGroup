@@ -5,7 +5,7 @@ import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:resheragroup/core/constants/app_webp.dart';
 
 import 'package:resheragroup/features/dashboard/widgets/reusable_slider.dart';
-import 'package:resheragroup/features/quickPick/screen/quick_pick_screen.dart';
+import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
 
 import '../../../core/constants/app_sizes.dart';
 

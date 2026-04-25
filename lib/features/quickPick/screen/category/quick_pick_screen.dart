@@ -9,7 +9,7 @@ import 'package:resheragroup/features/quickPick/widgets/category_card_widget.dar
 import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dart';
 
 
-import '../widgets/custom_quickpick_buttom_navigation.dart';
+import '../../widgets/custom_quickpick_buttom_navigation.dart';
 
 class QuickPickScreen extends StatefulWidget {
   const QuickPickScreen({super.key});
