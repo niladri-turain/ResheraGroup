@@ -105,22 +105,37 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                     Consumer<CategoryProvider>(
                       builder: (context, provider, child) {
                         if (provider.isLoading) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(20.0),
+                          return SizedBox(
+                            height: AppSize.height(0.6),
+                            width: double.infinity,
+                            child: const Center(
                               child: CircularProgressIndicator(),
                             ),
                           );
                         }
 
                         if (provider.errorMessage != null) {
-                          return Center(
+                          return SizedBox(
+                            height: AppSize.height(0.4),
+                            width: double.infinity,
                             child: Column(
-
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("Error: ${provider.errorMessage}"),
+                                Text(
+                                  provider.errorMessage!,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
                                 ElevatedButton(
                                   onPressed: () => provider.fetchCategories(),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF7B2CBF),
+                                    foregroundColor: Colors.white,
+                                  ),
                                   child: const Text("Retry"),
                                 ),
                               ],
