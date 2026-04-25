@@ -153,9 +153,9 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                           itemCount: provider.categories.length,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            crossAxisSpacing: AppSize.width(0.02),
+                            crossAxisSpacing: AppSize.width(0.03),
                             mainAxisSpacing: AppSize.height(0.015),
-                            childAspectRatio: 1,
+                            childAspectRatio: 1.25,
                           ),
                           itemBuilder: (context, index) {
                             final category = provider.categories[index];
@@ -167,7 +167,10 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => SubCategoryScreen(categoryTitle: category.name),
+                                    builder: (_) => SubCategoryScreen(
+                                      categoryTitle: category.name,
+                                      categoryId: category.id,
+                                    ),
                                   ),
                                 );
                               },

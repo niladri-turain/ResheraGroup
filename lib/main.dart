@@ -4,6 +4,8 @@ import 'package:resheragroup/main_screen.dart';
 import 'core/di/injection_container.dart' as di;
 import 'features/quickPick/provider/category_provider.dart';
 
+import 'features/quickPick/provider/sub_category_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
@@ -11,6 +13,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider(create: (_) => SubCategoryProvider()),
       ],
       child: const MyApp(),
     ),

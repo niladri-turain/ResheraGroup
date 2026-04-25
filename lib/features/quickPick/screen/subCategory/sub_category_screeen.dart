@@ -1,78 +1,34 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_images_png.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../provider/sub_category_provider.dart';
 import '../../widgets/category_card_widget.dart';
 
-class SubCategoryScreen extends StatelessWidget {
+class SubCategoryScreen extends StatefulWidget {
   final String categoryTitle;
+  final String categoryId;
 
-  SubCategoryScreen({super.key, required this.categoryTitle});
+  const SubCategoryScreen({
+    super.key,
+    required this.categoryTitle,
+    required this.categoryId,
+  });
 
-  final Map<String, List<String>> subCategories = {
-    "Food & Beverages": [
-      "Restaurant",
-      "Fast Food",
-      "Cafe",
-      "Tea House",
-      "Sweet Shop",
-      "Cake Shop & Bakery",
-      "Ice Cream Parlour",
-      "Egg Shop",
-      "Raw Meat (Chicken / Fish / Mutton)",
-      "Fruits",
-      "Fresh Vegetables",
-      "Groceries",
-      "Departmental Store",
-      "Dry Fruits",
-      "Home Made Food Products",
-      "Factory Made Food Products"
-    ],
-    "Construction & Hardware": [
-      "Hardware Shop",
-      "Builders",
-      "Marble & Tiles",
-      "Electric Materials",
-      "Ply Shop",
-      "Home Paint"
-    ],
-    "Home & Living": ["Furniture", "Home Decoration", "Home Interior"],
-    "Fashion & Lifestyle": [
-      "Fashion (Male / Female)",
-      "Winter Wear",
-      "Shoes",
-      "Watches",
-      "Bags & Luggage",
-      "Boutiques",
-      "Cosmetics & Imitation Jewellery",
-      "Jewellery Shop"
-    ],
-    "Automobile": [
-      "Pre-Owned Cars & Bikes",
-      "Battery",
-      "Tyres",
-      "Car Decor Items"
-    ],
-    "Education & Stationery": ["Book / Pen / Pencil", "Stationery Goods"],
-    "Agriculture & Nature": [
-      "Agriculture",
-      "Nursery (Plants / Flowers)",
-      "Nursery (Fish)",
-      "Flower Shop"
-    ],
-    "Retail & General": [
-      "Gift Shop",
-      "Printing Press",
-      "Sculptor Making",
-      "Agarbatti Sticks",
-      "Dashakarma (Puja Items)"
-    ],
-    "Health & Medical": ["Medicine"],
-    "Sports & Others": ["Sports"],
-  };
+  @override
+  State<SubCategoryScreen> createState() => _SubCategoryScreenState();
+}
+
+class _SubCategoryScreenState extends State<SubCategoryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SubCategoryProvider>().fetchSubCategories(widget.categoryId);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final list = subCategories[categoryTitle.trim()] ?? [];
     AppSize.init(context);
 
     return Scaffold(
@@ -87,7 +43,7 @@ class SubCategoryScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          categoryTitle,
+          widget.categoryTitle,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -95,36 +51,71 @@ class SubCategoryScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: list.isEmpty
-          ? const Center(child: Text("No Sub-categories found"))
-          : SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSize.width(0.04),
-                vertical: AppSize.height(0.02),
+      body: Consumer<SubCategoryProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    provider.errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => provider.fetchSubCategories(widget.categoryId),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7B2CBF),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text("Retry"),
+                  ),
+                ],
               ),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: list.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: AppSize.width(0.02),
-                  mainAxisSpacing: AppSize.height(0.015),
-                  childAspectRatio: 1,
-                ),
-                itemBuilder: (context, index) {
-                  return CategoryCard(
-                    title: list[index],
-                    // যেহেতু সাব-ক্যাটাগরির জন্য আলাদা ইমেজ নেই, তাই আমরা ক্যাটাগরির লজিক অনুযায়ী কোনো ডিফল্ট ইমেজ বা আইকন ব্যবহার করতে পারি।
-                    imagePath: AppImagesPng.toy,
-                    onTap: () {
-                      debugPrint("Tapped on ${list[index]}");
-                      // এখানে নির্দিষ্ট সাব-ক্যাটাগরির আইটেম পেজে যাওয়ার লজিক দিতে পারেন।
-                    },
-                  );
-                },
-              ),
+            );
+          }
+
+          if (provider.subCategories.isEmpty) {
+            return const Center(child: Text("No Sub-categories found"));
+          }
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSize.width(0.04),
+              vertical: AppSize.height(0.02),
             ),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: provider.subCategories.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: AppSize.width(0.02),
+                mainAxisSpacing: AppSize.height(0.015),
+                childAspectRatio: 1.25,
+              ),
+              itemBuilder: (context, index) {
+                final subCategory = provider.subCategories[index];
+                return CategoryCard(
+                  title: subCategory.name,
+                  imagePath: subCategory.image,
+                  isNetworkImage: true,
+                  onTap: () {
+                    debugPrint("Tapped on ${subCategory.name}");
+                    // Navigate to Items screen if needed
+                  },
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }
