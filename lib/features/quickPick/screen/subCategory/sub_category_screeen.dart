@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resheragroup/features/quickPick/screen/vendorList/vendor_list_screen.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../provider/sub_category_provider.dart';
 import '../../widgets/category_card_widget.dart';
@@ -129,7 +130,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const GroceryItemsScreens(),
+                              builder: (context) =>  VendorListScreen(categoryId: widget.categoryId,subCategoryId: subCategory.id),
                             ),
                           );
                         },

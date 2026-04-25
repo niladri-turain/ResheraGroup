@@ -119,7 +119,7 @@ class _GroceryItemsScreensState extends State<GroceryItemsScreens> {
 
                     Divider(color: const Color(0xffceaef3).withOpacity(0.2)),
 
-                    VendorList(vendors: vendors),
+                    // VendorList(vendors: vendors),
 
                     const SizedBox(height: 10),
                     FruitsList(fruits: fruits),

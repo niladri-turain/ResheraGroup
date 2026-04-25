@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resheragroup/features/quickPick/provider/vendor_provider.dart';
 import 'package:resheragroup/main_screen.dart';
 import 'core/di/injection_container.dart' as di;
 import 'features/quickPick/provider/category_provider.dart';
@@ -14,6 +15,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => SubCategoryProvider()),
+        ChangeNotifierProvider(create: (_) => VendorProvider()),
       ],
       child: const MyApp(),
     ),

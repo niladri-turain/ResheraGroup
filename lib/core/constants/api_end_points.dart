@@ -3,4 +3,5 @@ class ApiEndPoints {
   
   static const String businessCategories = "business-categories";
   static const String businessSubCategories = "business-subcategories";
+  static const String vendors = "vendors";
 }
