@@ -15,14 +15,14 @@ class VendorCategoryProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> fetchVendorCategories(String businessCategoryId, String subCategoryId) async {
+  Future<void> fetchVendorCategories(String businessCategoryId, String subCategoryId , String vendorId) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       final response = await _apiService.get(
-        '${ApiEndPoints.categories}?business_category_id=$businessCategoryId&business_sub_category_id=$subCategoryId',
+        '${ApiEndPoints.categories}?business_category_id=$businessCategoryId&business_sub_category_id=$subCategoryId&vendor_id=$vendorId',
       );
       final vendorCategoryResponse = VendorCategoryResponse.fromJson(response);
       _categories = vendorCategoryResponse.data;

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../widgets/custom_search_widget.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/vendor_provider.dart';
 import '../../widgets/vender_card_component.dart';
 
+import '../vendorCategory/vendor_category_list.dart';
 import '../../widgets/vendor_category_item_widget.dart';
 
 class VendorListScreen extends StatefulWidget {
@@ -35,7 +35,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<VendorProvider>().fetchVendorCategory(widget.categoryId, widget.subCategoryId);
-      context.read<VendorCategoryProvider>().fetchVendorCategories(widget.categoryId, widget.subCategoryId);
+     
     });
   }
 
@@ -124,55 +124,21 @@ class _VendorListScreenState extends State<VendorListScreen> {
                             backgroundImage: vendor.kycDetail?.shopPhoto?.url ?? "",
                             logoImage: vendor.kycDetail?.ownerPhoto?.url ?? "",
                             onTap: () {
-                              debugPrint("Tapped on ${vendor.businessName}");
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VendorCategoryList(
+                                    categoryId: widget.categoryId,
+                                    subCategoryId: widget.subCategoryId,
+                                    vendorId: vendor.id,
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },
                       ),
-                              Padding(
-                              padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Category List",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: AppSize.height(0.015)),
-                                  Consumer<VendorCategoryProvider>(
-                                    builder: (context, catProvider, child) {
-                                      if (catProvider.isLoading) {
-                                        return const Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      }
-                                      if (catProvider.categories.isEmpty) {
-                                        return const SizedBox();
-                                      }
-                                      return SizedBox(
-                                        height: AppSize.height(0.12),
-                                        child: ListView.builder(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: catProvider.categories.length,
-                                          itemBuilder: (context, catIndex) {
-                                            final category = catProvider.categories[catIndex];
-                                            return VendorCategoryItemWidget(
-                                              name: category.name,
-                                              image: category.image ?? "",
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  SizedBox(height: AppSize.height(0.02)),
-                                ],
-                              ),
-                            ),
+                            
                     ],
                   ),
                 );
