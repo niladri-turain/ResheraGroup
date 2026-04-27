@@ -4,14 +4,16 @@ import '../../../core/constants/app_sizes.dart';
 class VendorCard extends StatelessWidget {
   final String title;
   final String backgroundImage;
-  final String logoImage;
+  final String address;
+  final String vendorId;
   final VoidCallback onTap;
 
   const VendorCard({
     super.key,
     required this.title,
     required this.backgroundImage,
-    required this.logoImage,
+    required this.address,
+    required this.vendorId,
     required this.onTap,
   });
 
@@ -21,55 +23,71 @@ class VendorCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          image: DecorationImage(
-            image: NetworkImage(backgroundImage),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.2),
-              BlendMode.darken,
-            ),
-          ),
-        ),
+        margin: EdgeInsets.only(bottom: AppSize.height(0.02)),
+        width: double.infinity,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: ClipOval(
-                child: Image.network(
-                  logoImage,
-                  width: AppSize.width(0.12),
-                  height: AppSize.width(0.12),
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.store,
-                    size: AppSize.width(0.12),
-                    color: Colors.grey,
-                  ),
+            // Background Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.network(
+                backgroundImage,
+                height: AppSize.height(0.22),
+                width: double.infinity,
+                fit: BoxFit.fill,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: AppSize.height(0.22),
+                  width: double.infinity,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image, color: Colors.grey),
                 ),
               ),
             ),
-            SizedBox(height: AppSize.height(0.01)),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: AppSize.width(0.045),
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    offset: const Offset(1, 1),
-                    blurRadius: 3.0,
-                    color: Colors.black.withOpacity(0.5),
+            const SizedBox(height: 10),
+            // Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
+
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: AppSize.width(0.045),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  if (vendorId.isNotEmpty)
+                    Column(
+                      children: [
+                        SizedBox(height: 3,),
+                        Text(
+                          " ($vendorId)",
+                          style: TextStyle(
+
+                            color: Colors.grey[500],
+                            fontSize: AppSize.width(0.030),
+                            fontWeight: FontWeight.w400,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                 ],
+              ),
+            ),
+            // Address
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                address.isNotEmpty ? address : "No address provided",
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: AppSize.width(0.035),
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
           ],

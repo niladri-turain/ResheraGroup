@@ -77,24 +77,30 @@ class _VendorListScreenState extends State<VendorListScreen> {
                     padding: EdgeInsets.symmetric(
                         horizontal: AppSize.width(0.04),
                         vertical: AppSize.height(0.02)),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 8,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: AppSize.width(0.03),
-                        mainAxisSpacing: AppSize.height(0.015),
-                        childAspectRatio: 1.25,
-                      ),
+                    child: ListView.builder(
+                      itemCount: 4,
                       itemBuilder: (context, index) {
-                        return Shimmer.fromColors(
-                          baseColor: Colors.grey[300]!,
-                          highlightColor: Colors.grey[100]!,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(AppSize.width(0.04)),
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: AppSize.height(0.02)),
+                          child: Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: AppSize.height(0.22),
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Container(height: 15, width: 150, color: Colors.white),
+                                const SizedBox(height: 5),
+                                Container(height: 12, width: 200, color: Colors.white),
+                              ],
                             ),
                           ),
                         );
@@ -134,23 +140,18 @@ class _VendorListScreenState extends State<VendorListScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GridView.builder(
+                      ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         padding: EdgeInsets.all(AppSize.width(0.04)),
                         itemCount: provider.vendorCategory.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: AppSize.width(0.02),
-                          mainAxisSpacing: AppSize.height(0.015),
-                          childAspectRatio: 1.4,
-                        ),
                         itemBuilder: (context, index) {
                           final vendor = provider.vendorCategory[index];
                           return VendorCard(
                             title: vendor.businessName,
+                            vendorId: vendor.user?.vendorId ??"",
                             backgroundImage: vendor.kycDetail?.shopPhoto?.url ?? "",
-                            logoImage: vendor.kycDetail?.ownerPhoto?.url ?? "",
+                            address: vendor.user?.mobile ?? "",
                             onTap: () {
                               Navigator.push(
                                 context,
