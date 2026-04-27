@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resheragroup/features/quickPick/screen/vendorList/vendor_list_screen.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../provider/sub_category_provider.dart';
 import '../../widgets/category_card_widget.dart';
@@ -72,7 +73,34 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
             child: Consumer<SubCategoryProvider>(
               builder: (context, provider, child) {
                 if (provider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSize.width(0.04),
+                        vertical: AppSize.height(0.02)),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 8,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: AppSize.width(0.03),
+                        mainAxisSpacing: AppSize.height(0.015),
+                        childAspectRatio: 1.25,
+                      ),
+                      itemBuilder: (context, index) {
+                        return Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(AppSize.width(0.04)),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
                 }
 
                 if (provider.errorMessage != null) {

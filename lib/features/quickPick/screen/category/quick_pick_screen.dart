@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:resheragroup/core/constants/app_sizes.dart';
 import 'package:resheragroup/features/dashboard/screen/dashboard_screen.dart';
@@ -105,12 +106,28 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                     Consumer<CategoryProvider>(
                       builder: (context, provider, child) {
                         if (provider.isLoading) {
-                          return SizedBox(
-                            height: AppSize.height(0.6),
-                            width: double.infinity,
-                            child: const Center(
-                              child: CircularProgressIndicator(),
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: 8,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: AppSize.width(0.03),
+                              mainAxisSpacing: AppSize.height(0.015),
+                              childAspectRatio: 1.25,
                             ),
+                            itemBuilder: (context, index) {
+                              return Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(AppSize.width(0.04)),
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         }
 
