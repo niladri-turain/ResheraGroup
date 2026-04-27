@@ -100,7 +100,7 @@ class CustomHeaderWidget extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: AppSize.height(0.02)),
+
 
           /// 🔍 Search Bar
           // CustomSearchWidget(onSearch: onSearch),
