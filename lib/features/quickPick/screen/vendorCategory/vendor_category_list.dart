@@ -41,6 +41,8 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF7B2CBF),
         elevation: 0,
+        centerTitle: false,
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -66,27 +68,37 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
             itemCount: catProvider.categories.length,
             itemBuilder: (context, index) {
               final category = catProvider.categories[index];
-              return ExpansionTile(
-                initiallyExpanded: true, // ওপেন হয়ে থাকবে
-                title: Text(
-                  category.name,
-                  style: TextStyle(
-                    fontSize: AppSize.width(0.045), 
-                    fontWeight: FontWeight.bold, 
-                    color: Colors.black87,
-                  ),
-                ),
-                shape: const Border(), // Removes the default borders
-                childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
+              return Column(
                 children: [
-                  // Dummy Items for now to show the design
-                  for (int i = 0; i < 3; i++)
-                    _buildProductItem(
-                      "Special Item ${i + 1}",
-                      "Description for special item ${i + 1} will go here. It is tasty and fresh.",
-                      "₹219",
-                      category.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                  ExpansionTile(
+                    initiallyExpanded: true, // ওপেন হয়ে থাকবে
+                    title: Text(
+                      category.name,
+                      style: TextStyle(
+                        fontSize: AppSize.width(0.045),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
+                    shape: const Border(), // Removes the default borders
+                    childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
+                    children: [
+                      // Dummy Items for now to show the design
+                      for (int i = 0; i < 3; i++)
+                        _buildProductItem(
+                          "Special Item ${i + 1}",
+                          "Description for special item ${i + 1} will go here. It is tasty and fresh.",
+                          "₹219",
+                          category.image ??
+                              "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                        ),
+                    ],
+                  ),
+                  Container(
+                    height: 8,
+                    width: double.infinity,
+                    color: Colors.grey.shade100, // Section Separator / Shadow look
+                  ),
                 ],
               );
             },
