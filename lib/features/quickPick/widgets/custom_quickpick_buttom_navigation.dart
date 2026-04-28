@@ -42,7 +42,7 @@ class CustomTopNavigationBar extends StatelessWidget {
                 label: "Shopping",
                 index: 2,
               ),
-              _buildResheraBadge(),
+              _buildResheraBadge(context),
             ],
           ),
         ),
@@ -90,12 +90,13 @@ class CustomTopNavigationBar extends StatelessWidget {
     );
   }
 
-  Widget _buildResheraBadge() {
-    final bool isSelected = selectedIndex == 3;
-
+  Widget _buildResheraBadge(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
-      onTap: () => onItemSelected(3),
+      onTap: () {
+        // Pop until we reach the MainScreen (Dashboard)
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(
             horizontal: 16, vertical: 8),
@@ -107,15 +108,6 @@ class CustomTopNavigationBar extends StatelessWidget {
             ],
           ),
           borderRadius: BorderRadius.circular(20),
-          boxShadow: isSelected
-              ? const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ]
-              : [],
         ),
         child: const Text(
           "Reshera",
