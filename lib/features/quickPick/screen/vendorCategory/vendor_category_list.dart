@@ -1,3 +1,4 @@
+import 'package:resheragroup/core/service/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -21,9 +22,12 @@ class VendorCategoryList extends StatefulWidget {
 }
 
 class _VendorCategoryListState extends State<VendorCategoryList> {
+  String? cachedAddress;
+
   @override
   void initState() {
     super.initState();
+    _loadAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<VendorCategoryProvider>().fetchVendorCategories(
         widget.categoryId,
@@ -31,6 +35,15 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         widget.vendorId,
       );
     });
+  }
+
+  Future<void> _loadAddress() async {
+    final address = await LocationService.getCachedAddress();
+    if (mounted) {
+      setState(() {
+        cachedAddress = address;
+      });
+    }
   }
 
   @override
@@ -47,13 +60,29 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          "Vendor Categories",
-          style: TextStyle(
-            color: Colors.white, 
-            fontWeight: FontWeight.bold, 
-            fontSize: AppSize.width(0.045),
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Vendor Categories",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: AppSize.width(0.045),
+              ),
+            ),
+            if (cachedAddress != null)
+              Text(
+                cachedAddress!,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.normal,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
         ),
       ),
       body: Consumer<VendorCategoryProvider>(

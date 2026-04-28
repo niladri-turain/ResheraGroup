@@ -1,3 +1,4 @@
+import 'package:resheragroup/core/service/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -28,16 +29,24 @@ class VendorListScreen extends StatefulWidget {
 }
 
 class _VendorListScreenState extends State<VendorListScreen> {
-
- 
+  String? cachedAddress;
 
   @override
   void initState() {
     super.initState();
+    _loadAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<VendorProvider>().fetchVendorCategory(widget.categoryId, widget.subCategoryId);
-     
     });
+  }
+
+  Future<void> _loadAddress() async {
+    final address = await LocationService.getCachedAddress();
+    if (mounted) {
+      setState(() {
+        cachedAddress = address;
+      });
+    }
   }
 
   @override
@@ -55,13 +64,29 @@ class _VendorListScreenState extends State<VendorListScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          "Vendor List",
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Vendor List",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            if (cachedAddress != null)
+              Text(
+                cachedAddress!,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.normal,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
         ),
       ),
       body: Column(

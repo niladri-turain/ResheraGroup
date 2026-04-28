@@ -10,6 +10,7 @@ import 'package:resheragroup/features/quickPick/widgets/category_card_widget.dar
 import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dart';
 
 
+import 'package:resheragroup/core/service/location_service.dart';
 import '../../widgets/custom_quickpick_buttom_navigation.dart';
 
 class QuickPickScreen extends StatefulWidget {
@@ -21,13 +22,24 @@ class QuickPickScreen extends StatefulWidget {
 
 class _QuickPickScreenState extends State<QuickPickScreen> {
   int selectedIndex = 1; // Category selected by default
+  String currentLocation = "Fetching location...";
 
   @override
   void initState() {
     super.initState();
+    _fetchLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CategoryProvider>().fetchCategories();
     });
+  }
+
+  Future<void> _fetchLocation() async {
+    String address = await LocationService.getCurrentAddress();
+    if (mounted) {
+      setState(() {
+        currentLocation = address;
+      });
+    }
   }
 
   void _onNavTap(int index) {
@@ -80,7 +92,7 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
             children: [
               CustomHeaderWidget(
                 userName: "Sk Mousin Ali",
-                location: "Katju Nagar, Jadavpur",
+                location: currentLocation,
                 onNotificationTap: () {},
                 onProfileTap: () {},
                 onSearch: (value) {},
