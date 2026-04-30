@@ -26,6 +26,7 @@ class SubCategoryScreen extends StatefulWidget {
 
 class _SubCategoryScreenState extends State<SubCategoryScreen> {
   String? cachedAddress;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -92,7 +93,9 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
             color: const Color(0xFF7B2CBF),
             child: CustomSearchWidget(
               onSearch: (value) {
-                // Implement subcategory search logic here
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
               },
               hintText: 'Search in ${widget.categoryTitle}',
             ),
@@ -156,8 +159,25 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                   );
                 }
 
+                final filteredList = provider.subCategories.where((sub) {
+                  return sub.name.toLowerCase().contains(_searchQuery);
+                }).toList();
+
                 if (provider.subCategories.isEmpty) {
                   return const Center(child: Text("No Sub-categories found"));
+                }
+
+                if (filteredList.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "no search item found",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
                 }
 
                 return SingleChildScrollView(
@@ -168,7 +188,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                   child: GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: provider.subCategories.length,
+                    itemCount: filteredList.length,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: AppSize.width(0.02),
@@ -176,7 +196,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                       childAspectRatio: 1.25,
                     ),
                     itemBuilder: (context, index) {
-                      final subCategory = provider.subCategories[index];
+                      final subCategory = filteredList[index];
                       return CategoryCard(
                         title: subCategory.name,
                         imagePath: subCategory.image,
