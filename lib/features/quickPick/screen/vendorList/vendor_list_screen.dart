@@ -173,6 +173,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
                         itemBuilder: (context, index) {
                           final vendor = provider.vendorCategory[index];
                           return VendorCard(
+                            logo: vendor.kycDetail?.ownerPhoto?.url ?? "",
                             title: vendor.businessName,
                             vendorId: vendor.user?.vendorId ??"",
                             backgroundImage: vendor.kycDetail?.shopPhoto?.url ?? "",
