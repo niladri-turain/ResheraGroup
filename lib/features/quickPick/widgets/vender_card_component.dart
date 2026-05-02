@@ -22,6 +22,12 @@ class VendorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppSize.init(context);
+
+    // ডায়নামিক ভ্যালু ক্যালকুলেশন
+    final double logoRadius = AppSize.width(0.09);
+    final double logoOverlapOffset = -AppSize.width(0.13);
+    final double leftPadding = AppSize.width(0.24);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -35,14 +41,14 @@ class VendorCard extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(AppSize.width(0.04)),
                   child: Image.network(
                     backgroundImage,
-                    height: AppSize.height(0.22),
+                    height: AppSize.height(0.20),
                     width: double.infinity,
-                    fit: BoxFit.fill,
+                    fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
-                      height: AppSize.height(0.22),
+                      height: AppSize.height(0.20),
                       width: double.infinity,
                       color: Colors.grey[300],
                       child: const Icon(Icons.broken_image, color: Colors.grey),
@@ -50,83 +56,76 @@ class VendorCard extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  bottom: -25,
-                  left: 15,
+                  bottom: logoOverlapOffset,
+                  left: AppSize.width(0.05),
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          spreadRadius: 2,
+                          blurRadius: 8,
+                          spreadRadius: 1,
                         ),
                       ],
                     ),
                     child: CircleAvatar(
-                      radius: 35,
+                      radius: logoRadius,
                       backgroundColor: Colors.white,
                       child: CircleAvatar(
-                        radius: 32,
+                        radius: logoRadius - 3,
                         backgroundColor: Colors.grey[100],
                         backgroundImage: NetworkImage(logo),
-
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: AppSize.height(0.002)),
             // Title and Info
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Row(
+              padding: EdgeInsets.only(left: leftPadding, right: AppSize.width(0.04)),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // const SizedBox(width: 85), // Offset for logo
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: AppSize.width(0.045),
-                                fontWeight: FontWeight.bold,
-                              ),
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: AppSize.width(0.045),
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (vendorId.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4.0),
+                          child: Text(
+                            "($vendorId)",
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: AppSize.width(0.030),
+                              fontWeight: FontWeight.w400,
                             ),
-                            if (vendorId.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 3.0),
-                                child: Text(
-                                  " ($vendorId)",
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: AppSize.width(0.030),
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        // Address
-                        Text(
-                          address.isNotEmpty ? address : "No address provided",
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: AppSize.width(0.035),
-                            fontWeight: FontWeight.w400,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
+                    ],
+                  ),
+
+                  // Address
+                  Text(
+                    address.isNotEmpty ? address : "No address provided",
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: AppSize.width(0.035),
+                      fontWeight: FontWeight.w400,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

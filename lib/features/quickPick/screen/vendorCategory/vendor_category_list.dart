@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../provider/vendor_category_provider.dart';
+import '../../provider/product_provider.dart';
 import '../checkout/check_out_screen.dart';
 
 class VendorCategoryList extends StatefulWidget {
@@ -36,7 +37,16 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         widget.categoryId,
         widget.subCategoryId,
         widget.vendorId,
-      );
+      ).then((_) {
+        final categories = context.read<VendorCategoryProvider>().categories;
+        for (var category in categories) {
+          context.read<ProductProvider>().fetchProducts(
+            businessCategoryId: widget.categoryId,
+            businessSubCategoryId: widget.subCategoryId,
+            categoryId: category.id,
+          );
+        }
+      });
     });
   }
 
@@ -118,30 +128,40 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                   final category = catProvider.categories[index];
                   return Column(
                     children: [
-                      ExpansionTile(
-                        initiallyExpanded: true, // ওপেন হয়ে থাকবে
-                        title: Text(
-                          category.name,
-                          style: TextStyle(
-                            fontSize: AppSize.width(0.045),
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        shape: const Border(), // Removes the default borders
-                        childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
-                        children: [
-                          // Using dummy product IDs for demo
-                          for (int i = 0; i < 3; i++)
-                            _buildProductItem(
-                              "item_${category.id}_$i",
-                              "Special Item ${i + 1}",
-                              "Description for special item ${i + 1} will go here. It is tasty and fresh.",
-                              "₹219",
-                              category.image ??
-                                  "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                      Consumer<ProductProvider>(
+                        builder: (context, productProvider, child) {
+                          final products = productProvider.getProductsByCategory(category.id);
+                          
+                          return ExpansionTile(
+                            initiallyExpanded: true, // ওপেন হয়ে থাকবে
+                            title: Text(
+                              category.name,
+                              style: TextStyle(
+                                fontSize: AppSize.width(0.045),
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
                             ),
-                        ],
+                            shape: const Border(), // Removes the default borders
+                            childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
+                            children: [
+                              if (products.isEmpty && !productProvider.isLoading)
+                                Padding(
+                                  padding: EdgeInsets.symmetric(vertical: AppSize.height(0.02)),
+                                  child: const Text("No products found in this category"),
+                                )
+                              else
+                                for (var product in products)
+                                  _buildProductItem(
+                                    product.productId,
+                                    product.name,
+                                    product.description ?? "No description available",
+                                    "₹${product.finalPrice}",
+                                    product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                                  ),
+                            ],
+                          );
+                        },
                       ),
                       Container(
                         height: 8,

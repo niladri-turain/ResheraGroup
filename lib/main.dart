@@ -7,6 +7,7 @@ import 'features/quickPick/provider/category_provider.dart';
 
 import 'features/quickPick/provider/sub_category_provider.dart';
 import 'features/quickPick/provider/vendor_category_provider.dart';
+import 'features/quickPick/provider/product_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => SubCategoryProvider()),
         ChangeNotifierProvider(create: (_) => VendorProvider()),
         ChangeNotifierProvider(create: (_) => VendorCategoryProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
       ],
       child: const MyApp(),
     ),
