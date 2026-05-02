@@ -13,15 +13,13 @@ import '../../widgets/vendor_category_item_widget.dart';
 class VendorListScreen extends StatefulWidget {
   final String categoryId;
   final String subCategoryId;
-
+  final String categoryName;
 
   const VendorListScreen({
     super.key,
     required this.categoryId,
     required this.subCategoryId,
-
-
-
+    required this.categoryName,
   });
 
   @override
@@ -186,6 +184,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
                                     categoryId: widget.categoryId,
                                     subCategoryId: widget.subCategoryId,
                                     vendorId: vendor.id,
+                                    categoryName: widget.categoryName,
                                   ),
                                 ),
                               );

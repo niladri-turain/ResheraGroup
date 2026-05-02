@@ -11,12 +11,14 @@ class VendorCategoryList extends StatefulWidget {
   final String categoryId;
   final String subCategoryId;
   final String vendorId;
+  final String categoryName;
 
   const VendorCategoryList({
     super.key,
     required this.categoryId,
     required this.subCategoryId,
     required this.vendorId,
+    required this.categoryName,
   });
 
   @override
@@ -28,6 +30,8 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
   // To track quantities of items: {itemId: quantity}
   final Map<String, int> _itemQuantities = {};
 
+  String? _selectedCategoryId;
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +42,14 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         widget.subCategoryId,
         widget.vendorId,
       ).then((_) {
-        final categories = context.read<VendorCategoryProvider>().categories;
+        final catProvider = context.read<VendorCategoryProvider>();
+        if (catProvider.categories.isNotEmpty) {
+          setState(() {
+            _selectedCategoryId = catProvider.categories.first.id;
+          });
+        }
+        
+        final categories = catProvider.categories;
         for (var category in categories) {
           context.read<ProductProvider>().fetchProducts(
             businessCategoryId: widget.categoryId,
@@ -122,6 +133,11 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
               if (catProvider.categories.isEmpty) {
                 return const Center(child: Text("No categories found"));
               }
+
+              if (widget.categoryName == "Fashion & Lifestyle") {
+                return _buildFashionLayout(catProvider);
+              }
+
               return ListView.builder(
                 itemCount: catProvider.categories.length,
                 itemBuilder: (context, index) {
@@ -256,6 +272,274 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 ),
               ),
               const Divider(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFashionLayout(VendorCategoryProvider catProvider) {
+    return Column(
+      children: [
+        // Horizontal circular categories
+        Container(
+          height: AppSize.height(0.12),
+          padding: EdgeInsets.symmetric(vertical: AppSize.height(0.01)),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: catProvider.categories.length,
+            padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.02)),
+            itemBuilder: (context, index) {
+              final category = catProvider.categories[index];
+              final isSelected = _selectedCategoryId == category.id;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedCategoryId = category.id;
+                  });
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.02)),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: AppSize.width(0.14),
+                        height: AppSize.width(0.14),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFF7B2CBF) : Colors.grey.shade300,
+                            width: 2,
+                          ),
+                          image: DecorationImage(
+                            image: NetworkImage(category.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp"),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: AppSize.height(0.005)),
+                      Text(
+                        category.name,
+                        style: TextStyle(
+                          fontSize: AppSize.width(0.03),
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? const Color(0xFF7B2CBF) : Colors.black,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        // Filter and Sort row
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04), vertical: AppSize.height(0.01)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Products",
+                style: TextStyle(
+                  fontSize: AppSize.width(0.045),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.tune, color: Color(0xFF7B2CBF)),
+                onPressed: () => _showFilterBottomSheet(),
+              ),
+            ],
+          ),
+        ),
+        // Grid of products
+        Expanded(
+          child: Consumer<ProductProvider>(
+            builder: (context, productProvider, child) {
+              final products = _selectedCategoryId == null 
+                  ? [] 
+                  : productProvider.getProductsByCategory(_selectedCategoryId!);
+
+              if (productProvider.isLoading && products.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (products.isEmpty) {
+                return const Center(child: Text("No products found in this category"));
+              }
+
+              return GridView.builder(
+                padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.7,
+                  crossAxisSpacing: AppSize.width(0.04),
+                  mainAxisSpacing: AppSize.width(0.04),
+                ),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return _buildFashionProductCard(
+                    product.productId,
+                    product.name,
+                    "₹${product.finalPrice}",
+                    product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFashionProductCard(String id, String title, String price, String imageUrl) {
+    final quantity = _itemQuantities[id] ?? 0;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.network(
+                  imageUrl,
+                  height: AppSize.height(0.18),
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: AppSize.height(0.18),
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.image),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 14,
+                  child: Icon(Icons.favorite_border, size: 16, color: Colors.grey.shade400),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      price,
+                      style: const TextStyle(
+                        color: Color(0xFF7B2CBF),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (quantity == 0)
+                      GestureDetector(
+                        onTap: () => _updateQuantity(id, 1),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF7B2CBF),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.add, color: Colors.white, size: 16),
+                        ),
+                      )
+                    else
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => _updateQuantity(id, -1),
+                            child: const Icon(Icons.remove_circle_outline, color: Color(0xFF7B2CBF), size: 20),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Text(quantity.toString()),
+                          ),
+                          GestureDetector(
+                            onTap: () => _updateQuantity(id, 1),
+                            child: const Icon(Icons.add_circle, color: Color(0xFF7B2CBF), size: 20),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ListTile(
+                title: const Text("Price: Low to High"),
+                leading: const Icon(Icons.trending_up),
+                onTap: () => Navigator.pop(context),
+              ),
+              ListTile(
+                title: const Text("Price: High to Low"),
+                leading: const Icon(Icons.trending_down),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(),
+              const Text("Filter By Brand", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              // Add brand filters here
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7B2CBF),
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                child: const Text("Apply Filters", style: TextStyle(color: Colors.white)),
+              ),
             ],
           ),
         );

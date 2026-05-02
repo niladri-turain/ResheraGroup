@@ -207,7 +207,11 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>  VendorListScreen(categoryId: widget.categoryId,subCategoryId: subCategory.id),
+                              builder: (context) =>  VendorListScreen(
+                                categoryId: widget.categoryId,
+                                subCategoryId: subCategory.id,
+                                categoryName: widget.categoryTitle,
+                              ),
                             ),
                           );
                         },
