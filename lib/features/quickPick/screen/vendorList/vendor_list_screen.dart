@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../widgets/custom_search_widget.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/vendor_provider.dart';
 import '../../widgets/vender_card_component.dart';
@@ -28,6 +29,7 @@ class VendorListScreen extends StatefulWidget {
 
 class _VendorListScreenState extends State<VendorListScreen> {
   String? cachedAddress;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -89,9 +91,19 @@ class _VendorListScreenState extends State<VendorListScreen> {
       ),
       body: Column(
         children: [
-
+          Container(
+            padding: EdgeInsets.only(left: AppSize.width(0.04), right: AppSize.width(0.04), bottom: AppSize.width(0.02)),
+            color: const Color(0xFF7B2CBF),
+            child: CustomSearchWidget(
+              onSearch: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
+              hintText: 'Search vendors...',
+            ),
+          ),
           Expanded(
-
             child: Consumer<VendorProvider>(
               builder: (context, provider, child){
 
@@ -159,6 +171,23 @@ class _VendorListScreenState extends State<VendorListScreen> {
                   return const Center(child: Text("No Vendor List found"));
                 }
 
+                final filteredVendors = provider.vendorCategory.where((vendor) {
+                  return vendor.businessName.toLowerCase().contains(_searchQuery);
+                }).toList();
+
+                if (filteredVendors.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "no search item found",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }
+
                 return SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,9 +196,9 @@ class _VendorListScreenState extends State<VendorListScreen> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         padding: EdgeInsets.all(AppSize.width(0.04)),
-                        itemCount: provider.vendorCategory.length,
+                        itemCount: filteredVendors.length,
                         itemBuilder: (context, index) {
-                          final vendor = provider.vendorCategory[index];
+                          final vendor = filteredVendors[index];
                           return VendorCard(
                             logo: vendor.kycDetail?.ownerPhoto?.url ?? "",
                             title: vendor.businessName,

@@ -376,7 +376,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.7,
+                  childAspectRatio: 0.75,
                   crossAxisSpacing: AppSize.width(0.04),
                   mainAxisSpacing: AppSize.width(0.04),
                 ),
@@ -388,6 +388,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                     product.name,
                     "₹${product.finalPrice}",
                     product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                    product.description ?? "",
                   );
                 },
               );
@@ -398,7 +399,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
     );
   }
 
-  Widget _buildFashionProductCard(String id, String title, String price, String imageUrl) {
+  Widget _buildFashionProductCard(String id, String title, String price, String imageUrl, String description) {
     final quantity = _itemQuantities[id] ?? 0;
     return Container(
       decoration: BoxDecoration(
@@ -424,7 +425,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                   imageUrl,
                   height: AppSize.height(0.18),
                   width: double.infinity,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                   errorBuilder: (context, error, stackTrace) => Container(
                     height: AppSize.height(0.18),
                     color: Colors.grey.shade200,
@@ -432,15 +433,15 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                   ),
                 ),
               ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 14,
-                  child: Icon(Icons.favorite_border, size: 16, color: Colors.grey.shade400),
-                ),
-              ),
+              // Positioned(
+              //   top: 8,
+              //   right: 8,
+              //   child: CircleAvatar(
+              //     backgroundColor: Colors.white,
+              //     radius: 14,
+              //     child: Icon(Icons.favorite_border, size: 16, color: Colors.grey.shade400),
+              //   ),
+              // ),
             ],
           ),
           Padding(
@@ -454,7 +455,13 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: const TextStyle(fontWeight: FontWeight.w400, color: Colors.grey,fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -465,35 +472,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (quantity == 0)
-                      GestureDetector(
-                        onTap: () => _updateQuantity(id, 1),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF7B2CBF),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.add, color: Colors.white, size: 16),
-                        ),
-                      )
-                    else
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => _updateQuantity(id, -1),
-                            child: const Icon(Icons.remove_circle_outline, color: Color(0xFF7B2CBF), size: 20),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Text(quantity.toString()),
-                          ),
-                          GestureDetector(
-                            onTap: () => _updateQuantity(id, 1),
-                            child: const Icon(Icons.add_circle, color: Color(0xFF7B2CBF), size: 20),
-                          ),
-                        ],
-                      ),
+                    // ß
                   ],
                 ),
               ],
