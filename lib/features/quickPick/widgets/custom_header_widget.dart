@@ -86,7 +86,7 @@ class CustomHeaderWidget extends StatelessWidget {
               Row(
                 children: [
                   _circleIcon(
-                    icon: Icons.notifications,
+                    icon: Icons.shopping_cart_outlined,
                     onTap: onNotificationTap,
                     showDot: true,
                   ),

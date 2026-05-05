@@ -6,5 +6,6 @@ class ApiEndPoints {
   static const String vendors = "vendors";
   static const String categories = "categories";
   static const String productList = "products";
+  static const String productDetails = "products";
 
 }

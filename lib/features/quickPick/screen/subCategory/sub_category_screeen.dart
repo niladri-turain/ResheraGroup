@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../provider/sub_category_provider.dart';
 import '../../widgets/category_card_widget.dart';
+import '../checkout/check_out_screen.dart';
 import '../groceryItems/grocery_items_screens.dart';
 
 import '../../../../widgets/custom_search_widget.dart';
@@ -85,6 +86,29 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
               ),
           ],
         ),
+        actions: [
+          Padding(
+            padding:  EdgeInsets.only(right:AppSize.width(0.04)),
+            child: Container(
+              height: AppSize.width(0.10),
+              width: AppSize.width(0.10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+
+              child: IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

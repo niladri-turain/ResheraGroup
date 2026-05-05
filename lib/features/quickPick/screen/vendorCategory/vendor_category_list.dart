@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../productDetails/product_details_screen.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/product_provider.dart';
 import '../checkout/check_out_screen.dart';
@@ -122,6 +123,29 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
               ),
           ],
         ),
+        actions: [
+          Padding(
+            padding:  EdgeInsets.only(right:AppSize.width(0.04)),
+            child: Container(
+              height: AppSize.width(0.10),
+              width: AppSize.width(0.10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+
+              child: IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -174,6 +198,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                                     product.description ?? "No description available",
                                     "₹${product.finalPrice}",
                                     product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                                    category.id,
                                   ),
                             ],
                           );
@@ -383,12 +408,27 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final product = products[index];
-                  return _buildFashionProductCard(
-                    product.productId,
-                    product.name,
-                    "₹${product.finalPrice}",
-                    product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                    product.description ?? "",
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProductDetailsScreen(
+                            businessCategoryId: widget.categoryId,
+                            businessSubCategoryId: widget.subCategoryId,
+                            categoryId: _selectedCategoryId!,
+                            productId: product.productId,
+                          ),
+                        ),
+                      );
+                    },
+                    child: _buildFashionProductCard(
+                      product.productId,
+                      product.name,
+                      "₹${product.finalPrice}",
+                      product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                      product.description ?? "",
+                    ),
                   );
                 },
               );
@@ -526,7 +566,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
     );
   }
 
-  Widget _buildProductItem(String id, String title, String subtitle, String price, String imageUrl) {
+  Widget _buildProductItem(String id, String title, String subtitle, String price, String imageUrl, String categoryId) {
     final int quantity = _itemQuantities[id] ?? 0;
 
     return Container(
@@ -538,35 +578,64 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title, 
-                  style: TextStyle(
-                    fontSize: AppSize.width(0.04), 
-                    fontWeight: FontWeight.bold,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProductDetailsScreen(
+                      businessCategoryId: widget.categoryId,
+                      businessSubCategoryId: widget.subCategoryId,
+                      categoryId: categoryId,
+                      productId: id,
+                    ),
                   ),
-                ),
-                SizedBox(height: AppSize.height(0.004)),
-                Text(
-                  subtitle, 
-                  style: TextStyle(
-                    color: Colors.grey.shade600, 
-                    fontSize: AppSize.width(0.032),
-                  ), 
-                  maxLines: 2, 
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: AppSize.height(0.012)),
-                Text(
-                  price, 
-                  style: TextStyle(
-                    fontSize: AppSize.width(0.04), 
-                    fontWeight: FontWeight.bold,
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title, 
+                    style: TextStyle(
+                      fontSize: AppSize.width(0.04), 
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(height: AppSize.height(0.004)),
+                  Text(
+                    subtitle, 
+                    style: TextStyle(
+                      color: Colors.grey.shade600, 
+                      fontSize: AppSize.width(0.032),
+                    ), 
+                    maxLines: 2, 
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: AppSize.height(0.012)),
+                  Row(
+                    children: [
+                      Text(
+                        price, 
+                        style: TextStyle(
+                          fontSize: AppSize.width(0.04), 
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "View",
+                        style: TextStyle(
+                          color: const Color(0xFF7B2CBF),
+                          fontSize: AppSize.width(0.032),
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
           SizedBox(width: AppSize.width(0.03)),

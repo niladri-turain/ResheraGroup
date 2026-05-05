@@ -8,6 +8,7 @@ import 'package:resheragroup/features/quickPick/provider/category_provider.dart'
 import 'package:resheragroup/features/quickPick/screen/subCategory/sub_category_screeen.dart';
 import 'package:resheragroup/features/quickPick/widgets/category_card_widget.dart';
 import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dart';
+import '../checkout/check_out_screen.dart';
 
 
 import 'package:resheragroup/core/service/location_service.dart';
@@ -93,7 +94,12 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
               CustomHeaderWidget(
                 userName: "Sk Mousin Ali",
                 location: currentLocation,
-                onNotificationTap: () {},
+                onNotificationTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                  );
+                },
                 onProfileTap: () {},
                 onSearch: (value) {},
               ),

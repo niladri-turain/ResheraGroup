@@ -8,6 +8,7 @@ import '../../provider/vendor_category_provider.dart';
 import '../../provider/vendor_provider.dart';
 import '../../widgets/vender_card_component.dart';
 
+import '../checkout/check_out_screen.dart';
 import '../vendorCategory/vendor_category_list.dart';
 import '../../widgets/vendor_category_item_widget.dart';
 
@@ -88,6 +89,29 @@ class _VendorListScreenState extends State<VendorListScreen> {
               ),
           ],
         ),
+        actions: [
+          Padding(
+            padding:  EdgeInsets.only(right:AppSize.width(0.04)),
+            child: Container(
+              height: AppSize.width(0.10),
+              width: AppSize.width(0.10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+
+              child: IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
