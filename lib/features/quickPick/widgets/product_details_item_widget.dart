@@ -2,25 +2,31 @@ import 'package:flutter/material.dart';
 import '../model/product_list_model.dart';
 import '../../../../core/constants/app_sizes.dart';
 
-class ProductDetailsItemWidget extends StatelessWidget {
+class ProductDetailsItemWidget extends StatefulWidget {
   final ProductItem product;
 
   const ProductDetailsItemWidget({super.key, required this.product});
 
   @override
+  State<ProductDetailsItemWidget> createState() => _ProductDetailsItemWidgetState();
+}
+
+class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
+  String _selectedSize = "S";
+  int _selectedColorIndex = 1; // Defaulting to the second color (Green in the image)
+
+  final List<String> staticSizes = ["S", "M", "L", "XL", "XXL"];
+  final List<Color> staticColors = [
+    const Color(0xFFE91E63), // Pink
+    const Color(0xFF2EBD71), // Green
+    const Color(0xFFFFB300), // Amber/Yellow
+    const Color(0xFF2196F3), // Blue
+    const Color(0xFF000000), // Black
+  ];
+
+  @override
   Widget build(BuildContext context) {
     AppSize.init(context);
-
-    // Static data as requested
-    final List<String> staticSizes = ["S", "M", "L", "XL", "XXL"];
-    final List<Color> staticColors = [
-      const Color(0xFFE91E63), // Pink
-      const Color(0xFF4CAF50), // Green
-      const Color(0xFFFFC107), // Amber/Yellow
-      const Color(0xFF2196F3), // Blue
-      const Color(0xFF000000), // Black
-      const Color(0xFF9C27B0), // Purple
-    ];
 
     return SingleChildScrollView(
       child: Column(
@@ -28,10 +34,10 @@ class ProductDetailsItemWidget extends StatelessWidget {
         children: [
           // Product Image
           Image.network(
-            product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+            widget.product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
             width: double.infinity,
-            height: AppSize.height(0.45),
-            fit: BoxFit.cover,
+            height: AppSize.height(0.35),
+            fit: BoxFit.fill,
             errorBuilder: (_, __, ___) => Container(
               height: AppSize.height(0.45),
               color: Colors.grey[200],
@@ -55,7 +61,7 @@ class ProductDetailsItemWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  product.name,
+                  widget.product.name,
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
@@ -77,13 +83,13 @@ class ProductDetailsItemWidget extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      "₹${product.finalPrice}",
+                      "₹${widget.product.finalPrice}",
                       style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 12),
 
                       Text(
-                        "₹${product.mrp}",
+                        "₹${widget.product.mrp}",
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.grey,
@@ -98,7 +104,7 @@ class ProductDetailsItemWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          "${product.discount}% OFF",
+                          "${widget.product.discount}% OFF",
                           style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -116,24 +122,30 @@ class ProductDetailsItemWidget extends StatelessWidget {
                     itemCount: staticSizes.length,
                     itemBuilder: (context, index) {
                       final size = staticSizes[index];
-                      // Highlight XXL as in the design image
-                      final isSelected = size == "XXL";
-                      return Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF7B2CBF) : Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: isSelected ? const Color(0xFF7B2CBF) : Colors.grey[300]!),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          size,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                      final isSelected = size == _selectedSize;
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedSize = size;
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF7B2CBF) : Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: isSelected ? const Color(0xFF7B2CBF) : Colors.grey[300]!),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            size,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       );
@@ -148,19 +160,36 @@ class ProductDetailsItemWidget extends StatelessWidget {
                 const Text("Available Colors", style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 SizedBox(
-                  height: 40,
+                  height: 45,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: staticColors.length,
                     itemBuilder: (context, index) {
-                      return Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: staticColors[index],
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey[300]!),
+                      final isSelected = index == _selectedColorIndex;
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedColorIndex = index;
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? Colors.black : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: staticColors[index],
+                              shape: BoxShape.circle,
+                            ),
+                          ),
                         ),
                       );
                     },
