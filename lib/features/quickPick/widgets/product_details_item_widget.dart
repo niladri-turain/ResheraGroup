@@ -1,14 +1,18 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import '../model/product_details_model.dart';
 import '../../../../core/constants/app_sizes.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+
 class ProductDetailsItemWidget extends StatefulWidget {
   final ProductData product;
 
   const ProductDetailsItemWidget({super.key, required this.product});
 
   @override
-  State<ProductDetailsItemWidget> createState() => _ProductDetailsItemWidgetState();
+  State<ProductDetailsItemWidget> createState() =>
+      _ProductDetailsItemWidgetState();
 }
 
 class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
@@ -21,8 +25,10 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
   void initState() {
     super.initState();
     // Find primary variant if available
-    if (widget.product.variants != null && widget.product.variants!.isNotEmpty) {
-      final primaryIndex = widget.product.variants!.indexWhere((v) => v.isPrimary == true);
+    if (widget.product.variants != null &&
+        widget.product.variants!.isNotEmpty) {
+      final primaryIndex =
+          widget.product.variants!.indexWhere((v) => v.isPrimary == true);
       _selectedVariantIndex = primaryIndex != -1 ? primaryIndex : 0;
       _updateSelectedAttributesFromVariant();
     }
@@ -60,12 +66,40 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
     return groups.map((key, value) => MapEntry(key, value.toList()));
   }
 
+  bool _isAttributeValueAvailable(String attributeName, String value) {
+    if (widget.product.variants == null) return false;
+
+    return widget.product.variants!.any((v) {
+      // 1. The variant must have the attribute value we are checking
+      final matchesTarget = v.attributes?.any(
+            (a) => a.attributeName == attributeName && a.value == value,
+          ) ??
+          false;
+
+      if (!matchesTarget) return false;
+
+      // 2. The variant must match all OTHER currently selected attributes
+      for (var entry in _selectedAttributes.entries) {
+        if (entry.key == attributeName) continue;
+
+        final hasOtherAttr = v.attributes?.any(
+              (a) => a.attributeName == entry.key && a.value == entry.value,
+            ) ??
+            false;
+
+        if (!hasOtherAttr) return false;
+      }
+
+      return true;
+    });
+  }
+
   // Helper to find variant by attributes
   void _updateVariantByAttribute(String attributeName, String value) {
     if (widget.product.variants == null) return;
 
     final currentVariant = widget.product.variants![_selectedVariantIndex];
-    
+
     // Attempt to keep other attributes of the currently selected variant
     final otherAttributes = currentVariant.attributes
             ?.where((a) => a.attributeName != attributeName)
@@ -86,7 +120,10 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
       if (hasTargetAttr) {
         int matches = 0;
         for (var other in otherAttributes) {
-          if (v.attributes?.any((a) => a.attributeName == other.attributeName && a.value == other.value) ?? false) {
+          if (v.attributes?.any((a) =>
+                  a.attributeName == other.attributeName &&
+                  a.value == other.value) ??
+              false) {
             matches++;
           }
         }
@@ -107,42 +144,39 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
           _pageController.jumpToPage(0);
         }
       });
-
-      // Printing as requested
-      final groups = _getAttributeGroups();
-      final sizeKey = groups.keys.firstWhere((k) => k.toLowerCase().contains("size"), orElse: () => "");
-      final colorKey = groups.keys.firstWhere((k) => k.toLowerCase().contains("color"), orElse: () => "");
-      
-      print("----------------------------------");
-      if (attributeName.toLowerCase().contains("size")) {
-        print("Size Selected: $value");
-      } else if (attributeName.toLowerCase().contains("color")) {
-        print("Color Selected: $value");
-      } else {
-        print("$attributeName Selected: $value");
-      }
-      print("Current Size: ${_selectedAttributes[sizeKey] ?? 'N/A'}");
-      print("Current Color: ${_selectedAttributes[colorKey] ?? 'N/A'}");
-      print("----------------------------------");
     }
   }
 
   Color _getColorFromValue(String value) {
     switch (value.toLowerCase()) {
-      case 'red': return Colors.red;
-      case 'blue': return Colors.blue;
-      case 'navy': return const Color(0xFF000080);
-      case 'green': return Colors.green;
-      case 'black': return Colors.black;
-      case 'white': return Colors.white;
-      case 'yellow': return Colors.yellow;
-      case 'pink': return Colors.pink;
-      case 'purple': return Colors.purple;
-      case 'grey': return Colors.grey;
-      case 'orange': return Colors.orange;
-      case 'brown': return Colors.brown;
-      case 'teal': return Colors.teal;
-      default: return Colors.grey;
+      case 'red':
+        return Colors.red;
+      case 'blue':
+        return Colors.blue;
+      case 'navy':
+        return const Color(0xFF000080);
+      case 'green':
+        return Colors.green;
+      case 'black':
+        return Colors.black;
+      case 'white':
+        return Colors.white;
+      case 'yellow':
+        return Colors.yellow;
+      case 'pink':
+        return Colors.pink;
+      case 'purple':
+        return Colors.purple;
+      case 'grey':
+        return Colors.grey;
+      case 'orange':
+        return Colors.orange;
+      case 'brown':
+        return Colors.brown;
+      case 'teal':
+        return Colors.teal;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -155,8 +189,10 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
 
     // Get all available attributes from all variants
     final groups = _getAttributeGroups();
-    final sizeKey = groups.keys.firstWhere((k) => k.toLowerCase().contains("size"), orElse: () => "");
-    final colorKey = groups.keys.firstWhere((k) => k.toLowerCase().contains("color"), orElse: () => "");
+    final sizeKey = groups.keys
+        .firstWhere((k) => k.toLowerCase().contains("size"), orElse: () => "");
+    final colorKey = groups.keys
+        .firstWhere((k) => k.toLowerCase().contains("color"), orElse: () => "");
 
     return SingleChildScrollView(
       child: Column(
@@ -204,29 +240,40 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                   left: 0,
                   right: 0,
                   child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
+                      child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: 10,
+                        sigmaY: 10,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(
-                          images.length,
-                          (index) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _currentImageIndex == index ? Colors.black : Colors.white,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.white)),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                            images.length,
+                            (index) => Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _currentImageIndex == index
+                                    ? Colors.grey
+                                    : Colors.white,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  )),
                 ),
             ],
           ),
@@ -243,12 +290,14 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
               children: [
                 Text(
                   widget.product.business?.businessName ?? "",
-                  style: const TextStyle(color: Color(0xFF7B2CBF), fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Color(0xFF7B2CBF), fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   widget.product.name ?? "",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -256,7 +305,8 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                     Container(
                       width: 4,
                       height: 4,
-                      decoration: const BoxDecoration(color: Color(0xFF7B2CBF), shape: BoxShape.circle),
+                      decoration: const BoxDecoration(
+                          color: Color(0xFF7B2CBF), shape: BoxShape.circle),
                     ),
                     const SizedBox(width: 8),
                     const Text(
@@ -270,7 +320,8 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                   children: [
                     Text(
                       "₹${variant?.finalPrice ?? widget.product.finalPrice}",
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 12),
                     Text(
@@ -283,26 +334,32 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.green[50],
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         "${variant?.discount ?? widget.product.discount}% OFF",
-                        style: const TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
 
-                const Text("Select Size", style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text("Select Size",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 if (sizeKey.isEmpty)
                   const Padding(
                     padding: EdgeInsets.only(bottom: 24.0),
-                    child: Text("No sizes available", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    child: Text("No sizes available",
+                        style: TextStyle(color: Colors.grey, fontSize: 12)),
                   )
                 else ...[
                   SizedBox(
@@ -313,24 +370,46 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                       itemBuilder: (context, index) {
                         final size = groups[sizeKey]![index];
                         final isSelected = _selectedAttributes[sizeKey] == size;
+                        final isAvailable =
+                            _isAttributeValueAvailable(sizeKey, size);
                         return GestureDetector(
-                          onTap: () => _updateVariantByAttribute(sizeKey, size),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFF7B2CBF) : Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: isSelected ? const Color(0xFF7B2CBF) : Colors.grey[300]!),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              size,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.black,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
+                          onTap: isAvailable
+                              ? () => _updateVariantByAttribute(sizeKey, size)
+                              : null,
+                          child: Opacity(
+                            opacity: isAvailable ? 1.0 : 0.4,
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFF7B2CBF)
+                                    : Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: isSelected
+                                        ? const Color(0xFF7B2CBF)
+                                        : Colors.grey[300]!),
+                              ),
+                              alignment: Alignment.center,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Text(
+                                    size,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                      decoration: isAvailable
+                                          ? TextDecoration.none
+                                          : TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -342,7 +421,8 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                 ],
 
                 if (colorKey.isNotEmpty) ...[
-                  Text(colorKey, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(colorKey,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   SizedBox(
                     height: 45,
@@ -351,27 +431,41 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                       itemCount: groups[colorKey]!.length,
                       itemBuilder: (context, index) {
                         final colorValue = groups[colorKey]![index];
-                        final isSelected = _selectedAttributes[colorKey] == colorValue;
+                        final isSelected =
+                            _selectedAttributes[colorKey] == colorValue;
+                        final isAvailable =
+                            _isAttributeValueAvailable(colorKey, colorValue);
+
                         return GestureDetector(
-                          onTap: () => _updateVariantByAttribute(colorKey, colorValue),
+                          onTap: () =>
+                              _updateVariantByAttribute(colorKey, colorValue),
                           child: Container(
                             margin: const EdgeInsets.only(right: 12),
                             padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: isSelected ? Colors.black : Colors.transparent,
+                                color: isSelected
+                                    ? Colors.black
+                                    : Colors.transparent,
                                 width: 1.5,
                               ),
                             ),
-                            child: Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                 color: _getColorFromValue(colorValue),
-                                shape: BoxShape.circle,
-                                border: colorValue.toLowerCase() == 'white' ? Border.all(color: Colors.grey[300]!) : null,
-                              ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: _getColorFromValue(colorValue),
+                                    shape: BoxShape.circle,
+                                    border: colorValue.toLowerCase() == 'white'
+                                        ? Border.all(color: Colors.grey[300]!)
+                                        : null,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -382,11 +476,14 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                 ],
 
                 // Any other attributes
-                ...groups.entries.where((e) => e.key != sizeKey && e.key != colorKey).map((entry) {
+                ...groups.entries
+                    .where((e) => e.key != sizeKey && e.key != colorKey)
+                    .map((entry) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(entry.key, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(entry.key,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 40,
@@ -395,24 +492,45 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                           itemCount: entry.value.length,
                           itemBuilder: (context, index) {
                             final val = entry.value[index];
-                            final isSelected = _selectedAttributes[entry.key] == val;
+                            final isSelected =
+                                _selectedAttributes[entry.key] == val;
+                            final isAvailable =
+                                _isAttributeValueAvailable(entry.key, val);
+
                             return GestureDetector(
-                              onTap: () => _updateVariantByAttribute(entry.key, val),
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 12),
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? const Color(0xFF7B2CBF) : Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: isSelected ? const Color(0xFF7B2CBF) : Colors.grey[300]!),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  val,
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 12,
+                              onTap: isAvailable
+                                  ? () =>
+                                      _updateVariantByAttribute(entry.key, val)
+                                  : null,
+                              child: Opacity(
+                                opacity: isAvailable ? 1.0 : 0.4,
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(0xFF7B2CBF)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                        color: isSelected
+                                            ? const Color(0xFF7B2CBF)
+                                            : Colors.grey[300]!),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    val,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                      decoration: isAvailable
+                                          ? TextDecoration.none
+                                          : TextDecoration.lineThrough,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -426,11 +544,15 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                 }),
 
                 const Divider(height: 32),
-                const Text("Product Description", style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text("Product Description",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 HtmlWidget(
-                  variant?.longDescription ?? variant?.shortDescription ?? "No description available.",
-                  textStyle: const TextStyle(color: Colors.black54, height: 1.5, fontSize: 14),
+                  variant?.longDescription ??
+                      variant?.shortDescription ??
+                      "No description available.",
+                  textStyle: const TextStyle(
+                      color: Colors.black54, height: 1.5, fontSize: 14),
                 ),
                 const SizedBox(height: 100), // Spacing for bottom button
               ],
