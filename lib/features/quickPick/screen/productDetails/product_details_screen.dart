@@ -81,9 +81,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             if (cachedAddress != null)
               Text(
                 cachedAddress!,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 10,
+                  fontSize: AppSize.width(0.032),
                   fontWeight: FontWeight.normal,
                 ),
                 maxLines: 1,
