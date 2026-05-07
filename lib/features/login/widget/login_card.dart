@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_images_png.dart';
 import '../../../../core/constants/app_sizes.dart';
 import 'custom_login_text_field.dart';
+
 
 class LoginCard extends StatefulWidget {
   const LoginCard({super.key});
@@ -40,7 +42,7 @@ class _LoginCardState extends State<LoginCard> {
             child: Padding(
               padding: EdgeInsets.all(AppSize.width(0.03)),
               child: Image.asset(
-                'assets/images/logo.png', // Fallback to available logo
+                AppImagesPng.logo, // Updated to use AppImagesPng
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) => const Icon(Icons.business, color: Colors.orange, size: 40),
               ),

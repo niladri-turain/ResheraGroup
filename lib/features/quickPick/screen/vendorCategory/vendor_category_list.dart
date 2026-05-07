@@ -7,6 +7,8 @@ import '../productDetails/product_details_screen.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/product_provider.dart';
 import '../checkout/check_out_screen.dart';
+import '../../widgets/fashion_product_card.dart';
+import '../../widgets/standard_product_card.dart';
 
 class VendorCategoryList extends StatefulWidget {
   final String categoryId;
@@ -161,58 +163,64 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
               if (widget.categoryName == "Fashion & Lifestyle") {
                 return _buildFashionLayout(catProvider);
               }
-
-              return ListView.builder(
-                itemCount: catProvider.categories.length,
-                itemBuilder: (context, index) {
-                  final category = catProvider.categories[index];
-                  return Column(
-                    children: [
-                      Consumer<ProductProvider>(
-                        builder: (context, productProvider, child) {
-                          final products = productProvider.getProductsByCategory(category.id);
-                          
-                          return ExpansionTile(
-                            initiallyExpanded: true, // ওপেন হয়ে থাকবে
-                            title: Text(
-                              category.name,
-                              style: TextStyle(
-                                fontSize: AppSize.width(0.045),
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            shape: const Border(), // Removes the default borders
-                            childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
-                            children: [
-                              if (products.isEmpty && !productProvider.isLoading)
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical: AppSize.height(0.02)),
-                                  child: const Text("No products found in this category"),
-                                )
-                              else
-                                for (var product in products)
-                                  _buildProductItem(
-                                    product.productId,
-                                    product.name,
-                                    product.description ?? "No description available",
-                                    "₹${product.finalPrice}",
-                                    product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                                    category.id,
-                                  ),
-                            ],
-                          );
-                        },
-                      ),
-                      Container(
-                        height: 8,
-                        width: double.infinity,
-                        color: Colors.grey.shade100, // Section Separator / Shadow look
-                      ),
-                    ],
-                  );
-                },
-              );
+              return SizedBox();
+              // return ListView.builder(
+              //   itemCount: catProvider.categories.length,
+              //   itemBuilder: (context, index) {
+              //     final category = catProvider.categories[index];
+              //     return Column(
+              //       children: [
+              //         Consumer<ProductProvider>(
+              //           builder: (context, productProvider, child) {
+              //             final products = productProvider.getProductsByCategory(category.id);
+              //
+              //             return ExpansionTile(
+              //               initiallyExpanded: true, // ওপেন হয়ে থাকবে
+              //               title: Text(
+              //                 category.name,
+              //                 style: TextStyle(
+              //                   fontSize: AppSize.width(0.045),
+              //                   fontWeight: FontWeight.bold,
+              //                   color: Colors.black87,
+              //                 ),
+              //               ),
+              //               shape: const Border(), // Removes the default borders
+              //               childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
+              //               children: [
+              //                 if (products.isEmpty && !productProvider.isLoading)
+              //                   Padding(
+              //                     padding: EdgeInsets.symmetric(vertical: AppSize.height(0.02)),
+              //                     child: const Text("No products found in this category"),
+              //                   )
+              //                 else
+              //                   for (var product in products)
+              //                     StandardProductCard(
+              //                       id: product.productId,
+              //                       title: product.name,
+              //                       subtitle: product.description ?? "No description available",
+              //                       price: "₹${product.finalPrice}",
+              //                       imageUrl: product.image ??
+              //                           "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+              //                       categoryId: category.id,
+              //                       businessCategoryId: widget.categoryId,
+              //                       businessSubCategoryId: widget.subCategoryId,
+              //                       quantity: _itemQuantities[product.productId] ?? 0,
+              //                       onAdd: () => _updateQuantity(product.productId, 1),
+              //                       onRemove: () => _updateQuantity(product.productId, -1),
+              //                     ),
+              //               ],
+              //             );
+              //           },
+              //         ),
+              //         Container(
+              //           height: 8,
+              //           width: double.infinity,
+              //           color: Colors.grey.shade100, // Section Separator / Shadow look
+              //         ),
+              //       ],
+              //     );
+              //   },
+              // );
             },
           ),
           if (totalItems > 0)
@@ -408,13 +416,16 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final product = products[index];
-                  return _buildFashionProductCard(
-                    product.productId,
-                    product.name,
-                    "₹${product.finalPrice}",
-                    product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                    product.description ?? "",
-                    _selectedCategoryId!,
+                  return FashionProductCard(
+                    id: product.productId,
+                    title: product.name,
+                    price: "₹${product.finalPrice}",
+                    imageUrl: product.image ??
+                        "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                    description: product.description ?? "",
+                    categoryId: _selectedCategoryId!,
+                    businessCategoryId: widget.categoryId,
+                    businessSubCategoryId: widget.subCategoryId,
                   );
                 },
               );
@@ -422,130 +433,6 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildFashionProductCard(String id, String title, String price, String imageUrl, String description, String categoryId) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailsScreen(
-              businessCategoryId: widget.categoryId,
-              businessSubCategoryId: widget.subCategoryId,
-              categoryId: categoryId,
-              productId: id,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(
-                    imageUrl,
-                    height: AppSize.height(0.18),
-                    width: double.infinity,
-                    fit: BoxFit.fill,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: AppSize.height(0.18),
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.image),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  description.trim().isNotEmpty
-                      ? Text(
-                          description,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                              fontSize: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : SizedBox(height: AppSize.height(0.02)),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        price,
-                        style: const TextStyle(
-                          color: Color(0xFF7B2CBF),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailsScreen(
-                                businessCategoryId: widget.categoryId,
-                                businessSubCategoryId: widget.subCategoryId,
-                                categoryId: categoryId,
-                                productId: id,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7B2CBF),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            "View details",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -589,207 +476,6 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildProductItem(String id, String title, String subtitle, String price, String imageUrl, String categoryId) {
-    final int quantity = _itemQuantities[id] ?? 0;
-
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: AppSize.height(0.010)),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProductDetailsScreen(
-                      businessCategoryId: widget.categoryId,
-                      businessSubCategoryId: widget.subCategoryId,
-                      categoryId: categoryId,
-                      productId: id,
-                    ),
-                  ),
-                );
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title, 
-                    style: TextStyle(
-                      fontSize: AppSize.width(0.04), 
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: AppSize.height(0.004)),
-                  subtitle.trim().isNotEmpty && subtitle != "No description available"
-                      ? Text(
-                          subtitle, 
-                          style: TextStyle(
-                            color: Colors.grey.shade600, 
-                            fontSize: AppSize.width(0.032),
-                          ), 
-                          maxLines: 2, 
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : SizedBox(height: AppSize.height(0.04)),
-                  SizedBox(height: AppSize.height(0.012)),
-                  Row(
-                    children: [
-                      Text(
-                        price, 
-                        style: TextStyle(
-                          fontSize: AppSize.width(0.04), 
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF7B2CBF),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailsScreen(
-                                businessCategoryId: widget.categoryId,
-                                businessSubCategoryId: widget.subCategoryId,
-                                categoryId: categoryId,
-                                productId: id,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7B2CBF),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            "View details",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(width: AppSize.width(0.03)),
-          SizedBox(
-            height: AppSize.height(0.14),
-            width: AppSize.width(0.28),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    imageUrl,
-                    height: AppSize.height(0.11),
-                    width: AppSize.width(0.28),
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: Colors.grey[300], 
-                      child: const Icon(Icons.image),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: AppSize.height(0.008),
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: quantity == 0 
-                      ? SizedBox(
-                          height: AppSize.height(0.04),
-                          width: AppSize.width(0.2),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              side: const BorderSide(color: Color(0xFF7B2CBF)),
-                              padding: EdgeInsets.zero,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            onPressed: () => _updateQuantity(id, 1),
-                            child: Text(
-                              "ADD", 
-                              style: TextStyle(
-                                color: const Color(0xFF7B2CBF), 
-                                fontWeight: FontWeight.bold,
-                                fontSize: AppSize.width(0.032),
-                              ),
-                            ),
-                          ),
-                        )
-                      : Container(
-                          height: AppSize.height(0.04),
-                          width: AppSize.width(0.22),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF7B2CBF)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              )
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              GestureDetector(
-                                onTap: () => _updateQuantity(id, -1),
-                                child: Container(
-                                  width: AppSize.width(0.07),
-                                  alignment: Alignment.center,
-                                  child: const Icon(Icons.remove, size: 16, color: Color(0xFF7B2CBF)),
-                                ),
-                              ),
-                              Text(
-                                quantity.toString(),
-                                style: TextStyle(
-                                  color: const Color(0xFF7B2CBF),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: AppSize.width(0.035),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => _updateQuantity(id, 1),
-                                child: Container(
-                                  width: AppSize.width(0.07),
-                                  alignment: Alignment.center,
-                                  child: const Icon(Icons.add, size: 16, color: Color(0xFF7B2CBF)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
     );
   }
 }
