@@ -50,6 +50,7 @@ class PaginationMeta {
 class ProductItem {
   final String productId;
   final String name;
+  final Business? business;
   final String? description;
   final String? businessCategoryId;
   final String? businessSubCategoryId;
@@ -71,6 +72,7 @@ class ProductItem {
   ProductItem({
     required this.productId,
     required this.name,
+    this.business,
     this.description,
     this.businessCategoryId,
     this.businessSubCategoryId,
@@ -94,6 +96,8 @@ class ProductItem {
     return ProductItem(
       productId: json['product_id'] ?? '',
       name: json['name'] ?? '',
+      business:
+          json['business'] != null ? Business.fromJson(json['business']) : null,
       description: json['description'],
       businessCategoryId: json['business_category_id'],
       businessSubCategoryId: json['business_sub_category_id'],
@@ -116,6 +120,24 @@ class ProductItem {
     );
   }
 }
+
+class Business {
+  final String businessId;
+  final String businessName;
+
+  Business({
+    required this.businessId,
+    required this.businessName,
+  });
+
+  factory Business.fromJson(Map<String, dynamic> json) {
+    return Business(
+      businessId: json['business_id'] ?? '',
+      businessName: json['business_name'] ?? '',
+    );
+  }
+}
+
 
 class PrimaryVariant {
   final String variantId;

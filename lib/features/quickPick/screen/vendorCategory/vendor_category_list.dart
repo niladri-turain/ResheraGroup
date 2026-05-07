@@ -417,6 +417,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 itemBuilder: (context, index) {
                   final product = products[index];
                   return FashionProductCard(
+                    businessId: product.business?.businessId ?? "",
                     id: product.productId,
                     title: product.name,
                     price: "₹${product.finalPrice}",

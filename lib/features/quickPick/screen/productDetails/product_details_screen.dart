@@ -11,6 +11,7 @@ class ProductDetailsScreen extends StatefulWidget {
   final String businessSubCategoryId;
   final String categoryId;
   final String productId;
+  final String businessId;
 
   const ProductDetailsScreen({
     super.key,
@@ -18,6 +19,7 @@ class ProductDetailsScreen extends StatefulWidget {
     required this.businessSubCategoryId,
     required this.categoryId,
     required this.productId,
+    required  this.businessId,
   });
 
   @override
@@ -37,6 +39,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         businessSubCategoryId: widget.businessSubCategoryId,
         categoryId: widget.categoryId,
         productId: widget.productId,
+        businessId: widget.businessId,
       );
     });
   }

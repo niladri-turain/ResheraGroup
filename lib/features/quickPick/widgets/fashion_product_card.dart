@@ -11,6 +11,8 @@ class FashionProductCard extends StatelessWidget {
   final String categoryId;
   final String businessCategoryId;
   final String businessSubCategoryId;
+  final String businessId;
+
 
   const FashionProductCard({
     super.key,
@@ -22,6 +24,7 @@ class FashionProductCard extends StatelessWidget {
     required this.categoryId,
     required this.businessCategoryId,
     required this.businessSubCategoryId,
+    required this.businessId,
   });
 
   @override
@@ -104,6 +107,8 @@ class FashionProductCard extends StatelessWidget {
                               businessSubCategoryId: businessSubCategoryId,
                               categoryId: categoryId,
                               productId: id,
+                              businessId: businessId,
+
                             ),
                           ),
                         );
