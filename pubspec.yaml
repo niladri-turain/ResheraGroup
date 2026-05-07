@@ -45,6 +45,7 @@ dependencies:
   shimmer: ^3.0.0
   shared_preferences: ^2.5.5
   webview_flutter: ^4.13.1
+  flutter_widget_from_html: ^0.17.2
 
 
 dev_dependencies:

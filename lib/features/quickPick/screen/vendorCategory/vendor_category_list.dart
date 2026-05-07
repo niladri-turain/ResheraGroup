@@ -163,64 +163,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
               if (widget.categoryName == "Fashion & Lifestyle") {
                 return _buildFashionLayout(catProvider);
               }
-              return SizedBox();
-              // return ListView.builder(
-              //   itemCount: catProvider.categories.length,
-              //   itemBuilder: (context, index) {
-              //     final category = catProvider.categories[index];
-              //     return Column(
-              //       children: [
-              //         Consumer<ProductProvider>(
-              //           builder: (context, productProvider, child) {
-              //             final products = productProvider.getProductsByCategory(category.id);
-              //
-              //             return ExpansionTile(
-              //               initiallyExpanded: true, // ওপেন হয়ে থাকবে
-              //               title: Text(
-              //                 category.name,
-              //                 style: TextStyle(
-              //                   fontSize: AppSize.width(0.045),
-              //                   fontWeight: FontWeight.bold,
-              //                   color: Colors.black87,
-              //                 ),
-              //               ),
-              //               shape: const Border(), // Removes the default borders
-              //               childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
-              //               children: [
-              //                 if (products.isEmpty && !productProvider.isLoading)
-              //                   Padding(
-              //                     padding: EdgeInsets.symmetric(vertical: AppSize.height(0.02)),
-              //                     child: const Text("No products found in this category"),
-              //                   )
-              //                 else
-              //                   for (var product in products)
-              //                     StandardProductCard(
-              //                       id: product.productId,
-              //                       title: product.name,
-              //                       subtitle: product.description ?? "No description available",
-              //                       price: "₹${product.finalPrice}",
-              //                       imageUrl: product.image ??
-              //                           "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-              //                       categoryId: category.id,
-              //                       businessCategoryId: widget.categoryId,
-              //                       businessSubCategoryId: widget.subCategoryId,
-              //                       quantity: _itemQuantities[product.productId] ?? 0,
-              //                       onAdd: () => _updateQuantity(product.productId, 1),
-              //                       onRemove: () => _updateQuantity(product.productId, -1),
-              //                     ),
-              //               ],
-              //             );
-              //           },
-              //         ),
-              //         Container(
-              //           height: 8,
-              //           width: double.infinity,
-              //           color: Colors.grey.shade100, // Section Separator / Shadow look
-              //         ),
-              //       ],
-              //     );
-              //   },
-              // );
+              return _buildStandardLayout(catProvider);
             },
           ),
           if (totalItems > 0)
@@ -307,6 +250,67 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
               const Divider(),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStandardLayout(VendorCategoryProvider catProvider) {
+    return ListView.builder(
+      itemCount: catProvider.categories.length,
+      itemBuilder: (context, index) {
+        final category = catProvider.categories[index];
+        return Column(
+          children: [
+            Consumer<ProductProvider>(
+              builder: (context, productProvider, child) {
+                final products = productProvider.getProductsByCategory(category.id);
+
+                return ExpansionTile(
+                  initiallyExpanded: true,
+                  title: Text(
+                    category.name,
+                    style: TextStyle(
+                      fontSize: AppSize.width(0.045),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  shape: const Border(),
+                  childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
+                  children: [
+                    if (products.isEmpty && !productProvider.isLoading)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSize.height(0.02)),
+                        child: const Text("No products found in this category"),
+                      )
+                    else
+                      for (var product in products)
+                        StandardProductCard(
+                          id: product.productId,
+                          title: product.name,
+                          subtitle: product.description ?? "No description available",
+                          price: "₹${product.finalPrice}",
+                          imageUrl: product.image ??
+                              "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                          categoryId: category.id,
+                          businessCategoryId: widget.categoryId,
+                          businessSubCategoryId: widget.subCategoryId,
+                          businessId: product.business?.businessId ?? "",
+                          quantity: _itemQuantities[product.productId] ?? 0,
+                          onAdd: () => _updateQuantity(product.productId, 1),
+                          onRemove: () => _updateQuantity(product.productId, -1),
+                        ),
+                  ],
+                );
+              },
+            ),
+            Container(
+              height: 8,
+              width: double.infinity,
+              color: Colors.grey.shade100,
+            ),
+          ],
         );
       },
     );

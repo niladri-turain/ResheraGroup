@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../model/product_details_model.dart';
 import '../../../../core/constants/app_sizes.dart';
-
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 class ProductDetailsItemWidget extends StatefulWidget {
   final ProductData product;
 
@@ -15,15 +15,26 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
   int _selectedVariantIndex = 0;
   int _currentImageIndex = 0;
   final PageController _pageController = PageController();
+  final Map<String, String> _selectedAttributes = {};
 
   @override
   void initState() {
     super.initState();
     // Find primary variant if available
-    if (widget.product.variants != null) {
+    if (widget.product.variants != null && widget.product.variants!.isNotEmpty) {
       final primaryIndex = widget.product.variants!.indexWhere((v) => v.isPrimary == true);
-      if (primaryIndex != -1) {
-        _selectedVariantIndex = primaryIndex;
+      _selectedVariantIndex = primaryIndex != -1 ? primaryIndex : 0;
+      _updateSelectedAttributesFromVariant();
+    }
+  }
+
+  void _updateSelectedAttributesFromVariant() {
+    final variant = widget.product.variants![_selectedVariantIndex];
+    if (variant.attributes != null) {
+      for (var attr in variant.attributes!) {
+        if (attr.attributeName != null && attr.value != null) {
+          _selectedAttributes[attr.attributeName!] = attr.value!;
+        }
       }
     }
   }
@@ -54,6 +65,8 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
     if (widget.product.variants == null) return;
 
     final currentVariant = widget.product.variants![_selectedVariantIndex];
+    
+    // Attempt to keep other attributes of the currently selected variant
     final otherAttributes = currentVariant.attributes
             ?.where((a) => a.attributeName != attributeName)
             .toList() ??
@@ -64,6 +77,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
 
     for (int i = 0; i < widget.product.variants!.length; i++) {
       final v = widget.product.variants![i];
+      // We must match the clicked attribute value
       final hasTargetAttr = v.attributes?.any(
             (a) => a.attributeName == attributeName && a.value == value,
           ) ??
@@ -76,6 +90,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
             matches++;
           }
         }
+        // If we find a variant that matches more of our other attributes (like keeping color when changing size), we prefer it.
         if (matches > maxMatches) {
           maxMatches = matches;
           bestMatchIndex = i;
@@ -86,11 +101,29 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
     if (bestMatchIndex != -1) {
       setState(() {
         _selectedVariantIndex = bestMatchIndex;
+        _updateSelectedAttributesFromVariant();
         _currentImageIndex = 0;
         if (_pageController.hasClients) {
           _pageController.jumpToPage(0);
         }
       });
+
+      // Printing as requested
+      final groups = _getAttributeGroups();
+      final sizeKey = groups.keys.firstWhere((k) => k.toLowerCase().contains("size"), orElse: () => "");
+      final colorKey = groups.keys.firstWhere((k) => k.toLowerCase().contains("color"), orElse: () => "");
+      
+      print("----------------------------------");
+      if (attributeName.toLowerCase().contains("size")) {
+        print("Size Selected: $value");
+      } else if (attributeName.toLowerCase().contains("color")) {
+        print("Color Selected: $value");
+      } else {
+        print("$attributeName Selected: $value");
+      }
+      print("Current Size: ${_selectedAttributes[sizeKey] ?? 'N/A'}");
+      print("Current Color: ${_selectedAttributes[colorKey] ?? 'N/A'}");
+      print("----------------------------------");
     }
   }
 
@@ -270,7 +303,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                       itemCount: groups[sizeKey]!.length,
                       itemBuilder: (context, index) {
                         final size = groups[sizeKey]![index];
-                        final isSelected = attributes.any((a) => a.attributeName == sizeKey && a.value == size);
+                        final isSelected = _selectedAttributes[sizeKey] == size;
                         return GestureDetector(
                           onTap: () => _updateVariantByAttribute(sizeKey, size),
                           child: Container(
@@ -309,7 +342,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                       itemCount: groups[colorKey]!.length,
                       itemBuilder: (context, index) {
                         final colorValue = groups[colorKey]![index];
-                        final isSelected = attributes.any((a) => a.attributeName == colorKey && a.value == colorValue);
+                        final isSelected = _selectedAttributes[colorKey] == colorValue;
                         return GestureDetector(
                           onTap: () => _updateVariantByAttribute(colorKey, colorValue),
                           child: Container(
@@ -353,7 +386,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                           itemCount: entry.value.length,
                           itemBuilder: (context, index) {
                             final val = entry.value[index];
-                            final isSelected = attributes.any((a) => a.attributeName == entry.key && a.value == val);
+                            final isSelected = _selectedAttributes[entry.key] == val;
                             return GestureDetector(
                               onTap: () => _updateVariantByAttribute(entry.key, val),
                               child: Container(
@@ -386,9 +419,9 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                 const Divider(height: 32),
                 const Text("Product Description", style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                Text(
+                HtmlWidget(
                   variant?.longDescription ?? variant?.shortDescription ?? "No description available.",
-                  style: const TextStyle(color: Colors.black54, height: 1.5, fontSize: 14),
+                  textStyle: const TextStyle(color: Colors.black54, height: 1.5, fontSize: 14),
                 ),
                 const SizedBox(height: 100), // Spacing for bottom button
               ],
