@@ -132,7 +132,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         },
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 16,horizontal: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -145,18 +145,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ),
         child: Row(
           children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  side: const BorderSide(color: Color(0xFF7B2CBF)),
-                ),
-                child: const Text("Add to Cart", style: TextStyle(color: Color(0xFF7B2CBF))),
-              ),
-            ),
-            const SizedBox(width: 16),
+
+
             Expanded(
               child: ElevatedButton(
                 onPressed: () {},
