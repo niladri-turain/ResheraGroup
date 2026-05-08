@@ -182,6 +182,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         print("success=$success");
 
                         if (success && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Product added to cart"),
+                              backgroundColor: const Color(0xFF7B2CBF),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
                           Navigator.push(
                             context,
                             MaterialPageRoute(
