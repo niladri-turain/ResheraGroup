@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/service/location_service.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../provider/product_details_provider.dart';
+import '../../provider/cart_provider.dart';
+import '../../model/product_details_model.dart';
 import '../../widgets/cart_widgets.dart';
 import '../../widgets/product_details_item_widget.dart';
 import '../checkout/check_out_screen.dart';
@@ -30,6 +32,7 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   String? cachedAddress;
   int _cartCount = 0;
+  Variant? _selectedVariant;
 
   @override
   void initState() {
@@ -132,7 +135,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 return const Center(child: Text("Product not found"));
               }
 
-              return ProductDetailsItemWidget(product: provider.productDetails!);
+              return ProductDetailsItemWidget(
+                product: provider.productDetails!,
+                onVariantChanged: (variant) {
+                  setState(() {
+                    _selectedVariant = variant;
+                  });
+                },
+              );
             },
           ),
           Positioned(
@@ -157,13 +167,31 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 children: [
                   if (_cartCount > 0)
                     FloatingCartBar(
-                      itemCount: _cartCount, // In real app, this would be total cart items
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const CheckOutScreen()),
+                      itemCount: _cartCount,
+                      onTap: () async {
+                        if (_selectedVariant == null) return;
+
+                        final cartProvider = context.read<CartProvider>();
+                        final success = await cartProvider.addToCart(
+                          productId: widget.productId,
+                          businessCategoryId: widget.businessCategoryId,
+                          variantId: _selectedVariant!.variantId ?? "",
+                          quantity: _cartCount,
+                          attributes: _selectedVariant!.attributes ?? [],
                         );
+                        print("success=$success");
+
+                        if (success && mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const CheckOutScreen()),
+                          );
+                        } else if (mounted && cartProvider.errorMessage != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(cartProvider.errorMessage!)),
+                          );
+                        }
                       },
                     ),
                   Container(

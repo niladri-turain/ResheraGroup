@@ -7,8 +7,13 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class ProductDetailsItemWidget extends StatefulWidget {
   final ProductData product;
+  final Function(Variant variant) onVariantChanged;
 
-  const ProductDetailsItemWidget({super.key, required this.product});
+  const ProductDetailsItemWidget({
+    super.key,
+    required this.product,
+    required this.onVariantChanged,
+  });
 
   @override
   State<ProductDetailsItemWidget> createState() =>
@@ -31,6 +36,11 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
           widget.product.variants!.indexWhere((v) => v.isPrimary == true);
       _selectedVariantIndex = primaryIndex != -1 ? primaryIndex : 0;
       _updateSelectedAttributesFromVariant();
+      
+      // Notify parent about initial variant
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onVariantChanged(widget.product.variants![_selectedVariantIndex]);
+      });
     }
   }
 
@@ -144,6 +154,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
           _pageController.jumpToPage(0);
         }
       });
+      widget.onVariantChanged(widget.product.variants![_selectedVariantIndex]);
     }
   }
 

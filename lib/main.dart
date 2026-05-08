@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:resheragroup/features/quickPick/provider/vendor_provider.dart';
 import 'package:resheragroup/main_screen.dart';
 import 'core/di/injection_container.dart' as di;
+import 'features/quickPick/provider/cart_provider.dart';
 import 'features/quickPick/provider/category_provider.dart';
 
 import 'features/quickPick/provider/sub_category_provider.dart';
@@ -22,6 +23,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => VendorCategoryProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => ProductDetailsProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: const MyApp(),
     ),
