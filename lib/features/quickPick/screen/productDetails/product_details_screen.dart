@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/service/location_service.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../provider/product_details_provider.dart';
+import '../../widgets/cart_widgets.dart';
 import '../../widgets/product_details_item_widget.dart';
 import '../checkout/check_out_screen.dart';
 
@@ -28,6 +29,7 @@ class ProductDetailsScreen extends StatefulWidget {
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   String? cachedAddress;
+  int _cartCount = 0;
 
   @override
   void initState() {
@@ -114,52 +116,73 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
         ],
       ),
-      body: Consumer<ProductDetailsProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Stack(
+        children: [
+          Consumer<ProductDetailsProvider>(
+            builder: (context, provider, child) {
+              if (provider.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          if (provider.errorMessage != null) {
-            return Center(child: Text(provider.errorMessage!));
-          }
+              if (provider.errorMessage != null) {
+                return Center(child: Text(provider.errorMessage!));
+              }
 
-          if (provider.productDetails == null) {
-            return const Center(child: Text("Product not found"));
-          }
+              if (provider.productDetails == null) {
+                return const Center(child: Text("Product not found"));
+              }
 
-          return ProductDetailsItemWidget(product: provider.productDetails!);
-        },
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16,horizontal: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-
-
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7B2CBF),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              return ProductDetailsItemWidget(product: provider.productDetails!);
+            },
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withOpacity(0),
+                    Colors.white.withOpacity(0.9),
+                    Colors.white,
+                  ],
+                  stops: const [0, 0.2, 1],
                 ),
-                child: const Text("Buy Now", style: TextStyle(color: Colors.white)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_cartCount > 0)
+                    FloatingCartBar(
+                      itemCount: _cartCount, // In real app, this would be total cart items
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const CheckOutScreen()),
+                        );
+                      },
+                    ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    color: Colors.white,
+                    child: CartCounterWidget(
+                      initialLabel: "Buy Now",
+                      onCountChanged: (count) {
+                        setState(() {
+                          _cartCount = count;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

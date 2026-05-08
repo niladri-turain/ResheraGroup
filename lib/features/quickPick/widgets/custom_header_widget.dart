@@ -85,11 +85,11 @@ class CustomHeaderWidget extends StatelessWidget {
               /// Icons
               Row(
                 children: [
-                  _circleIcon(
-                    icon: Icons.shopping_cart_outlined,
-                    onTap: onNotificationTap,
-                    showDot: true,
-                  ),
+                  // _circleIcon(
+                  //   icon: Icons.shopping_cart_outlined,
+                  //   onTap: onNotificationTap,
+                  //   showDot: true,
+                  // ),
                   SizedBox(width: AppSize.width(0.03)),
                   _circleIcon(
                     icon: Icons.person_outline,
