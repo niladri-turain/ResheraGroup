@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/constants/api_end_points.dart';
+import '../../../core/constants/app_strings.dart';
 import '../../../core/service/api_service.dart';
 import '../model/product_details_model.dart';
 
@@ -8,7 +9,7 @@ class CartProvider with ChangeNotifier {
   final ApiService _apiService = GetIt.I<ApiService>();
   
   // Updated Bearer Token
-  static const String _bearerToken = "3|z7TObCtolxbRKsFaV6Kvx3kP9CzX64Fvcxews6yo893fa3bd";
+  static const String _bearerToken = AppStrings.token;
   
   bool _isSyncing = false;
   bool get isSyncing => _isSyncing;

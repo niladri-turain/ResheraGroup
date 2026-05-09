@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:resheragroup/core/constants/app_strings.dart';
 import '../../../core/constants/api_end_points.dart';
 import '../../../core/service/api_service.dart';
 import '../model/cart_list_model.dart';
@@ -8,7 +9,7 @@ class ViewCartListProvider with ChangeNotifier {
   final ApiService _apiService = GetIt.I<ApiService>();
   
   // Constant Bearer Token & User ID
-  static const String _bearerToken = "3|z7TObCtolxbRKsFaV6Kvx3kP9CzX64Fvcxews6yo893fa3bd";
+  static const String _bearerToken = AppStrings.token;
   static const String _userId = "Wpmbk5ezJn";
 
   CartListModel? _cartData;
