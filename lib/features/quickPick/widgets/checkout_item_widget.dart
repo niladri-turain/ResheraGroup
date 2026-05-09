@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CheckoutItemWidget extends StatelessWidget {
   final String image;
   final String title;
-  final String weight;
+  final String subtitle;
   final String price;
   final int quantity;
   final VoidCallback onIncrease;
@@ -13,7 +13,7 @@ class CheckoutItemWidget extends StatelessWidget {
     super.key,
     required this.image,
     required this.title,
-    required this.weight,
+    required this.subtitle,
     required this.price,
     required this.quantity,
     required this.onIncrease,
@@ -28,12 +28,25 @@ class CheckoutItemWidget extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              image,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-            ),
+            child: image.startsWith('http')
+                ? Image.network(
+                    image,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.image_not_supported),
+                    ),
+                  )
+                : Image.asset(
+                    image,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -48,7 +61,7 @@ class CheckoutItemWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  weight,
+                  subtitle,
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 12,

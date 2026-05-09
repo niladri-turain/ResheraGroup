@@ -7,7 +7,7 @@ import '../model/product_details_model.dart';
 class CartProvider with ChangeNotifier {
   final ApiService _apiService = GetIt.I<ApiService>();
   
-  // Constant token for authorization
+  // Updated Bearer Token
   static const String _bearerToken = "3|z7TObCtolxbRKsFaV6Kvx3kP9CzX64Fvcxews6yo893fa3bd";
   
   bool _isSyncing = false;
@@ -28,26 +28,29 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final Map<String, dynamic> body = {
+      // Building flat structure for Multipart form-data as per your requirement
+      final Map<String, String> body = {
         'user_id': 'Wpmbk5ezJn',
         'product_id': productId,
         'business_category_id': businessCategoryId,
         'product_variant_id': variantId,
-        'quantity': quantity,
-        'attributes': attributes.map((a) => {
-          'attribute_id': a.attributeId ?? "",
-          'attribute_value_id': a.valueId ?? "",
-        }).toList(),
+        'quantity': quantity.toString(),
       };
 
-      // Passing the bearer token in the post request
-      final response = await _apiService.post(
+      // Adding attributes in the format: attributes[i][attribute_id]
+      for (int i = 0; i < attributes.length; i++) {
+        body['attributes[$i][attribute_id]'] = attributes[i].attributeId ?? "";
+        body['attributes[$i][attribute_value_id]'] = attributes[i].valueId ?? "";
+      }
+
+      // Using multipartRequest for form-data support with POST method
+      final response = await _apiService.multipartRequest(
         ApiEndPoints.cart, 
+        method: 'POST',
         body: body, 
         token: _bearerToken
       );
 
-      // Checking success key as per your latest response
       if (response['success'] == true) {
         return true;
       } else {

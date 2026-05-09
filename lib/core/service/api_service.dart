@@ -17,7 +17,7 @@ class ApiService {
   }
 
   // GET Request
-  Future<dynamic> get(String endpoint, {String? token}) async {
+  Future<dynamic> get(String endpoint, {String? token,dynamic body,}) async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl$endpoint'),
@@ -70,6 +70,34 @@ class ApiService {
         Uri.parse('$baseUrl$endpoint'),
         headers: _getHeaders(token),
       );
+      return _processResponse(response);
+    } on SocketException {
+      throw Exception('No Internet connection');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Multipart Request (Supports GET/POST with form-data)
+  Future<dynamic> multipartRequest(String endpoint, {
+    required String method,
+    Map<String, String>? body,
+    String? token,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      final request = http.MultipartRequest(method, uri);
+      
+      // Adding headers
+      request.headers.addAll(_getHeaders(token));
+      
+      // Adding form-data fields
+      if (body != null) {
+        request.fields.addAll(body);
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
       return _processResponse(response);
     } on SocketException {
       throw Exception('No Internet connection');

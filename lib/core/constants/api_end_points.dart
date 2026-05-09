@@ -8,5 +8,6 @@ class ApiEndPoints {
   static const String productList = "products";
   static const String productDetails = "products/details";
   static const String cart = "cart";
+  static const String getAllCart = "cart";
 
 }
