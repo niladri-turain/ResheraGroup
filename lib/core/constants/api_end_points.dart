@@ -10,5 +10,6 @@ class ApiEndPoints {
   static const String cart = "cart";
   static const String getAllCart = "cart";
   static const String updateCart = "cart";
+  static const String deleteCart = "cart";
 
 }

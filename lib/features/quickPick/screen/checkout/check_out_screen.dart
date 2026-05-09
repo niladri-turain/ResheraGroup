@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../provider/update_cart_provider.dart';
+import '../../provider/delete_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
 import '../../widgets/checkout_item_widget.dart';
 
@@ -47,11 +48,11 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       ),
       body: Consumer<ViewCartListProvider>(
         builder: (context, provider, child) {
-          if (provider.isLoading) {
+          if (provider.isLoading && provider.cartData == null) {
             return _buildSkeleton();
           }
 
-          if (provider.errorMessage != null) {
+          if (provider.errorMessage != null && provider.cartData == null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -72,6 +73,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           }
 
           final updateProvider = context.watch<UpdateCartProvider>();
+          final deleteProvider = context.watch<DeleteCartProvider>();
 
           double totalAmount = 0;
           for (var item in cartData.data!) {
@@ -111,7 +113,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                               subtitle: attributes,
                               price: item.product?.finalPrice.toString() ?? "0",
                               quantity: item.quantity ?? 1,
-                              onIncrease: updateProvider.isUpdating
+                              onIncrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
                                   ? () {}
                                   : () async {
                                       final success = await updateProvider.updateCart(
@@ -119,68 +121,96 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                         quantity: (item.quantity ?? 0) + 1,
                                       );
                                       if (success) {
-                                        if (mounted) {
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                backgroundColor: const Color(0xFF7B2CBF),
-                                                behavior: SnackBarBehavior.floating, // একটু উপরে ভেসে থাকবে
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(10),
-                                                ),
-                                                content: const Text(
-                                                  'Cart updated successfully',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        }
-                                        provider.fetchCart();
+                                        // if (mounted) {
+                                        //   ScaffoldMessenger.of(context).showSnackBar(
+                                        //     SnackBar(
+                                        //       backgroundColor: const Color(0xFF7B2CBF),
+                                        //       behavior: SnackBarBehavior.floating,
+                                        //       shape: RoundedRectangleBorder(
+                                        //         borderRadius: BorderRadius.circular(10),
+                                        //       ),
+                                        //       content: const Text(
+                                        //         'Cart updated successfully',
+                                        //         style: TextStyle(
+                                        //           color: Colors.white,
+                                        //           fontWeight: FontWeight.w500,
+                                        //         ),
+                                        //       ),
+                                        //     ),
+                                        //   );
+                                        // }
+                                          provider.fetchCart(showLoader: false);
                                       }
                                     },
-                              onDecrease: updateProvider.isUpdating
+                              onDecrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
                                   ? () {}
-                                  : () async {if ((item.quantity ?? 0) > 1) {
-                                final success = await updateProvider.updateCart(
-                                  cartId: item.id ?? "",
-                                  quantity: (item.quantity ?? 0) - 1,
-                                );
-                                if (success) {
-                                  if (mounted) {
-
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        backgroundColor: const Color(0xFF7B2CBF),
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        content: const Text(
-                                          'Cart removed successfully',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  provider.fetchCart();
-                                }
-                              }
-                              },
+                                  : () async {
+                                      if ((item.quantity ?? 0) > 1) {
+                                        final success = await updateProvider.updateCart(
+                                          cartId: item.id ?? "",
+                                          quantity: (item.quantity ?? 0) - 1,
+                                        );
+                                        if (success) {
+                                          // if (mounted) {
+                                          //   ScaffoldMessenger.of(context).showSnackBar(
+                                          //     SnackBar(
+                                          //       backgroundColor: const Color(0xFF7B2CBF),
+                                          //       behavior: SnackBarBehavior.floating,
+                                          //       shape: RoundedRectangleBorder(
+                                          //         borderRadius: BorderRadius.circular(10),
+                                          //       ),
+                                          //       content: const Text(
+                                          //         'Cart updated successfully',
+                                          //         style: TextStyle(
+                                          //           color: Colors.white,
+                                          //           fontWeight: FontWeight.w500,
+                                          //         ),
+                                          //       ),
+                                          //     ),
+                                          //   );
+                                          // }
+                                          provider.fetchCart(showLoader: false);
+                                        }
+                                      } else if ((item.quantity ?? 0) == 1) {
+                                        final success = await deleteProvider.deleteCart(
+                                          cartId: item.id ?? "",
+                                        );
+                                        if (success) {
+                                          // if (mounted) {
+                                          //   ScaffoldMessenger.of(context).showSnackBar(
+                                          //     SnackBar(
+                                          //       backgroundColor: const Color(0xFF7B2CBF),
+                                          //       behavior: SnackBarBehavior.floating,
+                                          //       shape: RoundedRectangleBorder(
+                                          //         borderRadius: BorderRadius.circular(10),
+                                          //       ),
+                                          //       content: const Text(
+                                          //         'item delete successfully',
+                                          //         style: TextStyle(
+                                          //           color: Colors.white,
+                                          //           fontWeight: FontWeight.w500,
+                                          //         ),
+                                          //       ),
+                                          //     ),
+                                          //   );
+                                          // }
+                                          provider.fetchCart(showLoader: false);
+                                        }
+                                      }
+                                    },
                             ),
-                            // if (updateProvider.isUpdating)
+                            // if (updateProvider.isUpdating || deleteProvider.isDeleting)
                             //   Positioned.fill(
                             //     child: Container(
-                            //       color: Colors.white.withOpacity(0.5),
+                            //       color: Colors.white.withOpacity(0.3),
                             //       child: const Center(
-                            //         child: CircularProgressIndicator(
-                            //           valueColor: AlwaysStoppedAnimation<Color>(Color(0XFF9333ea)),
+                            //         child: SizedBox(
+                            //           width: 20,
+                            //           height: 20,
+                            //           child: CircularProgressIndicator(
+                            //             strokeWidth: 2,
+                            //             valueColor: AlwaysStoppedAnimation<Color>(Color(0XFF9333ea)),
+                            //           ),
                             //         ),
                             //       ),
                             //     ),

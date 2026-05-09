@@ -43,16 +43,19 @@ class ViewCartListProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetches or Updates the cart using GET method with form-data body as per your screenshot.
-  /// Call without parameters to fetch list, or with parameters to update and fetch.
+  /// Fetches or Updates the cart.
+  /// [showLoader] determines if the global isLoading state should be set.
   Future<void> fetchCart({
     String? productId,
     String? businessCategoryId,
     String? variantId,
     int? quantity,
     List<CartAttribute>? attributes,
+    bool showLoader = true,
   }) async {
-    _isLoading = true;
+    if (showLoader) {
+      _isLoading = true;
+    }
     _errorMessage = null;
     notifyListeners();
 
