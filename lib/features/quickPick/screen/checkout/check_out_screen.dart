@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../provider/update_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
 import '../../widgets/checkout_item_widget.dart';
 
@@ -70,6 +71,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             return const Center(child: Text("Your cart is empty"));
           }
 
+          final updateProvider = context.watch<UpdateCartProvider>();
+
           double totalAmount = 0;
           for (var item in cartData.data!) {
             final price = double.tryParse(item.product?.finalPrice.toString() ?? '0') ?? 0;
@@ -100,14 +103,89 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                 .join(", ") ??
                             "";
 
-                        return CheckoutItemWidget(
-                          image: item.image ?? "",
-                          title: item.productName ?? "",
-                          subtitle: attributes,
-                          price: item.product?.finalPrice.toString() ?? "0",
-                          quantity: item.quantity ?? 1,
-                          onIncrease: () {},
-                          onDecrease: () {},
+                        return Stack(
+                          children: [
+                            CheckoutItemWidget(
+                              image: item.image ?? "",
+                              title: item.productName ?? "",
+                              subtitle: attributes,
+                              price: item.product?.finalPrice.toString() ?? "0",
+                              quantity: item.quantity ?? 1,
+                              onIncrease: updateProvider.isUpdating
+                                  ? () {}
+                                  : () async {
+                                      final success = await updateProvider.updateCart(
+                                        cartId: item.id ?? "",
+                                        quantity: (item.quantity ?? 0) + 1,
+                                      );
+                                      if (success) {
+                                        if (mounted) {
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                backgroundColor: const Color(0xFF7B2CBF),
+                                                behavior: SnackBarBehavior.floating, // একটু উপরে ভেসে থাকবে
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(10),
+                                                ),
+                                                content: const Text(
+                                                  'Cart updated successfully',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                        provider.fetchCart();
+                                      }
+                                    },
+                              onDecrease: updateProvider.isUpdating
+                                  ? () {}
+                                  : () async {if ((item.quantity ?? 0) > 1) {
+                                final success = await updateProvider.updateCart(
+                                  cartId: item.id ?? "",
+                                  quantity: (item.quantity ?? 0) - 1,
+                                );
+                                if (success) {
+                                  if (mounted) {
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: const Color(0xFF7B2CBF),
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        content: const Text(
+                                          'Cart removed successfully',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  provider.fetchCart();
+                                }
+                              }
+                              },
+                            ),
+                            // if (updateProvider.isUpdating)
+                            //   Positioned.fill(
+                            //     child: Container(
+                            //       color: Colors.white.withOpacity(0.5),
+                            //       child: const Center(
+                            //         child: CircularProgressIndicator(
+                            //           valueColor: AlwaysStoppedAnimation<Color>(Color(0XFF9333ea)),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
+                          ],
                         );
                       },
                     ),
@@ -177,117 +255,117 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           );
         },
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 1),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.home_outlined, color: Color(0XFF9333ea)),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Delivering to Home',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'Floor 1st, 9F Abdul biryani center,...',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Change',
-                    style: TextStyle(color: Colors.green),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Paying Type', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: selectedPayment,
-                            isExpanded: true,
-                            items: ['UPI Pay', 'Cash on Delivery'].map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedPayment = newValue!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0XFF9333ea),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Place Order',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                        Icon(Icons.chevron_right, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      // bottomNavigationBar: Container(
+      //   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      //   decoration: const BoxDecoration(
+      //     color: Colors.white,
+      //     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      //     boxShadow: [
+      //       BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 1),
+      //     ],
+      //   ),
+      //   child: Column(
+      //     mainAxisSize: MainAxisSize.min,
+      //     children: [
+      //       Row(
+      //         children: [
+      //           Container(
+      //             padding: const EdgeInsets.all(8),
+      //             decoration: BoxDecoration(
+      //               color: Colors.purple.shade50,
+      //               borderRadius: BorderRadius.circular(8),
+      //             ),
+      //             child: const Icon(Icons.home_outlined, color: Color(0XFF9333ea)),
+      //           ),
+      //           const SizedBox(width: 12),
+      //           const Expanded(
+      //             child: Column(
+      //               crossAxisAlignment: CrossAxisAlignment.start,
+      //               children: [
+      //                 Text(
+      //                   'Delivering to Home',
+      //                   style: TextStyle(fontWeight: FontWeight.bold),
+      //                 ),
+      //                 Text(
+      //                   'Floor 1st, 9F Abdul biryani center,...',
+      //                   style: TextStyle(color: Colors.grey, fontSize: 12),
+      //                   overflow: TextOverflow.ellipsis,
+      //                 ),
+      //               ],
+      //             ),
+      //           ),
+      //           TextButton(
+      //             onPressed: () {},
+      //             child: const Text(
+      //               'Change',
+      //               style: TextStyle(color: Colors.green),
+      //             ),
+      //           ),
+      //         ],
+      //       ),
+      //       const SizedBox(height: 16),
+      //       Row(
+      //         children: [
+      //           Expanded(
+      //             child: Column(
+      //               crossAxisAlignment: CrossAxisAlignment.start,
+      //               children: [
+      //                 const Text('Paying Type', style: TextStyle(fontSize: 12, color: Colors.grey)),
+      //                 Container(
+      //                   padding: const EdgeInsets.symmetric(horizontal: 12),
+      //                   decoration: BoxDecoration(
+      //                     border: Border.all(color: Colors.grey.shade300),
+      //                     borderRadius: BorderRadius.circular(8),
+      //                   ),
+      //                   child: DropdownButtonHideUnderline(
+      //                     child: DropdownButton<String>(
+      //                       value: selectedPayment,
+      //                       isExpanded: true,
+      //                       items: ['UPI Pay', 'Cash on Delivery'].map((String value) {
+      //                         return DropdownMenuItem<String>(
+      //                           value: value,
+      //                           child: Text(value),
+      //                         );
+      //                       }).toList(),
+      //                       onChanged: (newValue) {
+      //                         setState(() {
+      //                           selectedPayment = newValue!;
+      //                         });
+      //                       },
+      //                     ),
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //           ),
+      //           const SizedBox(width: 16),
+      //           Expanded(
+      //             child: ElevatedButton(
+      //               onPressed: () {},
+      //               style: ElevatedButton.styleFrom(
+      //                 backgroundColor: const Color(0XFF9333ea),
+      //                 padding: const EdgeInsets.symmetric(vertical: 16),
+      //                 shape: RoundedRectangleBorder(
+      //                   borderRadius: BorderRadius.circular(12),
+      //                 ),
+      //               ),
+      //               child: const Row(
+      //                 mainAxisAlignment: MainAxisAlignment.center,
+      //                 children: [
+      //                   Text(
+      //                     'Place Order',
+      //                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      //                   ),
+      //                   Icon(Icons.chevron_right, color: Colors.white),
+      //                 ],
+      //               ),
+      //             ),
+      //           ),
+      //         ],
+      //       ),
+      //     ],
+      //   ),
+      // ),
     );
   }
 

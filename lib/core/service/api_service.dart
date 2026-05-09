@@ -82,6 +82,7 @@ class ApiService {
   Future<dynamic> multipartRequest(String endpoint, {
     required String method,
     Map<String, String>? body,
+    Map<String, String>? headers,
     String? token,
   }) async {
     try {
@@ -90,6 +91,9 @@ class ApiService {
       
       // Adding headers
       request.headers.addAll(_getHeaders(token));
+      if (headers != null) {
+        request.headers.addAll(headers);
+      }
       
       // Adding form-data fields
       if (body != null) {
