@@ -6,9 +6,11 @@ import '../../../../core/constants/app_sizes.dart';
 import '../productDetails/product_details_screen.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/product_provider.dart';
+import '../../provider/view_cart_list_provider.dart';
 import '../checkout/check_out_screen.dart';
 import '../../widgets/fashion_product_card.dart';
 import '../../widgets/standard_product_card.dart';
+import '../../widgets/cart_widgets.dart';
 
 class VendorCategoryList extends StatefulWidget {
   final String categoryId;
@@ -40,6 +42,16 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
     super.initState();
     _loadAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Sync initial cart quantities
+      final cartProvider = context.read<ViewCartListProvider>();
+      if (cartProvider.cartData?.data != null) {
+        for (var item in cartProvider.cartData!.data!) {
+          if (item.productId != null && item.quantity != null) {
+            _itemQuantities[item.productId!] = item.quantity!;
+          }
+        }
+      }
+
       context.read<VendorCategoryProvider>().fetchVendorCategories(
         widget.categoryId,
         widget.subCategoryId,
@@ -83,6 +95,14 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         _itemQuantities[itemId] = newQty;
       }
     });
+
+    // Sync with global cart provider
+    final qty = _itemQuantities[itemId] ?? 0;
+    context.read<ViewCartListProvider>().fetchCart(
+      productId: itemId,
+      businessCategoryId: widget.categoryId,
+      quantity: qty,
+    );
   }
 
   int get totalItems => _itemQuantities.values.fold(0, (sum, item) => sum + item);
@@ -166,15 +186,16 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
               return _buildStandardLayout(catProvider);
             },
           ),
-          if (totalItems > 0)
-            Positioned(
-              bottom: 50,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.46, // 🔥 responsive width
-                  child: GestureDetector(
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Consumer<ViewCartListProvider>(
+              builder: (context, cartProvider, child) {
+                return Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FloatingCartBar(
+                    itemCount: cartProvider.totalItems,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -183,28 +204,11 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                         ),
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0XFF9333ea),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "View Cart ($totalItems items)",
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(width: 5),
-                          const Icon(Icons.arrow_forward, color: Colors.white),
-                        ],
-                      ),
-                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
+          ),
         ],
       ),
     );
@@ -413,7 +417,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.72,
+                  childAspectRatio: 0.65,
                   crossAxisSpacing: AppSize.width(0.04),
                   mainAxisSpacing: AppSize.width(0.04),
                 ),
@@ -431,6 +435,10 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                     categoryId: _selectedCategoryId!,
                     businessCategoryId: widget.categoryId,
                     businessSubCategoryId: widget.subCategoryId,
+                    onCountChanged: (count) {
+                      _updateQuantity(product.productId, count - (_itemQuantities[product.productId] ?? 0));
+                    },
+                    initialCount: _itemQuantities[product.productId] ?? 0,
                   );
                 },
               );

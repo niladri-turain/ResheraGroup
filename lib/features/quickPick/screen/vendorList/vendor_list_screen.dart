@@ -2,6 +2,8 @@ import 'package:resheragroup/core/service/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:resheragroup/features/quickPick/provider/view_cart_list_provider.dart';
+import 'package:resheragroup/features/quickPick/widgets/cart_widgets.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../widgets/custom_search_widget.dart';
 import '../../provider/vendor_category_provider.dart';
@@ -113,143 +115,167 @@ class _VendorListScreenState extends State<VendorListScreen> {
           // ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Container(
-            padding: EdgeInsets.only(left: AppSize.width(0.04), right: AppSize.width(0.04), bottom: AppSize.width(0.02)),
-            color: const Color(0xFF7B2CBF),
-            child: CustomSearchWidget(
-              onSearch: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
-              },
-              hintText: 'Search vendors...',
-            ),
-          ),
-          Expanded(
-            child: Consumer<VendorProvider>(
-              builder: (context, provider, child){
-
-                if (provider.isLoading) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: AppSize.width(0.04),
-                        vertical: AppSize.height(0.02)),
-                    child: ListView.builder(
-                      itemCount: 4,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: AppSize.height(0.02)),
-                          child: Shimmer.fromColors(
-                            baseColor: Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: AppSize.height(0.22),
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
+          Column(
+            children: [
+              Container(
+                padding: EdgeInsets.only(left: AppSize.width(0.04), right: AppSize.width(0.04), bottom: AppSize.width(0.02)),
+                color: const Color(0xFF7B2CBF),
+                child: CustomSearchWidget(
+                  onSearch: (value) {
+                    setState(() {
+                      _searchQuery = value.toLowerCase();
+                    });
+                  },
+                  hintText: 'Search vendors...',
+                ),
+              ),
+              Expanded(
+                child: Consumer<VendorProvider>(
+                  builder: (context, provider, child){
+    
+                    if (provider.isLoading) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: AppSize.width(0.04),
+                            vertical: AppSize.height(0.02)),
+                        child: ListView.builder(
+                          itemCount: 4,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: AppSize.height(0.02)),
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      height: AppSize.height(0.22),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Container(height: 15, width: 150, color: Colors.white),
+                                    const SizedBox(height: 5),
+                                    Container(height: 12, width: 200, color: Colors.white),
+                                  ],
                                 ),
-                                const SizedBox(height: 10),
-                                Container(height: 15, width: 150, color: Colors.white),
-                                const SizedBox(height: 5),
-                                Container(height: 12, width: 200, color: Colors.white),
-                              ],
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }
+                    if (provider.errorMessage != null) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              provider.errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.red),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }
-                if (provider.errorMessage != null) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          provider.errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.red),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () => provider.fetchVendorCategory(widget.categoryId,widget.subCategoryId),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF7B2CBF),
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text("Retry"),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 12),
-                        ElevatedButton(
-                          onPressed: () => provider.fetchVendorCategory(widget.categoryId,widget.subCategoryId),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7B2CBF),
-                            foregroundColor: Colors.white,
+                      );
+                    }
+    
+                    if (provider.vendorCategory.isEmpty) {
+                      return const Center(child: Text("No Vendor List found"));
+                    }
+    
+                    final filteredVendors = provider.vendorCategory.where((vendor) {
+                      return vendor.businessName.toLowerCase().contains(_searchQuery);
+                    }).toList();
+    
+                    if (filteredVendors.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          "no search item found",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
                           ),
-                          child: const Text("Retry"),
                         ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (provider.vendorCategory.isEmpty) {
-                  return const Center(child: Text("No Vendor List found"));
-                }
-
-                final filteredVendors = provider.vendorCategory.where((vendor) {
-                  return vendor.businessName.toLowerCase().contains(_searchQuery);
-                }).toList();
-
-                if (filteredVendors.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      "no search item found",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  );
-                }
-
-                return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        padding: EdgeInsets.all(AppSize.width(0.04)),
-                        itemCount: filteredVendors.length,
-                        itemBuilder: (context, index) {
-                          final vendor = filteredVendors[index];
-                          return VendorCard(
-                            logo: vendor.kycDetail?.ownerPhoto?.url ?? "",
-                            title: vendor.businessName,
-                            vendorId: vendor.user?.vendorId ??"",
-                            backgroundImage: vendor.kycDetail?.shopPhoto?.url ?? "",
-                            address: vendor.user?.mobile ?? "",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => VendorCategoryList(
-                                    categoryId: widget.categoryId,
-                                    subCategoryId: widget.subCategoryId,
-                                    vendorId: vendor.id,
-                                    categoryName: widget.categoryName,
-                                  ),
-                                ),
+                      );
+                    }
+    
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: EdgeInsets.all(AppSize.width(0.04)),
+                            itemCount: filteredVendors.length,
+                            itemBuilder: (context, index) {
+                              final vendor = filteredVendors[index];
+                              return VendorCard(
+                                logo: vendor.kycDetail?.ownerPhoto?.url ?? "",
+                                title: vendor.businessName,
+                                vendorId: vendor.user?.vendorId ??"",
+                                backgroundImage: vendor.kycDetail?.shopPhoto?.url ?? "",
+                                address: vendor.user?.mobile ?? "",
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => VendorCategoryList(
+                                        categoryId: widget.categoryId,
+                                        subCategoryId: widget.subCategoryId,
+                                        vendorId: vendor.id,
+                                        categoryName: widget.categoryName,
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
+                          ),
+                                
+                        ],
                       ),
-                            
-                    ],
-                  ),
-                );
-              },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Consumer<ViewCartListProvider>(
+                builder: (context, cartProvider, child) {
+                  return FloatingCartBar(
+                    itemCount: cartProvider.totalItems,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],

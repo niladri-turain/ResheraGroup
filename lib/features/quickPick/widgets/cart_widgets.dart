@@ -125,7 +125,7 @@ class FloatingCartBar extends StatelessWidget {
           margin: EdgeInsets.only(bottom: 20),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF08BA4B), // Green color from image
+            color: const Color(0xFF7B2CBF), // Green color from image
             borderRadius: BorderRadius.circular(35),
             boxShadow: [
               BoxShadow(

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:resheragroup/features/quickPick/provider/view_cart_list_provider.dart';
+import 'package:resheragroup/features/quickPick/widgets/cart_widgets.dart';
 
 import '../checkout/check_out_screen.dart';
 import 'groceryItemWidgets/custom_delivery_address_widget.dart';
@@ -172,6 +175,7 @@ class _GroceryItemsScreensState extends State<GroceryItemsScreens> {
                         setState(() {
                           quantities[index] = 1;
                         });
+                        // Optional: sync with provider if these were real products
                       },
 
                       onIncrease: (index) {
@@ -194,44 +198,24 @@ class _GroceryItemsScreensState extends State<GroceryItemsScreens> {
             ),
 
             /// 🔥 FLOATING CART (OVERLAY)
-            if (totalItems > 0)
-              Positioned(
-                bottom: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.5, // 🔥 responsive width
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CheckOutScreen(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0XFF9333ea),
-                          borderRadius: BorderRadius.circular(30),
+            Consumer<ViewCartListProvider>(
+              builder: (context, cartProvider, child) {
+                return Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FloatingCartBar(
+                    itemCount: cartProvider.totalItems,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CheckOutScreen(),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "View Cart ($totalItems items)",
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            const Icon(Icons.arrow_forward, color: Colors.white),
-                          ],
-                        ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
-                ),
-              ),
+                );
+              },
+            ),
           ],
         ),
       ),

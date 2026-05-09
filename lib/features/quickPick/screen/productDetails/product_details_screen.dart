@@ -4,6 +4,7 @@ import '../../../../core/service/location_service.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../provider/product_details_provider.dart';
 import '../../provider/cart_provider.dart';
+import '../../provider/view_cart_list_provider.dart';
 import '../../model/product_details_model.dart';
 import '../../widgets/cart_widgets.dart';
 import '../../widgets/product_details_item_widget.dart';
@@ -165,51 +166,40 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (_cartCount > 0)
-                    FloatingCartBar(
-                      itemCount: _cartCount,
-                      onTap: () async {
-                        if (_selectedVariant == null) return;
-
-                        final cartProvider = context.read<CartProvider>();
-                        final success = await cartProvider.addToCart(
-                          productId: widget.productId,
-                          businessCategoryId: widget.businessCategoryId,
-                          variantId: _selectedVariant!.variantId ?? "",
-                          quantity: _cartCount,
-                          attributes: _selectedVariant!.attributes ?? [],
-                        );
-                        print("success=$success");
-
-                        if (success && mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Product added to cart"),
-                              backgroundColor: const Color(0xFF7B2CBF),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
+                  Consumer<ViewCartListProvider>(
+                    builder: (context, cartProvider, child) {
+                      return FloatingCartBar(
+                        itemCount: cartProvider.totalItems,
+                        onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const CheckOutScreen()),
+                              builder: (context) => const CheckOutScreen(),
+                            ),
                           );
-                        } else if (mounted && cartProvider.errorMessage != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(cartProvider.errorMessage!)),
-                          );
-                        }
-                      },
-                    ),
+                        },
+                      );
+                    },
+                  ),
                   Container(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     color: Colors.white,
                     child: CartCounterWidget(
-                      initialLabel: "Buy Now",
-                      onCountChanged: (count) {
-                        setState(() {
-                          _cartCount = count;
-                        });
+                      initialLabel: "Add to cart",
+                      onCountChanged: (count) async {
+                        if (_selectedVariant == null) return;
+
+                        final success = await context.read<CartProvider>().addToCart(
+                          productId: widget.productId,
+                          businessCategoryId: widget.businessCategoryId,
+                          variantId: _selectedVariant!.variantId ?? "",
+                          quantity: count,
+                          attributes: _selectedVariant!.attributes ?? [],
+                        );
+
+                        if (success && mounted) {
+                          context.read<ViewCartListProvider>().fetchCart();
+                        }
                       },
                     ),
                   ),

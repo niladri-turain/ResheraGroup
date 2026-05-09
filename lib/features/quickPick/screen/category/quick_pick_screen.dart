@@ -8,6 +8,8 @@ import 'package:resheragroup/features/quickPick/provider/category_provider.dart'
 import 'package:resheragroup/features/quickPick/screen/subCategory/sub_category_screeen.dart';
 import 'package:resheragroup/features/quickPick/widgets/category_card_widget.dart';
 import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dart';
+import 'package:resheragroup/features/quickPick/provider/view_cart_list_provider.dart';
+import 'package:resheragroup/features/quickPick/widgets/cart_widgets.dart';
 import '../checkout/check_out_screen.dart';
 
 
@@ -87,138 +89,162 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
         ),
 
         /// 🔹 Main Content
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomHeaderWidget(
-                userName: "Sk Mousin Ali",
-                location: currentLocation,
-                onNotificationTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
-                  );
-                },
-                onProfileTap: () {},
-                onSearch: (value) {},
-              ),
-
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSize.width(0.04),
-                  vertical: AppSize.height(0.02),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppStrings.searchBycate,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: AppSize.width(0.045),
-                        fontWeight: FontWeight.w600,
-                      ),
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomHeaderWidget(
+                    userName: "Sk Mousin Ali",
+                    location: currentLocation,
+                    onNotificationTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                      );
+                    },
+                    onProfileTap: () {},
+                    onSearch: (value) {},
+                  ),
+    
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSize.width(0.04),
+                      vertical: AppSize.height(0.02),
                     ),
-                    SizedBox(height: AppSize.height(0.015)),
-                    Consumer<CategoryProvider>(
-                      builder: (context, provider, child) {
-                        if (provider.isLoading) {
-                          return GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: 8,
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: AppSize.width(0.03),
-                              mainAxisSpacing: AppSize.height(0.015),
-                              childAspectRatio: 1.25,
-                            ),
-                            itemBuilder: (context, index) {
-                              return Shimmer.fromColors(
-                                baseColor: Colors.grey[300]!,
-                                highlightColor: Colors.grey[100]!,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(AppSize.width(0.04)),
-                                  ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppStrings.searchBycate,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: AppSize.width(0.045),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: AppSize.height(0.015)),
+                        Consumer<CategoryProvider>(
+                          builder: (context, provider, child) {
+                            if (provider.isLoading) {
+                              return GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: 8,
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: AppSize.width(0.03),
+                                  mainAxisSpacing: AppSize.height(0.015),
+                                  childAspectRatio: 1.25,
+                                ),
+                                itemBuilder: (context, index) {
+                                  return Shimmer.fromColors(
+                                    baseColor: Colors.grey[300]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(AppSize.width(0.04)),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+    
+                            if (provider.errorMessage != null) {
+                              return SizedBox(
+                                height: AppSize.height(0.4),
+                                width: double.infinity,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      provider.errorMessage!,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ElevatedButton(
+                                      onPressed: () => provider.fetchCategories(),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF7B2CBF),
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      child: const Text("Retry"),
+                                    ),
+                                  ],
                                 ),
                               );
-                            },
-                          );
-                        }
-
-                        if (provider.errorMessage != null) {
-                          return SizedBox(
-                            height: AppSize.height(0.4),
-                            width: double.infinity,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  provider.errorMessage!,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                ElevatedButton(
-                                  onPressed: () => provider.fetchCategories(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF7B2CBF),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: const Text("Retry"),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-
-                        if (provider.categories.isEmpty) {
-                          return const Center(child: Text("No categories found"));
-                        }
-
-                        return GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: provider.categories.length,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: AppSize.width(0.03),
-                            mainAxisSpacing: AppSize.height(0.015),
-                            childAspectRatio: 1.25,
-                          ),
-                          itemBuilder: (context, index) {
-                            final category = provider.categories[index];
-                            return CategoryCard(
-                              title: category.name,
-                              imagePath: category.image,
-                              isNetworkImage: true,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => SubCategoryScreen(
-                                      categoryTitle: category.name,
-                                      categoryId: category.id,
-                                    ),
-                                  ),
+                            }
+    
+                            if (provider.categories.isEmpty) {
+                              return const Center(child: Text("No categories found"));
+                            }
+    
+                            return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: provider.categories.length,
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: AppSize.width(0.03),
+                                mainAxisSpacing: AppSize.height(0.015),
+                                childAspectRatio: 1.25,
+                              ),
+                              itemBuilder: (context, index) {
+                                final category = provider.categories[index];
+                                return CategoryCard(
+                                  title: category.name,
+                                  imagePath: category.image,
+                                  isNetworkImage: true,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => SubCategoryScreen(
+                                          categoryTitle: category.name,
+                                          categoryId: category.id,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             );
                           },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Consumer<ViewCartListProvider>(
+                  builder: (context, cartProvider, child) {
+                    return FloatingCartBar(
+                      itemCount: cartProvider.totalItems,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CheckOutScreen()),
                         );
                       },
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

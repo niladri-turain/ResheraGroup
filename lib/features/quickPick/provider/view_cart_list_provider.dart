@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:resheragroup/core/constants/app_strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/api_end_points.dart';
 import '../../../core/service/api_service.dart';
 import '../model/cart_list_model.dart';
@@ -11,6 +12,7 @@ class ViewCartListProvider with ChangeNotifier {
   // Constant Bearer Token & User ID
   static const String _bearerToken = AppStrings.token;
   static const String _userId = "Wpmbk5ezJn";
+  static const String _cartCountKey = "cart_total_items";
 
   CartListModel? _cartData;
   CartListModel? get cartData => _cartData;
@@ -20,6 +22,26 @@ class ViewCartListProvider with ChangeNotifier {
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  int _totalItems = 0;
+  int get totalItems => _totalItems;
+
+  ViewCartListProvider() {
+    _loadCartCount();
+  }
+
+  Future<void> _loadCartCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    _totalItems = prefs.getInt(_cartCountKey) ?? 0;
+    notifyListeners();
+  }
+
+  Future<void> _saveCartCount(int count) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_cartCountKey, count);
+    _totalItems = count;
+    notifyListeners();
+  }
 
   /// Fetches or Updates the cart using GET method with form-data body as per your screenshot.
   /// Call without parameters to fetch list, or with parameters to update and fetch.
@@ -62,6 +84,9 @@ class ViewCartListProvider with ChangeNotifier {
 
       if (response['success'] == true) {
         _cartData = CartListModel.fromJson(response);
+        if (_cartData?.totalItems != null) {
+          await _saveCartCount(_cartData!.totalItems!);
+        }
       } else {
         _errorMessage = response['message'] ?? 'Failed to sync cart';
       }

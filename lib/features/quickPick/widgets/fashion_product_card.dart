@@ -12,7 +12,8 @@ class FashionProductCard extends StatelessWidget {
   final String businessCategoryId;
   final String businessSubCategoryId;
   final String businessId;
-
+  final int initialCount;
+  final Function(int) onCountChanged;
 
   const FashionProductCard({
     super.key,
@@ -25,6 +26,8 @@ class FashionProductCard extends StatelessWidget {
     required this.businessCategoryId,
     required this.businessSubCategoryId,
     required this.businessId,
+    this.initialCount = 0,
+    required this.onCountChanged,
   });
 
   @override
@@ -85,7 +88,7 @@ class FashionProductCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       )
-                    : SizedBox(height: AppSize.height(0.02)),
+                    : SizedBox(height: AppSize.height(0.0)),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -97,39 +100,42 @@ class FashionProductCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProductDetailsScreen(
-                              businessCategoryId: businessCategoryId,
-                              businessSubCategoryId: businessSubCategoryId,
-                              categoryId: categoryId,
-                              productId: id,
-                              businessId: businessId,
 
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF7B2CBF),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          "View details",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailsScreen(
+                          businessCategoryId: businessCategoryId,
+                          businessSubCategoryId: businessSubCategoryId,
+                          categoryId: categoryId,
+                          productId: id,
+                          businessId: businessId,
                         ),
                       ),
+                    );
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFF7B2CBF).withOpacity(0.3)),
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                  ],
+                    child: const Text(
+                      "View details",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF7B2CBF),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

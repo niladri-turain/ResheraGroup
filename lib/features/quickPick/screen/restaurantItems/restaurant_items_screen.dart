@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:resheragroup/features/quickPick/screen/restaurantItems/food_items_detais_screen.dart';
 import 'package:resheragroup/features/quickPick/screen/restaurantItems/restaurantItemWidgets/custom_reusable_restaurant_card_widget.dart';
 import 'package:resheragroup/features/quickPick/screen/restaurantItems/restaurantItemWidgets/list_component_widget.dart';
 import 'package:resheragroup/features/quickPick/screen/restaurantItems/restaurantItemWidgets/restaurant_vender_model.dart';
-
+import 'package:resheragroup/features/quickPick/provider/view_cart_list_provider.dart';
+import 'package:resheragroup/features/quickPick/widgets/cart_widgets.dart';
+import '../checkout/check_out_screen.dart';
 import '../groceryItems/groceryItemWidgets/custom_delivery_address_widget.dart';
 
 class RestaurantItemsScreen extends StatefulWidget {
@@ -55,69 +58,88 @@ class _RestaurantItemsScreenState extends State<RestaurantItemsScreen> {
   ];
   @override
   Widget build(BuildContext context) {
-    return   SafeArea(
+    return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: DeliverAddressWidget(address: "Katju Nagar,kolkata -7...",),
-                ),
-                Container(color: Color(0XFFf1f5f9),
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Restaurants For You",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-
-                        ),
-                        const SizedBox(height: 10,),
-                        RestaurantHorizontalList(items: venderList),
-                      ],
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      child: DeliverAddressWidget(address: "Katju Nagar,kolkata -7...",),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 10,),
-                ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  itemCount: restaurantList.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    final item = restaurantList[index];
+                    Container(color: const Color(0XFFf1f5f9),
+                      width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Restaurants For You",
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 10,),
+                            RestaurantHorizontalList(items: venderList),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10,),
+                    ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: restaurantList.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        final item = restaurantList[index];
 
-                    return RestaurantCard(
-                      name: item["name"]!,
-                      image: item["image"]!,
-                      items: item["items"]!,
-                      time: item["time"]!,
-                      price: item["price"]!,
-                      onTap: (){
-                        if(item["name"]=="WOW! Chicken by WOW! Momo")
-                          {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const FoodItemsDetaisScreen()),
-                            );
-                          }
+                        return RestaurantCard(
+                          name: item["name"]!,
+                          image: item["image"]!,
+                          items: item["items"]!,
+                          time: item["time"]!,
+                          price: item["price"]!,
+                          onTap: (){
+                            if(item["name"]=="WOW! Chicken by WOW! Momo")
+                              {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const FoodItemsDetaisScreen()),
+                                );
+                              }
+                          },
+                        );
                       },
-                    );
-                  },
-                )
-
-              ],
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
+            Consumer<ViewCartListProvider>(
+              builder: (context, cartProvider, child) {
+                return Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FloatingCartBar(
+                    itemCount: cartProvider.totalItems,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CheckOutScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
