@@ -19,12 +19,20 @@ class CartCounterWidget extends StatefulWidget {
 }
 
 class _CartCounterWidgetState extends State<CartCounterWidget> {
-  late int _count;
+  int _count = 0;
 
   @override
   void initState() {
     super.initState();
     _count = widget.initialCount;
+  }
+
+  @override
+  void didUpdateWidget(covariant CartCounterWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialCount != widget.initialCount) {
+      _count = widget.initialCount;
+    }
   }
 
   void _increment() {
