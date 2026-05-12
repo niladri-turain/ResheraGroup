@@ -112,12 +112,14 @@ class FloatingCartBar extends StatelessWidget {
   final int itemCount;
   final VoidCallback onTap;
   final double bottomOffset;
+  final String label;
 
   const FloatingCartBar({
     super.key,
     required this.itemCount,
     required this.onTap,
     this.bottomOffset = 0,
+    this.label = 'View cart',
   });
 
   @override
@@ -130,7 +132,7 @@ class FloatingCartBar extends StatelessWidget {
         onTap: onTap,
         child: Container(
           width: 150,
-          margin: EdgeInsets.only(bottom: 20),
+          margin: const EdgeInsets.only(bottom: 20),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: const Color(0xFF7B2CBF), // Green color from image
@@ -145,27 +147,14 @@ class FloatingCartBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Circular images stack
-              // SizedBox(
-              //   width: 75,
-              //   height: 40,
-              //   child: Stack(
-              //     children: [
-              //       _buildCircleImage(0, 'https://picsum.photos/100/100?1'),
-              //       _buildCircleImage(18, 'https://picsum.photos/100/100?2'),
-              //       _buildCircleImage(36, 'https://picsum.photos/100/100?3'),
-              //     ],
-              //   ),
-              // ),
-
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
-                      'View cart',
-                      style: TextStyle(
+                    Text(
+                      label,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,

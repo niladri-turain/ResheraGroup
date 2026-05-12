@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/service/location_service.dart';
 import '../../provider/update_cart_provider.dart';
 import '../../provider/delete_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
+import '../../widgets/cart_widgets.dart';
 import '../../widgets/checkout_item_widget.dart';
+import '../itemOrder/item_order_screen.dart';
 
 class CheckOutScreen extends StatefulWidget {
   const CheckOutScreen({super.key});
@@ -15,21 +19,30 @@ class CheckOutScreen extends StatefulWidget {
 
 class _CheckOutScreenState extends State<CheckOutScreen> {
   String selectedPayment = 'UPI Pay';
+  String? cachedAddress;
 
   @override
   void initState() {
     super.initState();
+    _loadAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ViewCartListProvider>().fetchCart();
     });
   }
-
+  Future<void> _loadAddress() async {
+    final address = await LocationService.getCachedAddress();
+    if (mounted) {
+      setState(() {
+        cachedAddress = address;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF7B2CBF),
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -41,9 +54,29 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             ),
           ),
         ),
-        title: const Text(
-          'Checkout',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Checkout",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: AppSize.width(0.045),
+              ),
+            ),
+            if (cachedAddress != null)
+              Text(
+                cachedAddress!,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: AppSize.width(0.032),
+                  fontWeight: FontWeight.normal,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
         ),
       ),
       body: Consumer<ViewCartListProvider>(
@@ -285,6 +318,37 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           );
         },
       ),
+      floatingActionButton: Consumer<ViewCartListProvider>(
+        builder: (context, provider, child) {
+          final cartData = provider.cartData;
+          if (cartData == null || cartData.data == null || cartData.data!.isEmpty) {
+            return const SizedBox.shrink();
+          }
+
+          int totalItems = 0;
+          for (var item in cartData.data!) {
+            totalItems += (item.quantity ?? 0);
+          }
+
+          if (totalItems == 0) return const SizedBox.shrink();
+
+          return FloatingCartBar(
+            itemCount: totalItems,
+            label: 'Proceed to',
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ItemOrderScreen(),
+                  ),
+                );
+              },
+
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       // bottomNavigationBar: Container(
       //   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
       //   decoration: const BoxDecoration(
