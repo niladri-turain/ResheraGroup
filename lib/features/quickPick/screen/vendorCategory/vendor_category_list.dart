@@ -2,7 +2,9 @@ import 'package:resheragroup/core/service/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../../core/constants/app_images_png.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../dashboard/widgets/reusable_slider.dart';
 import '../productDetails/product_details_screen.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/product_provider.dart';
@@ -11,6 +13,7 @@ import '../checkout/check_out_screen.dart';
 import '../../widgets/fashion_product_card.dart';
 import '../../widgets/standard_product_card.dart';
 import '../../widgets/cart_widgets.dart';
+import '../../widgets/main_vendor_slider_widget.dart';
 
 class VendorCategoryList extends StatefulWidget {
   final String categoryId;
@@ -261,9 +264,18 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
 
   Widget _buildStandardLayout(VendorCategoryProvider catProvider) {
     return ListView.builder(
-      itemCount: catProvider.categories.length,
+      itemCount: catProvider.categories.length + 1,
       itemBuilder: (context, index) {
-        final category = catProvider.categories[index];
+        if (index == 0) {
+          return const Column(
+            children: [
+              SizedBox(height: 10),
+              MainVendorSliderWidget(),
+              SizedBox(height: 10),
+            ],
+          );
+        }
+        final category = catProvider.categories[index - 1];
         return Column(
           children: [
             Consumer<ProductProvider>(
@@ -323,6 +335,12 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
   Widget _buildFashionLayout(VendorCategoryProvider catProvider) {
     return Column(
       children: [
+
+        // show main banner slider
+        const SizedBox(height: 10,),
+        const MainVendorSliderWidget(),
+
+
         // Horizontal circular categories
         Container(
           height: AppSize.height(0.12),

@@ -4,5 +4,7 @@ class AppStrings {
   static const profile = "Profile";
   static const guestUser = "Guest User";
   static const searchBycate="Shop by Category";
-  static const token="2|IcBA3X5EoOtULY0JDaCSBJn10taNPQExMr2WDPjJf3854a0a";
+  static const token="12|1bFpmHtYAX2Ka5ZRadtTjZnoZ5zKxBMRX50CY6zz16431aca";
+  static const businessId="VolejRejNm";
+  static const bannerType="main_banner";
 }
