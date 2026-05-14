@@ -5,6 +5,8 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_images_png.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../dashboard/widgets/reusable_slider.dart';
+import '../../model/promotional_vendor_banner_model.dart';
+import '../../provider/main_vendor_banner_provider.dart';
 import '../productDetails/product_details_screen.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/product_provider.dart';
@@ -14,6 +16,7 @@ import '../../widgets/fashion_product_card.dart';
 import '../../widgets/standard_product_card.dart';
 import '../../widgets/cart_widgets.dart';
 import '../../widgets/main_vendor_slider_widget.dart';
+import '../../provider/promotional_vendor_banner_provider.dart';
 
 class VendorCategoryList extends StatefulWidget {
   final String categoryId;
@@ -45,6 +48,8 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
     super.initState();
     _loadAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // context.read<MainVendorBannerProvider>().fetchMainVendorBanners();
+      context.read<PromotionalVendorBannerProvider>().fetchPromotionalBanners();
       // Sync initial cart quantities
       final cartProvider = context.read<ViewCartListProvider>();
       if (cartProvider.cartData?.data != null) {
@@ -278,9 +283,10 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         final category = catProvider.categories[index - 1];
         return Column(
           children: [
-            Consumer<ProductProvider>(
-              builder: (context, productProvider, child) {
+            Consumer2<ProductProvider, PromotionalVendorBannerProvider>(
+              builder: (context, productProvider, promoProvider, child) {
                 final products = productProvider.getProductsByCategory(category.id);
+                final banners = promoProvider.bannerModel?.data ?? [];
 
                 return ExpansionTile(
                   initiallyExpanded: true,
@@ -300,23 +306,48 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                         padding: EdgeInsets.symmetric(vertical: AppSize.height(0.02)),
                         child: const Text("No products found in this category"),
                       )
-                    else
-                      for (var product in products)
+                    else ...[
+                      for (int i = 0; i < products.length; i++) ...[
                         StandardProductCard(
-                          id: product.productId,
-                          title: product.name,
-                          subtitle: product.description ?? "No description available",
-                          price: "₹${product.finalPrice}",
-                          imageUrl: product.image ??
+                          id: products[i].productId,
+                          title: products[i].name,
+                          subtitle: products[i].description ?? "No description available",
+                          price: "₹${products[i].finalPrice}",
+                          imageUrl: products[i].image ??
                               "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
                           categoryId: category.id,
                           businessCategoryId: widget.categoryId,
                           businessSubCategoryId: widget.subCategoryId,
-                          businessId: product.business?.businessId ?? "",
-                          quantity: _itemQuantities[product.productId] ?? 0,
-                          onAdd: () => _updateQuantity(product.productId, 1),
-                          onRemove: () => _updateQuantity(product.productId, -1),
+                          businessId: products[i].business?.businessId ?? "",
+                          quantity: _itemQuantities[products[i].productId] ?? 0,
+                          onAdd: () => _updateQuantity(products[i].productId, 1),
+                          onRemove: () => _updateQuantity(products[i].productId, -1),
                         ),
+                        if ((i + 1) % 2 == 0 && banners.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Container(
+                              width: double.infinity,
+                              height: 200,
+                              margin: EdgeInsets.symmetric(
+                                horizontal: AppSize.width(0.03),
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  AppSize.width(0.04),
+                                ),
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                    banners[((i + 1) ~/ 2 - 1) % banners.length].image ?? "",
+                                  ),
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                      ],
+                    ],
                   ],
                 );
               },
@@ -417,8 +448,8 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         ),
         // Grid of products
         Expanded(
-          child: Consumer<ProductProvider>(
-            builder: (context, productProvider, child) {
+          child: Consumer2<ProductProvider, PromotionalVendorBannerProvider>(
+            builder: (context, productProvider, promoProvider, child) {
               final products = _selectedCategoryId == null 
                   ? [] 
                   : productProvider.getProductsByCategory(_selectedCategoryId!);
@@ -431,32 +462,101 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 return const Center(child: Text("No products found in this category"));
               }
 
-              return GridView.builder(
+              final banners = promoProvider.bannerModel?.data ?? [];
+
+              // logic to interleave products and banners
+              // every 2 products (one row), 1 banner (full width)
+              List<dynamic> uiRows = [];
+              for (int i = 0; i < products.length; i += 2) {
+                // Add a row of products
+                if (i + 1 < products.length) {
+                  uiRows.add([products[i], products[i + 1]]);
+                  // Add a banner if available
+                  if (banners.isNotEmpty) {
+                    int bannerIndex = (i ~/ 2) % banners.length;
+                    uiRows.add(banners[bannerIndex]);
+                  }
+                } else {
+                  uiRows.add([products[i]]);
+                }
+              }
+
+              return ListView.builder(
                 padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.65,
-                  crossAxisSpacing: AppSize.width(0.04),
-                  mainAxisSpacing: AppSize.width(0.04),
-                ),
-                itemCount: products.length,
+                itemCount: uiRows.length,
                 itemBuilder: (context, index) {
-                  final product = products[index];
-                  return FashionProductCard(
-                    businessId: product.business?.businessId ?? "",
-                    id: product.productId,
-                    title: product.name,
-                    price: "₹${product.finalPrice}",
-                    imageUrl: product.image ??
-                        "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                    description: product.description ?? "",
-                    categoryId: _selectedCategoryId!,
-                    businessCategoryId: widget.categoryId,
-                    businessSubCategoryId: widget.subCategoryId,
-                    onCountChanged: (count) {
-                      _updateQuantity(product.productId, count - (_itemQuantities[product.productId] ?? 0));
-                    },
-                    initialCount: _itemQuantities[product.productId] ?? 0,
+                  final item = uiRows[index];
+
+                  if (item is PromotionalBannerData) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          item.image ?? "",
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 200,
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.image, color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  // It's a list of 1 or 2 products (a row)
+                  final productPair = item as List<dynamic>;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: FashionProductCard(
+                            businessId: productPair[0].business?.businessId ?? "",
+                            id: productPair[0].productId,
+                            title: productPair[0].name,
+                            price: "₹${productPair[0].finalPrice}",
+                            imageUrl: productPair[0].image ??
+                                "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                            description: productPair[0].description ?? "",
+                            categoryId: _selectedCategoryId!,
+                            businessCategoryId: widget.categoryId,
+                            businessSubCategoryId: widget.subCategoryId,
+                            onCountChanged: (count) {
+                              _updateQuantity(productPair[0].productId,
+                                  count - (_itemQuantities[productPair[0].productId] ?? 0));
+                            },
+                            initialCount: _itemQuantities[productPair[0].productId] ?? 0,
+                          ),
+                        ),
+                        SizedBox(width: AppSize.width(0.04)),
+                        Expanded(
+                          child: productPair.length > 1
+                              ? FashionProductCard(
+                                  businessId: productPair[1].business?.businessId ?? "",
+                                  id: productPair[1].productId,
+                                  title: productPair[1].name,
+                                  price: "₹${productPair[1].finalPrice}",
+                                  imageUrl: productPair[1].image ??
+                                      "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                                  description: productPair[1].description ?? "",
+                                  categoryId: _selectedCategoryId!,
+                                  businessCategoryId: widget.categoryId,
+                                  businessSubCategoryId: widget.subCategoryId,
+                                  onCountChanged: (count) {
+                                    _updateQuantity(productPair[1].productId,
+                                        count - (_itemQuantities[productPair[1].productId] ?? 0));
+                                  },
+                                  initialCount: _itemQuantities[productPair[1].productId] ?? 0,
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
                   );
                 },
               );
