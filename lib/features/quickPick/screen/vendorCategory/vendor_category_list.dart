@@ -23,6 +23,8 @@ class VendorCategoryList extends StatefulWidget {
   final String subCategoryId;
   final String vendorId;
   final String categoryName;
+  final String bannerLogo;
+  final String vendorName;
 
   const VendorCategoryList({
     super.key,
@@ -30,6 +32,8 @@ class VendorCategoryList extends StatefulWidget {
     required this.subCategoryId,
     required this.vendorId,
     required this.categoryName,
+    this.bannerLogo = "",
+    this.vendorName = "",
   });
 
   @override
@@ -129,28 +133,55 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              "Vendor Categories",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: AppSize.width(0.045),
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: AppSize.width(0.05),
+                backgroundColor: Colors.white,
+                child: CircleAvatar(
+                  radius: AppSize.width(0.09) - 3,
+                  backgroundColor: Colors.grey[100],
+                  backgroundImage: NetworkImage(widget.bannerLogo),
+                ),
               ),
             ),
-            if (cachedAddress != null)
-              Text(
-                cachedAddress!,
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: AppSize.width(0.032),
-                  fontWeight: FontWeight.normal,
+            const SizedBox(width: 10,),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.vendorName??"Vendor Categories",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: AppSize.width(0.045),
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+                if (cachedAddress != null)
+                  Text(
+                    cachedAddress!,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: AppSize.width(0.032),
+                      fontWeight: FontWeight.normal,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
           ],
         ),
         actions: [

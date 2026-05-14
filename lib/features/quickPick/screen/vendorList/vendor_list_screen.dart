@@ -183,7 +183,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
                             ),
                             const SizedBox(height: 12),
                             ElevatedButton(
-                              onPressed: () => provider.fetchVendorCategory(widget.categoryId,widget.subCategoryId),
+                              onPressed: () => provider.fetchVendorCategory(widget.categoryId,widget.subCategoryId,),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF7B2CBF),
                                 foregroundColor: Colors.white,
@@ -242,6 +242,8 @@ class _VendorListScreenState extends State<VendorListScreen> {
                                         subCategoryId: widget.subCategoryId,
                                         vendorId: vendor.id,
                                         categoryName: widget.categoryName,
+                                        bannerLogo: vendor.kycDetail?.ownerPhoto?.url ?? "",
+                                        vendorName: vendor.businessName,
                                       ),
                                     ),
                                   );
