@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_sizes.dart';
+import '../../../core/constants/app_images_png.dart';
 import '../../../core/service/shared_pref_service.dart';
 import '../../../core/di/injection_container.dart';
 import '../../quickPick/provider/login_provider.dart';
@@ -18,8 +19,6 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
   final SharedPrefService _prefService = sl<SharedPrefService>();
   
   String? name;
-  String? email;
-  String? phone;
   String? username;
 
   @override
@@ -30,15 +29,11 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
 
   Future<void> _loadData() async {
     final n = await _prefService.getName();
-    final e = await _prefService.getEmail();
-    final p = await _prefService.getPhone();
-    final u = await _prefService.getUsername();
+    final un = await _prefService.getUsername();
     if (mounted) {
       setState(() {
         name = n;
-        email = e;
-        phone = p;
-        username = u;
+        username = un;
       });
     }
   }
@@ -47,13 +42,6 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
     await context.read<LoginProvider>().logout();
     if (mounted) {
       await context.read<ViewCartListProvider>().clearCartLocal();
-      // Reset local state
-      setState(() {
-        name = null;
-        email = null;
-        phone = null;
-        username = null;
-      });
     }
   }
 
@@ -63,84 +51,133 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
 
     return Consumer<LoginProvider>(
       builder: (context, loginProvider, child) {
-        // If not logged in, show LoginScreen within the current tab structure
         if (loginProvider.userName == null) {
           return const LoginScreen();
         }
 
         return Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            backgroundColor: Colors.black,
-            automaticallyImplyLeading: false,
-            title: const Text("My Account", style: TextStyle(color: Colors.white)),
-            actions: [
-              IconButton(
-                onPressed: _handleLogout,
-                icon: const Icon(Icons.logout, color: Colors.redAccent),
-              )
-            ],
-          ),
-          body: SingleChildScrollView(
-            padding: EdgeInsets.all(AppSize.width(0.05)),
-            child: Column(
-              children: [
-                const CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.orange,
-                  child: Icon(Icons.person, size: 60, color: Colors.white),
+          body: Stack(
+            children: [
+              // 1. Background Image
+              Positioned.fill(
+                child: Image.asset(
+                  AppImagesPng.dashboardBackground,
+                  fit: BoxFit.cover,
                 ),
-                const SizedBox(height: 20),
-                _buildInfoCard("Name", name ?? loginProvider.userName ?? "N/A", Icons.person_outline),
-                _buildInfoCard("Username", username ?? "N/A", Icons.alternate_email),
-                _buildInfoCard("Email", email ?? "N/A", Icons.email_outlined),
-                _buildInfoCard("Phone", phone ?? "N/A", Icons.phone_android_outlined),
-                const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _handleLogout,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              
+              // 2. Dark Overlay
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.85),
+                ),
+              ),
+
+              // 3. Content
+              SafeArea(
+                child: Column(
+                  children: [
+                    // Header Section
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSize.width(0.05),
+                        vertical: AppSize.height(0.02),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: AppSize.width(0.07),
+                            backgroundColor: Colors.grey[700],
+                            child: Icon(Icons.person, size: AppSize.width(0.08), color: Colors.white70),
+                          ),
+                          SizedBox(width: AppSize.width(0.04)),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  name ?? loginProvider.userName ?? "User Name",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: AppSize.width(0.045),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  username ?? "ID: 000000",
+                                  style: TextStyle(
+                                    color: Colors.orange[800],
+                                    fontSize: AppSize.width(0.03),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.blueAccent.withOpacity(0.5), width: 1),
+                            ),
+                            child: IconButton(
+                              onPressed: _handleLogout,
+                              icon: const Icon(Icons.lock_outline, color: Colors.orange, size: 20),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: const Text("Logout", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
+
+                    const Divider(color: Colors.white10, height: 1),
+
+                    // Menu List
+                    Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.02)),
+                        children: [
+                          _buildMenuItem(Icons.home_outlined, "Home", onTap: () {}),
+                          _buildMenuItem(Icons.dashboard_customize_outlined, "My Dashboard", onTap: () {}),
+                          _buildMenuItem(Icons.person_outline, "My Profile", onTap: () {}),
+                          _buildMenuItem(Icons.verified_user_outlined, "Member Registration", onTap: () {}),
+                          _buildMenuItem(Icons.account_balance_wallet_outlined, "Deposit", onTap: () {}),
+                          _buildMenuItem(Icons.confirmation_number_outlined, "Ticket", onTap: () {}),
+                          _buildMenuItem(Icons.directions_car_outlined, "My Dream Car", onTap: () {}),
+                          _buildMenuItem(Icons.storefront_outlined, "My Network", hasDropdown: true),
+                          _buildMenuItem(Icons.description_outlined, "BA BV Report", onTap: () {}),
+                          _buildMenuItem(Icons.person_add_alt_1_outlined, "Franchisee Registration", onTap: () {}),
+                          _buildMenuItem(Icons.track_changes_outlined, "Commissions", hasDropdown: true),
+                          _buildMenuItem(Icons.lightbulb_outline, "Lead Generation", onTap: () {}),
+                          _buildMenuItem(Icons.favorite_border, "Wish Request", onTap: () {}),
+                          _buildMenuItem(Icons.lock_open_outlined, "Logout", onTap: _handleLogout),
+                          SizedBox(height: AppSize.height(0.05)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildInfoCard(String title, String value, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+  Widget _buildMenuItem(IconData icon, String title, {VoidCallback? onTap, bool hasDropdown = false}) {
+    return ListTile(
+      onTap: onTap,
+      leading: Icon(icon, color: Colors.white60, size: 22),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),
       ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.orange, size: 24),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                const SizedBox(height: 4),
-                Text(value, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
-              ],
-            ),
-          ),
-        ],
-      ),
+      trailing: hasDropdown ? const Icon(Icons.keyboard_arrow_down, color: Colors.white30, size: 18) : null,
+      dense: true,
+      visualDensity: const VisualDensity(vertical: -2),
     );
   }
 }
