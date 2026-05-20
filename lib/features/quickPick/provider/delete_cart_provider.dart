@@ -34,7 +34,7 @@ class DeleteCartProvider with ChangeNotifier {
         "${ApiEndPoints.updateCart}/$cartId",
         method: 'POST',
         headers: headers,
-        token: token ?? AppStrings.token,
+        // token: token ?? AppStrings.token,
       );
 
       if (response['success'] == true) {

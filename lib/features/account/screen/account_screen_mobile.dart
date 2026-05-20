@@ -4,7 +4,7 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_images_png.dart';
 import '../../../core/service/shared_pref_service.dart';
 import '../../../core/di/injection_container.dart';
-import '../../quickPick/provider/login_provider.dart';
+import '../../login/provider/login_provider.dart';
 import '../../quickPick/provider/view_cart_list_provider.dart';
 import '../../login/screen/login_screen.dart';
 

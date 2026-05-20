@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:resheragroup/core/constants/app_colors.dart';
-import '../../quickPick/provider/login_provider.dart';
+import '../../login/provider/login_provider.dart';
 
 import '../../../core/constants/app_sizes.dart'; // 👈 add this
 

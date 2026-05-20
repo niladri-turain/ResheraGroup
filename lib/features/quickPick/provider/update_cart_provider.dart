@@ -41,7 +41,7 @@ class UpdateCartProvider with ChangeNotifier {
         method: 'POST',
         body: body,
         headers: headers,
-        token: token ?? AppStrings.token,
+        // token: token ?? AppStrings.token,
       );
 
       if (response['success'] == true) {

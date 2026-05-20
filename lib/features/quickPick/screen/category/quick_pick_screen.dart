@@ -9,7 +9,7 @@ import 'package:resheragroup/features/quickPick/screen/subCategory/sub_category_
 import 'package:resheragroup/features/quickPick/widgets/category_card_widget.dart';
 import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dart';
 import 'package:resheragroup/features/quickPick/provider/view_cart_list_provider.dart';
-import 'package:resheragroup/features/quickPick/provider/login_provider.dart';
+import 'package:resheragroup/features/login/provider/login_provider.dart';
 import 'package:resheragroup/features/quickPick/widgets/cart_widgets.dart';
 import 'package:resheragroup/main_screen.dart';
 import '../checkout/check_out_screen.dart';

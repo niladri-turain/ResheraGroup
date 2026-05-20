@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_images_png.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../main_screen.dart';
-import '../../quickPick/provider/login_provider.dart';
+import '../provider/login_provider.dart';
 import '../../dashboard/screen/dashboard_screen.dart';
 import 'custom_login_text_field.dart';
 

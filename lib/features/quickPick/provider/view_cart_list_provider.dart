@@ -92,7 +92,7 @@ class ViewCartListProvider with ChangeNotifier {
         "${ApiEndPoints.cart}?user_id=${userId?.toString() ?? ''}",
         method: 'GET',
         body: body,
-        token: token ?? AppStrings.token,
+        // token: token ?? AppStrings.token,
       );
 
       if (response['success'] == true) {

@@ -51,7 +51,7 @@ class CartProvider with ChangeNotifier {
         ApiEndPoints.cart, 
         method: 'POST',
         body: body, 
-        token: token ?? AppStrings.token
+        // token: token ?? AppStrings.token
       );
 
       if (response['success'] == true) {

@@ -15,7 +15,7 @@ import 'features/quickPick/provider/update_cart_provider.dart';
 import 'features/quickPick/provider/delete_cart_provider.dart';
 import 'features/quickPick/provider/main_vendor_banner_provider.dart';
 import 'features/quickPick/provider/promotional_vendor_banner_provider.dart';
-import 'features/quickPick/provider/login_provider.dart';
+import 'features/login/provider/login_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

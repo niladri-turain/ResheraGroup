@@ -28,7 +28,7 @@ class MainVendorBannerProvider with ChangeNotifier {
       
       final response = await _apiService.get(
         endpoint,
-        token: AppStrings.token,
+        // token: AppStrings.token,
       );
 
       _bannerModel = MainVendorBannerModel.fromJson(response);

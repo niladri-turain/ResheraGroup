@@ -30,7 +30,7 @@ class PromotionalVendorBannerProvider with ChangeNotifier {
       
       final response = await _apiService.get(
         endpoint,
-        token: token ?? AppStrings.token,
+        // token: token ?? AppStrings.token,
       );
 
       _bannerModel = PromotionalVendorBannerModel.fromJson(response);
