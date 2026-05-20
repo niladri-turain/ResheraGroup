@@ -8,4 +8,6 @@ class AppStrings {
   static const businessId = "VolejRejNm";
   static const mainBannerType = "main_banner";
   static const promotionalBannerType = "promotional_banner";
+  static const xApiTokenForAll="vY8mK2xQp9LsD4nF7aBcE1gHjK5mNpQrTuWxYz123456789";
+  static const xApiTokenForLogin="w0pMhvoMbpGhNnR5AOfL3yI7U71KcTESRq5uTGUoOBxpJeUeyfReE0ll5DUchXMy";
 }

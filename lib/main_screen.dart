@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:resheragroup/features/login/screen/login_screen.dart';
 import 'package:resheragroup/widgets/custom_bottom_navigation.dart';
 
-import 'features/account/screen/account_screen.dart';
+import 'features/account/screen/account_screen_mobile.dart';
 import 'features/dashboard/screen/dashboard_screen.dart';
 import 'features/home/screen/home_screen.dart';
 import 'features/order/screen/order_screen.dart';
@@ -22,7 +22,7 @@ class _MainScreenState extends State<MainScreen> {
     const DashboardScreen(),
     const OrderScreen(),
     const HomeScreen(),
-    const LoginScreen(),
+    const AccountScreenMobile(),
   ];
 
 

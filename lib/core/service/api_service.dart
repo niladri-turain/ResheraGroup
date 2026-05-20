@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../constants/app_strings.dart';
 
 class ApiService {
   final String baseUrl;
@@ -8,20 +9,29 @@ class ApiService {
   ApiService({required this.baseUrl});
 
   // Common headers
-  Map<String, String> _getHeaders([String? token]) {
+  Map<String, String> _getHeaders({String? token, String? xApiToken}) {
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'X-API-TOKEN': xApiToken ?? AppStrings.xApiTokenForAll,
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
+  // Helper to get full URI
+  Uri _getUri(String endpoint) {
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      return Uri.parse(endpoint);
+    }
+    return Uri.parse('$baseUrl$endpoint');
+  }
+
   // GET Request
-  Future<dynamic> get(String endpoint, {String? token,dynamic body,}) async {
+  Future<dynamic> get(String endpoint, {String? token, String? xApiToken, dynamic body}) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: _getHeaders(token),
+        _getUri(endpoint),
+        headers: _getHeaders(token: token, xApiToken: xApiToken),
       );
       return _processResponse(response);
     } on SocketException {
@@ -32,11 +42,11 @@ class ApiService {
   }
 
   // POST Request
-  Future<dynamic> post(String endpoint, {dynamic body, String? token}) async {
+  Future<dynamic> post(String endpoint, {dynamic body, String? token, String? xApiToken}) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: _getHeaders(token),
+        _getUri(endpoint),
+        headers: _getHeaders(token: token, xApiToken: xApiToken),
         body: jsonEncode(body),
       );
       return _processResponse(response);
@@ -48,11 +58,11 @@ class ApiService {
   }
 
   // PUT Request
-  Future<dynamic> put(String endpoint, {dynamic body, String? token}) async {
+  Future<dynamic> put(String endpoint, {dynamic body, String? token, String? xApiToken}) async {
     try {
       final response = await http.put(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: _getHeaders(token),
+        _getUri(endpoint),
+        headers: _getHeaders(token: token, xApiToken: xApiToken),
         body: jsonEncode(body),
       );
       return _processResponse(response);
@@ -64,11 +74,11 @@ class ApiService {
   }
 
   // DELETE Request
-  Future<dynamic> delete(String endpoint, {String? token}) async {
+  Future<dynamic> delete(String endpoint, {String? token, String? xApiToken}) async {
     try {
       final response = await http.delete(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: _getHeaders(token),
+        _getUri(endpoint),
+        headers: _getHeaders(token: token, xApiToken: xApiToken),
       );
       return _processResponse(response);
     } on SocketException {
@@ -84,13 +94,14 @@ class ApiService {
     Map<String, String>? body,
     Map<String, String>? headers,
     String? token,
+    String? xApiToken,
   }) async {
     try {
-      final uri = Uri.parse('$baseUrl$endpoint');
+      final uri = _getUri(endpoint);
       final request = http.MultipartRequest(method, uri);
       
       // Adding headers
-      request.headers.addAll(_getHeaders(token));
+      request.headers.addAll(_getHeaders(token: token, xApiToken: xApiToken));
       if (headers != null) {
         request.headers.addAll(headers);
       }

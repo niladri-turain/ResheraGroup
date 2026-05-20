@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_images_png.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../main_screen.dart';
+import '../../quickPick/provider/login_provider.dart';
+import '../../dashboard/screen/dashboard_screen.dart';
 import 'custom_login_text_field.dart';
 
 
@@ -14,6 +18,15 @@ class LoginCard extends StatefulWidget {
 class _LoginCardState extends State<LoginCard> {
   bool _rememberMe = false;
   bool _obscurePassword = true;
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,12 +83,14 @@ class _LoginCardState extends State<LoginCard> {
           SizedBox(height: AppSize.height(0.03)),
 
           // Input Fields
-          const CustomLoginTextField(
+          CustomLoginTextField(
             hintText: "Username / Nickname",
+            controller: _usernameController,
           ),
           SizedBox(height: AppSize.height(0.02)),
           CustomLoginTextField(
             hintText: "Password",
+            controller: _passwordController,
             isPassword: _obscurePassword,
             suffixIcon: IconButton(
               icon: Icon(
@@ -139,34 +154,66 @@ class _LoginCardState extends State<LoginCard> {
           SizedBox(height: AppSize.height(0.01)),
 
           // Login Button
-          SizedBox(
-            width: double.infinity,
-            height: AppSize.height(0.05),
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF5722), // Orange color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSize.width(0.03)),
-                ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Login",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: AppSize.width(0.045),
-                      fontWeight: FontWeight.bold,
+          Consumer<LoginProvider>(
+            builder: (context, loginProvider, child) {
+              return SizedBox(
+                width: double.infinity,
+                height: AppSize.height(0.05),
+                child: ElevatedButton(
+                  onPressed: loginProvider.isLoading
+                      ? null
+                      : () async {
+                          final success = await loginProvider.login(
+                            _usernameController.text.trim(),
+                            _passwordController.text.trim(),
+                          );
+                          if (success) {
+                            if (mounted) {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) => const MainScreen()),
+                                (route) => false,
+                              );
+                            }
+                          } else {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(loginProvider.errorMessage ?? "Login failed")),
+                              );
+                            }
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF5722), // Orange color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSize.width(0.03)),
                     ),
+                    elevation: 0,
                   ),
-                  SizedBox(width: AppSize.width(0.02)),
-                  const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                ],
-              ),
-            ),
+                  child: loginProvider.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Login",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: AppSize.width(0.045),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: AppSize.width(0.02)),
+                            const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                          ],
+                        ),
+                ),
+              );
+            },
           ),
         ],
       ),

@@ -9,6 +9,7 @@ import 'package:resheragroup/features/quickPick/screen/subCategory/sub_category_
 import 'package:resheragroup/features/quickPick/widgets/category_card_widget.dart';
 import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dart';
 import 'package:resheragroup/features/quickPick/provider/view_cart_list_provider.dart';
+import 'package:resheragroup/features/quickPick/provider/login_provider.dart';
 import 'package:resheragroup/features/quickPick/widgets/cart_widgets.dart';
 import '../checkout/check_out_screen.dart';
 
@@ -95,17 +96,21 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomHeaderWidget(
-                    userName: "Sk Mousin Ali",
-                    location: currentLocation,
-                    onNotificationTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                  Consumer<LoginProvider>(
+                    builder: (context, loginProvider, child) {
+                      return CustomHeaderWidget(
+                        userName: loginProvider.userName ?? AppStrings.guestUser,
+                        location: currentLocation,
+                        onNotificationTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                          );
+                        },
+                        onProfileTap: () {},
+                        onSearch: (value) {},
                       );
                     },
-                    onProfileTap: () {},
-                    onSearch: (value) {},
                   ),
     
                   Padding(

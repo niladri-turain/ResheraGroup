@@ -4,14 +4,13 @@ import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/api_end_points.dart';
 import '../../../core/service/api_service.dart';
+import '../../../core/service/shared_pref_service.dart';
 import '../model/cart_list_model.dart';
 
 class ViewCartListProvider with ChangeNotifier {
   final ApiService _apiService = GetIt.I<ApiService>();
+  final SharedPrefService _prefService = GetIt.I<SharedPrefService>();
   
-  // Constant Bearer Token & User ID
-  static const String _bearerToken = AppStrings.token;
-  static const String _userId = "Wpmbk5ezJn";
   static const String _cartCountKey = "cart_total_items";
 
   CartListModel? _cartData;
@@ -43,6 +42,14 @@ class ViewCartListProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> clearCartLocal() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_cartCountKey);
+    _cartData = null;
+    _totalItems = 0;
+    notifyListeners();
+  }
+
   /// Fetches or Updates the cart.
   /// [showLoader] determines if the global isLoading state should be set.
   Future<void> fetchCart({
@@ -60,6 +67,9 @@ class ViewCartListProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      final token = await _prefService.getToken();
+      final userId = await _prefService.getUserId();
+
       // Building form-data body as per your screenshot
       final Map<String, String> body = {};
 
@@ -79,10 +89,10 @@ class ViewCartListProvider with ChangeNotifier {
       // Using GET method with form-data body via multipartRequest
       // URL contains user_id as query param, and body contains fields as per Postman
       final response = await _apiService.multipartRequest(
-        "${ApiEndPoints.cart}?user_id=$_userId",
+        "${ApiEndPoints.cart}?user_id=${userId ?? ''}",
         method: 'GET',
         body: body,
-        token: _bearerToken,
+        token: token ?? AppStrings.token,
       );
 
       if (response['success'] == true) {

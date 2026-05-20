@@ -3,13 +3,12 @@ import 'package:get_it/get_it.dart';
 import '../../../core/constants/api_end_points.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/service/api_service.dart';
+import '../../../core/service/shared_pref_service.dart';
 import '../model/product_details_model.dart';
 
 class CartProvider with ChangeNotifier {
   final ApiService _apiService = GetIt.I<ApiService>();
-  
-  // Updated Bearer Token
-  static const String _bearerToken = AppStrings.token;
+  final SharedPrefService _prefService = GetIt.I<SharedPrefService>();
   
   bool _isSyncing = false;
   bool get isSyncing => _isSyncing;
@@ -29,9 +28,12 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      final token = await _prefService.getToken();
+      final userId = await _prefService.getUserId();
+
       // Building flat structure for Multipart form-data as per your requirement
       final Map<String, String> body = {
-        'user_id': 'Wpmbk5ezJn',
+        'user_id': userId ?? '',
         'product_id': productId,
         'business_category_id': businessCategoryId,
         'product_variant_id': variantId,
@@ -49,7 +51,7 @@ class CartProvider with ChangeNotifier {
         ApiEndPoints.cart, 
         method: 'POST',
         body: body, 
-        token: _bearerToken
+        token: token ?? AppStrings.token
       );
 
       if (response['success'] == true) {

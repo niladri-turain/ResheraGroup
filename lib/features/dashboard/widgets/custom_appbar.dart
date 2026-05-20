@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:resheragroup/core/constants/app_colors.dart';
-
+import '../../quickPick/provider/login_provider.dart';
 
 import '../../../core/constants/app_sizes.dart'; // 👈 add this
 
@@ -16,6 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.black,
       elevation: 0,
+      automaticallyImplyLeading: false,
       titleSpacing: 0,
       toolbarHeight: AppSize.height(0.07), // 👈 responsive height
 
@@ -40,13 +42,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             SizedBox(width: AppSize.width(0.02)),
 
             /// Username
-            Text(
-              AppStrings.guestUser,
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: AppSize.width(0.04),
-                fontWeight: FontWeight.w500,
-              ),
+            Consumer<LoginProvider>(
+              builder: (context, loginProvider, child) {
+                return Text(
+                  loginProvider.userName ?? AppStrings.guestUser,
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontSize: AppSize.width(0.04),
+                    fontWeight: FontWeight.w500,
+                  ),
+                );
+              },
             ),
 
             const Spacer(),

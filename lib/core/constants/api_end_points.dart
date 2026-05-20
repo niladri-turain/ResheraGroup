@@ -12,5 +12,5 @@ class ApiEndPoints {
   static const String updateCart = "cart";
   static const String deleteCart = "cart";
   static const String vendorBanner = "vendors.banners";
-
+  static const String loginApi = "https://test.resheragroup.in/api/member/v1/login";
 }
