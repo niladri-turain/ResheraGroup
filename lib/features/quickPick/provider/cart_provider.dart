@@ -33,7 +33,7 @@ class CartProvider with ChangeNotifier {
 
       // Building flat structure for Multipart form-data as per your requirement
       final Map<String, String> body = {
-        'user_id': userId ?? '',
+        'user_id': userId?.toString() ?? '',
         'product_id': productId,
         'business_category_id': businessCategoryId,
         'product_variant_id': variantId,

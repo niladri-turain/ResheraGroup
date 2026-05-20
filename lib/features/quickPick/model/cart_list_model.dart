@@ -64,7 +64,7 @@ class CartItem {
 }
 
 class User {
-  String? userId;
+  int? userId;
   String? name;
   String? email;
   String? mobile;

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../../core/di/injection_container.dart';
+import '../../../core/service/shared_pref_service.dart';
 import '../../../widgets/custom_skeleton_widget.dart';
 
 import '../../../core/constants/app_sizes.dart';
@@ -41,8 +44,21 @@ class _OrderScreenState extends State<OrderScreen> {
             return NavigationDecision.navigate;
           },
         ),
-      )
-      ..loadRequest(Uri.parse('https://resheragroup.in/order-menu'));
+      );
+    _loadPage();
+  }
+
+  Future<void> _loadPage() async {
+    final token = await sl<SharedPrefService>().getToken();
+    _controller.loadRequest(
+      Uri.parse('https://resheragroup.in/order-menu'),
+      // headers: {
+      //   'Authorization': 'Bearer ${token ?? ""}',
+      //   'Accept': 'application/json',
+      //   'Content-Type': 'application/json',
+      //   'X-API-TOKEN': AppStrings.xApiTokenForLogin
+      // },
+    );
   }
 
   @override

@@ -11,7 +11,7 @@ class SharedPrefService {
 
   Future<void> saveUserData({
     required String token,
-    required String userId,
+    required int userId,
     required String username,
     required String name,
     required String email,
@@ -19,7 +19,7 @@ class SharedPrefService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
-    await prefs.setString(_userIdKey, userId);
+    await prefs.setInt(_userIdKey, userId);
     await prefs.setString(_usernameKey, username);
     await prefs.setString(_nameKey, name);
     await prefs.setString(_emailKey, email);
@@ -32,9 +32,9 @@ class SharedPrefService {
     return prefs.getString(_tokenKey);
   }
 
-  Future<String?> getUserId() async {
+  Future<int?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_userIdKey);
+    return prefs.getInt(_userIdKey);
   }
 
   Future<String?> getName() async {

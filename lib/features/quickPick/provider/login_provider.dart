@@ -54,7 +54,7 @@ class LoginProvider with ChangeNotifier {
 
         await _prefService.saveUserData(
           token: data.token ?? '',
-          userId: user.userId ?? '',
+          userId: user.userId ?? 0,
           username: user.username ?? '',
           name: user.name ?? '',
           email: user.email ?? '',

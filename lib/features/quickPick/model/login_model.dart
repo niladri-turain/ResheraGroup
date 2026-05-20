@@ -27,7 +27,7 @@ class LoginData {
 }
 
 class UserData {
-  String? userId;
+  int? userId;
   String? username;
   String? name;
   String? email;

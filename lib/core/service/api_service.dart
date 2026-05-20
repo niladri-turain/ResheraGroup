@@ -14,7 +14,7 @@ class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'X-API-TOKEN': xApiToken ?? AppStrings.xApiTokenForAll,
-      if (token != null) 'Authorization': 'Bearer $token',
+      // if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 

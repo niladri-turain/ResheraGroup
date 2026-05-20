@@ -89,7 +89,7 @@ class ViewCartListProvider with ChangeNotifier {
       // Using GET method with form-data body via multipartRequest
       // URL contains user_id as query param, and body contains fields as per Postman
       final response = await _apiService.multipartRequest(
-        "${ApiEndPoints.cart}?user_id=${userId ?? ''}",
+        "${ApiEndPoints.cart}?user_id=${userId?.toString() ?? ''}",
         method: 'GET',
         body: body,
         token: token ?? AppStrings.token,

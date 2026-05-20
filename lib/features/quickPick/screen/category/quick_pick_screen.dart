@@ -11,6 +11,7 @@ import 'package:resheragroup/features/quickPick/widgets/custom_header_widget.dar
 import 'package:resheragroup/features/quickPick/provider/view_cart_list_provider.dart';
 import 'package:resheragroup/features/quickPick/provider/login_provider.dart';
 import 'package:resheragroup/features/quickPick/widgets/cart_widgets.dart';
+import 'package:resheragroup/main_screen.dart';
 import '../checkout/check_out_screen.dart';
 
 
@@ -107,7 +108,15 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                             MaterialPageRoute(builder: (context) => const CheckOutScreen()),
                           );
                         },
-                        onProfileTap: () {},
+                        onProfileTap: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MainScreen(initialIndex: 3),
+                            ),
+                            (route) => false,
+                          );
+                        },
                         onSearch: (value) {},
                       );
                     },

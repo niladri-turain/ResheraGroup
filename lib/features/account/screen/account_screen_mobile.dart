@@ -30,10 +30,12 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
   Future<void> _loadData() async {
     final n = await _prefService.getName();
     final un = await _prefService.getUsername();
+    final id = await _prefService.getUserId();
     if (mounted) {
       setState(() {
         name = n;
         username = un;
+        // Optionally store the int ID if needed elsewhere
       });
     }
   }
