@@ -16,6 +16,7 @@ import 'features/quickPick/provider/delete_cart_provider.dart';
 import 'features/quickPick/provider/main_vendor_banner_provider.dart';
 import 'features/quickPick/provider/promotional_vendor_banner_provider.dart';
 import 'features/login/provider/login_provider.dart';
+import 'features/home/provider/home_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MainVendorBannerProvider()),
         ChangeNotifierProvider(create: (_) => PromotionalVendorBannerProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
       ],
       child: const MyApp(),
     ),

@@ -8,6 +8,7 @@ class SharedPrefService {
   static const String _emailKey = 'email';
   static const String _phoneKey = 'phone';
   static const String _isLoggedInKey = 'is_logged_in';
+  static const String _dashboardSessionKey = 'dashboard_session';
 
   Future<void> saveUserData({
     required String token,
@@ -65,5 +66,15 @@ class SharedPrefService {
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+  }
+
+  Future<void> saveDashboardSession(String session) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_dashboardSessionKey, session);
+  }
+
+  Future<String?> getDashboardSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_dashboardSessionKey);
   }
 }
