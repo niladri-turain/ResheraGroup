@@ -1,43 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_sizes.dart';
+import '../model/order_list_model.dart';
 
 class OrderDetailsWidget extends StatelessWidget {
-  final String orderId;
-  final String orderDate;
-  final String orderStatus; // 'Pending', 'Processing', 'Delivered'
-  final String statusDescription;
-  final String customerName;
-  final String customerPhone;
-  final String deliveryAddress;
-  final List<OrderItem> items;
-  final int totalQuantity;
-  final double itemMrp;
-  final double discount;
-  final double itemPrice;
-  final double loyaltyBonus;
-  final double platformCharge;
-  final double deliveryCharge;
-  final double grandTotal;
+  final OrderData order;
   final VoidCallback? onCancelOrder;
 
   const OrderDetailsWidget({
     super.key,
-    required this.orderId,
-    required this.orderDate,
-    required this.orderStatus,
-    required this.statusDescription,
-    required this.customerName,
-    required this.customerPhone,
-    required this.deliveryAddress,
-    required this.items,
-    required this.totalQuantity,
-    required this.itemMrp,
-    required this.discount,
-    required this.itemPrice,
-    required this.loyaltyBonus,
-    required this.platformCharge,
-    required this.deliveryCharge,
-    required this.grandTotal,
+    required this.order,
     this.onCancelOrder,
   });
 
@@ -60,6 +30,7 @@ class OrderDetailsWidget extends StatelessWidget {
   }
 
   Widget _buildStatusCard() {
+    final status = order.orderStatusLabel ?? 'Pending';
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -71,23 +42,23 @@ class OrderDetailsWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(orderId, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              Text("Date: $orderDate", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text(order.orderNo ?? order.id ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text("Date: ${order.placedAt ?? ''}", style: const TextStyle(color: Colors.grey, fontSize: 12)),
             ],
           ),
           const SizedBox(height: 20),
           Row(
             children: [
               _buildStepIndicator("Pending", true),
-              _buildLine(orderStatus == 'Processing' || orderStatus == 'Delivered'),
-              _buildStepIndicator("Processing", orderStatus == 'Processing' || orderStatus == 'Delivered'),
-              _buildLine(orderStatus == 'Delivered'),
-              _buildStepIndicator("Delivered", orderStatus == 'Delivered'),
+              _buildLine(status == 'Processing' || status == 'Delivered'),
+              _buildStepIndicator("Processing", status == 'Processing' || status == 'Delivered'),
+              _buildLine(status == 'Delivered'),
+              _buildStepIndicator("Delivered", status == 'Delivered'),
             ],
           ),
           const SizedBox(height: 20),
           Text(
-            statusDescription,
+            order.notes ?? "Your order has been placed and is ${status.toLowerCase()}.",
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
@@ -144,7 +115,7 @@ class OrderDetailsWidget extends StatelessWidget {
             children: [
               const Icon(Icons.person_outline, color: Colors.orange, size: 20),
               const SizedBox(width: 8),
-              Expanded(child: Text("$customerName | $customerPhone", style: const TextStyle(fontSize: 13))),
+              Expanded(child: Text("Customer | ID: ${order.userId ?? ''}", style: const TextStyle(fontSize: 13))),
             ],
           ),
           const SizedBox(height: 12),
@@ -153,7 +124,7 @@ class OrderDetailsWidget extends StatelessWidget {
             children: [
               const Icon(Icons.home_outlined, color: Colors.orange, size: 20),
               const SizedBox(width: 8),
-              Expanded(child: Text(deliveryAddress, style: const TextStyle(fontSize: 13, color: Colors.black87))),
+              Expanded(child: Text("Address not available in response", style: const TextStyle(fontSize: 13, color: Colors.black87))),
             ],
           ),
         ],
@@ -162,6 +133,7 @@ class OrderDetailsWidget extends StatelessWidget {
   }
 
   Widget _buildProductDetails() {
+    final items = order.items ?? [];
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -175,11 +147,19 @@ class OrderDetailsWidget extends StatelessWidget {
           const Text("Product Details", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 12),
           ...items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+            padding: const EdgeInsets.only(bottom: 12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(item.productName ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                if (item.attributes != null && item.attributes!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      item.attributes!.map((a) => "${a.name}: ${a.value}").join(", "),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
@@ -187,7 +167,7 @@ class OrderDetailsWidget extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text("₹${item.mrp}", style: const TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey, fontSize: 12)),
                     const SizedBox(width: 8),
-                    Text("₹${item.price}", style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
+                    Text("₹${item.finalPrice}", style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
                   ],
                 ),
               ],
@@ -210,19 +190,19 @@ class OrderDetailsWidget extends StatelessWidget {
         children: [
           const Text("Order Summary", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 16),
-          _summaryRow("Total Quantity", "$totalQuantity"),
-          _summaryRow("Item MRP", "₹$itemMrp"),
-          _summaryRow("Discount", "-₹$discount", valueColor: Colors.green),
-          _summaryRow("Item Price", "₹$itemPrice"),
-          _summaryRow("Loyalty Bonus", "$loyaltyBonus"),
-          _summaryRow("Platform charge", "₹$platformCharge", valueColor: Colors.green),
-          _summaryRow("Delivery charge", "₹$deliveryCharge", valueColor: Colors.green),
+          _summaryRow("Invoice No", order.invoiceNo ?? 'N/A'),
+          _summaryRow("Payment Method", order.paymentMethodLabel ?? 'N/A'),
+          _summaryRow("Total Quantity", "${order.totalItems ?? 0}"),
+          _summaryRow("Item Total", "₹${order.itemsTotal ?? 0}"),
+          _summaryRow("Discount", "-₹${order.discountAmount ?? 0}", valueColor: Colors.green),
+          _summaryRow("Platform charge", "₹${order.platformCharge ?? 0}", valueColor: Colors.green),
+          _summaryRow("Delivery charge", "₹${order.deliveryCharge ?? 0}", valueColor: Colors.green),
           const Divider(height: 24, thickness: 1, color: Color(0xFFEEEEEE)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Grand total", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              Text("₹$grandTotal", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              Text("₹${order.grandTotal ?? 0}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
             ],
           ),
           const SizedBox(height: 24),
@@ -260,18 +240,4 @@ class OrderDetailsWidget extends StatelessWidget {
       ),
     );
   }
-}
-
-class OrderItem {
-  final String name;
-  final int quantity;
-  final double mrp;
-  final double price;
-
-  OrderItem({
-    required this.name,
-    required this.quantity,
-    required this.mrp,
-    required this.price,
-  });
 }

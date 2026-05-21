@@ -82,7 +82,7 @@ class OrderItemCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const OrderDetailsScreen(),
+            builder: (context) => OrderDetailsScreen(orderId: order.id ?? ''),
           ),
         );
       },

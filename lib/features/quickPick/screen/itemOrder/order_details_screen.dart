@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/service/location_service.dart';
+import '../../provider/order_details_provider.dart';
 import '../../widgets/order_details_widget.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
-  const OrderDetailsScreen({super.key});
+  final String orderId;
+  const OrderDetailsScreen({super.key, required this.orderId});
 
   @override
   State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
@@ -17,6 +20,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   void initState() {
     super.initState();
     _loadAddress();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderDetailsProvider>().fetchOrderDetails(widget.orderId);
+    });
   }
 
   Future<void> _loadAddress() async {
@@ -67,32 +73,28 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           ],
         ),
       ),
-      body: OrderDetailsWidget(
-        orderId: "ORD180526173633781",
-        orderDate: "18 May, 2026",
-        orderStatus: "Pending",
-        statusDescription: "Your order has been placed and is pending.",
-        customerName: "Dev Testing",
-        customerPhone: "8420909090",
-        deliveryAddress: "Howrah Maidan, Howrah, Kolkata Metropolitan Area, Howrah, West Bengal, 711317, India",
-        items: [
-          OrderItem(
-            name: "CODE 0104",
-            quantity: 1,
-            mrp: 1000.00,
-            price: 100.00,
-          ),
-        ],
-        totalQuantity: 2,
-        itemMrp: 1000.00,
-        discount: 900.00,
-        itemPrice: 100.00,
-        loyaltyBonus: 0.00,
-        platformCharge: 5.00,
-        deliveryCharge: 100.00,
-        grandTotal: 205.00,
-        onCancelOrder: () {
-          // Handle logic
+      body: Consumer<OrderDetailsProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.errorMessage != null) {
+            return Center(child: Text(provider.errorMessage!));
+          }
+
+          final order = provider.orderDetailsData?.data;
+
+          if (order == null) {
+            return const Center(child: Text("Order not found"));
+          }
+
+          return OrderDetailsWidget(
+            order: order,
+            onCancelOrder: () {
+              // Handle logic
+            },
+          );
         },
       ),
     );
