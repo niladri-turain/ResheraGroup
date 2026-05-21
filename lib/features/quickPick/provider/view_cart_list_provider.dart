@@ -92,10 +92,10 @@ class ViewCartListProvider with ChangeNotifier {
         "${ApiEndPoints.cart}?user_id=${userId?.toString() ?? ''}",
         method: 'GET',
         body: body,
-        // token: token ?? AppStrings.token,
+        // token: token,
       );
 
-      if (response['success'] == true) {
+      if (response['success'] == true ) {
         _cartData = CartListModel.fromJson(response);
         if (_cartData?.totalItems != null) {
           await _saveCartCount(_cartData!.totalItems!);

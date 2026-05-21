@@ -7,9 +7,11 @@ class CartListModel {
   CartListModel({this.success, this.message, this.totalItems, this.data});
 
   CartListModel.fromJson(Map<String, dynamic> json) {
-    success = json['success'];
+    success = json['success'] ?? json['status'];
     message = json['message'];
-    totalItems = json['total_items'];
+    totalItems = json['total_items'] is int
+        ? json['total_items']
+        : int.tryParse(json['total_items']?.toString() ?? '');
     if (json['data'] != null) {
       data = <CartItem>[];
       json['data'].forEach((v) {
@@ -21,7 +23,7 @@ class CartListModel {
 
 class CartItem {
   String? id;
-  User? user;
+  int? userId;
   String? businessCategoryId;
   String? productId;
   String? productVariantId;
@@ -33,7 +35,7 @@ class CartItem {
 
   CartItem(
       {this.id,
-      this.user,
+      this.userId,
       this.businessCategoryId,
       this.productId,
       this.productVariantId,
@@ -44,13 +46,18 @@ class CartItem {
       this.attributes});
 
   CartItem.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    user = json['user'] != null ? User.fromJson(json['user']) : null;
-    businessCategoryId = json['business_category_id'];
-    productId = json['product_id'];
-    productVariantId = json['product_variant_id'];
+    id = json['id']?.toString();
+    // Handling "user" which is now an int ID
+    userId = json['user'] is int 
+        ? json['user'] 
+        : int.tryParse(json['user']?.toString() ?? '');
+    businessCategoryId = json['business_category_id']?.toString();
+    productId = json['product_id']?.toString();
+    productVariantId = json['product_variant_id']?.toString();
     productName = json['product_name'];
-    quantity = json['quantity'];
+    quantity = json['quantity'] is int
+        ? json['quantity']
+        : int.tryParse(json['quantity']?.toString() ?? '');
     image = json['image'];
     product =
         json['product'] != null ? Product.fromJson(json['product']) : null;
@@ -60,24 +67,6 @@ class CartItem {
         attributes!.add(CartAttribute.fromJson(v));
       });
     }
-  }
-}
-
-class User {
-  int? userId;
-  String? name;
-  String? email;
-  String? mobile;
-  String? profileImage;
-
-  User({this.userId, this.name, this.email, this.mobile, this.profileImage});
-
-  User.fromJson(Map<String, dynamic> json) {
-    userId = json['user_id'];
-    name = json['name'];
-    email = json['email'];
-    mobile = json['mobile'];
-    profileImage = json['profile_image'];
   }
 }
 
@@ -108,8 +97,8 @@ class CartAttribute {
       this.attributeValue});
 
   CartAttribute.fromJson(Map<String, dynamic> json) {
-    attributeId = json['attribute_id'];
-    attributeValueId = json['attribute_value_id'];
+    attributeId = json['attribute_id']?.toString();
+    attributeValueId = json['attribute_value_id']?.toString();
     attributeName = json['attribute_name'];
     attributeValue = json['attribute_value'];
   }
