@@ -206,23 +206,23 @@ class OrderDetailsWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          Center(
-            child: SizedBox(
-              width: 150,
-              child: ElevatedButton(
-                onPressed: onCancelOrder,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE54D4D),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                child: const Text(
-                  "Waiting for invoice",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
+          // Center(
+          //   child: SizedBox(
+          //     width: 150,
+          //     child: ElevatedButton(
+          //       onPressed: onCancelOrder,
+          //       style: ElevatedButton.styleFrom(
+          //         backgroundColor:  const Color(0xFF7B2CBF),
+          //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          //         padding: const EdgeInsets.symmetric(vertical: 12),
+          //       ),
+          //       child: const Text(
+          //         "Download invoice",
+          //         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

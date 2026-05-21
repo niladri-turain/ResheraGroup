@@ -19,31 +19,31 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isPageLoading = true; // For WebView itself
   bool _isApiLoading = true;  // For initial dashboard API check
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            setState(() {
-              _isPageLoading = true;
-            });
-          },
-          onPageFinished: (String url) {
-            setState(() {
-              _isPageLoading = false;
-            });
-          },
-        ),
-      );
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeDashboard();
-    });
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _controller = WebViewController()
+  //     ..setJavaScriptMode(JavaScriptMode.unrestricted)
+  //     ..setBackgroundColor(const Color(0x00000000))
+  //     ..setNavigationDelegate(
+  //       NavigationDelegate(
+  //         onPageStarted: (String url) {
+  //           setState(() {
+  //             _isPageLoading = true;
+  //           });
+  //         },
+  //         onPageFinished: (String url) {
+  //           setState(() {
+  //             _isPageLoading = false;
+  //           });
+  //         },
+  //       ),
+  //     );
+  //  
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     _initializeDashboard();
+  //   });
+  // }
 
   Future<void> _initializeDashboard() async {
     final loginProvider = context.read<LoginProvider>();
@@ -88,12 +88,15 @@ class _HomeScreenState extends State<HomeScreen> {
     AppSize.init(context);
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         body: Stack(
           children: [
-            if (!_isApiLoading) WebViewWidget(controller: _controller),
-            if (_isApiLoading || _isPageLoading) 
-              const Center(child: CustomSkeletonWidget()),
+            // if (!_isApiLoading) WebViewWidget(controller: _controller),
+            // if (_isApiLoading || _isPageLoading) 
+            //   const Center(child: CustomSkeletonWidget()),
+            Center(
+              child: Text("Dashboard Coming Soon",style: TextStyle(fontSize: 18,color: Colors.black),),
+            )
           ],
         ),
       ),

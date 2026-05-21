@@ -19,7 +19,7 @@ class OrderData {
   String? id;
   String? orderNo;
   String? invoiceNo;
-  int? businessId;
+  String? businessId;
   int? businessCategoryId;
   int? userId;
   int? paymentStatus;
