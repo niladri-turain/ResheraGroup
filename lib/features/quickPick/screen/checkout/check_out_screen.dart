@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resheragroup/features/quickPick/provider/order_provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/service/location_service.dart';
@@ -333,16 +334,34 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           if (totalItems == 0) return const SizedBox.shrink();
 
           return FloatingCartBar(
-            itemCount: totalItems,
+            itemCount: cartData.totalItems??0,
             label: 'Proceed to',
 
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ItemOrderScreen(),
-                  ),
-                );
+              onTap: () async {
+                final success = await context.read<OrderProvider>().placeOrder();
+                if (success) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Order placed successfully")),
+                    );
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ItemOrderScreen(),
+                      ),
+                    );
+                    if (mounted) {
+                      context.read<ViewCartListProvider>().fetchCart();
+                    }
+                  }
+                } else {
+                  if (mounted) {
+                    final error = context.read<OrderProvider>().errorMessage;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(error ?? "Failed to place order")),
+                    );
+                  }
+                }
               },
 
           );

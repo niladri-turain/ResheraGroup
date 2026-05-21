@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resheragroup/features/login/provider/login_provider.dart';
+import 'package:resheragroup/main_screen.dart';
 import '../../../../core/service/location_service.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../provider/product_details_provider.dart';
@@ -185,8 +187,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Consumer<ViewCartListProvider>(
-                    builder: (context, cartProvider, child) {
+                  Consumer2<ViewCartListProvider, LoginProvider>(
+                    builder: (context, cartProvider, loginProvider, child) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -194,6 +196,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             FloatingCartBar(
                               itemCount: cartProvider.totalItems + _localQuantity,
                               onTap: () async {
+                                // 1. Check if logged in
+                                if (loginProvider.userName == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Please login to proceed")),
+                                  );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const MainScreen(initialIndex: 3),
+                                    ),
+                                  );
+                                  return;
+                                }
+
                                 if (_localQuantity > 0 && _selectedVariant != null) {
                                   // Call addToCart API only when navigating to checkout
                                   final success = await context.read<CartProvider>().addToCart(
@@ -230,6 +246,18 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               initialCount: _localQuantity,
                               initialLabel: "Add to cart",
                               onCountChanged: (count) {
+                                if (loginProvider.userName == null && count > 0) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Please login to add items to cart")),
+                                  );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const MainScreen(initialIndex: 3),
+                                    ),
+                                  );
+                                  return;
+                                }
                                 setState(() {
                                   _localQuantity = count;
                                 });

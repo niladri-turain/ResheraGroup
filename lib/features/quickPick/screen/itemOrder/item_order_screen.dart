@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:resheragroup/features/quickPick/provider/order_list_provider.dart';
 
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/service/location_service.dart';
@@ -117,6 +119,8 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
   void initState() {
     super.initState();
     _loadAddress();
-
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderListProvider>().fetchOrders();
+    });
   }
 }

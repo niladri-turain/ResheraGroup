@@ -17,6 +17,8 @@ import 'features/quickPick/provider/main_vendor_banner_provider.dart';
 import 'features/quickPick/provider/promotional_vendor_banner_provider.dart';
 import 'features/login/provider/login_provider.dart';
 import 'features/home/provider/home_provider.dart';
+import 'features/quickPick/provider/order_provider.dart';
+import 'features/quickPick/provider/order_list_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => PromotionalVendorBannerProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => OrderListProvider()),
       ],
       child: const MyApp(),
     ),
