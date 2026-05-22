@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:resheragroup/features/quickPick/screen/itemOrder/item_order_screen.dart';
+import 'package:resheragroup/main_screen.dart';
+
+import '../../dashboard/screen/dashboard_screen.dart';
 
 class CustomTopNavigationBar extends StatelessWidget {
   final int selectedIndex;
@@ -103,9 +106,15 @@ class CustomTopNavigationBar extends StatelessWidget {
   Widget _buildResheraBadge(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
-      onTap: () {
+      onTap: () {  Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MainScreen(),
+        ),
+            (route) => false,
+      );
         // Pop until we reach the MainScreen (Dashboard)
-        Navigator.of(context).popUntil((route) => route.isFirst);
+
       },
       child: Container(
         padding: const EdgeInsets.symmetric(

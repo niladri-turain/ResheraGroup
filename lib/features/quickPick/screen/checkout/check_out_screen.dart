@@ -6,6 +6,9 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/service/location_service.dart';
 import '../../../../main_screen.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/service/shared_pref_service.dart';
+import '../../../login/screen/login_screen.dart';
 import '../../provider/update_cart_provider.dart';
 import '../../provider/delete_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
@@ -27,11 +30,40 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   @override
   void initState() {
     super.initState();
+    _checkLoginAndLoadData();
+  }
+
+  Future<void> _checkLoginAndLoadData() async {
+    final prefService = sl<SharedPrefService>();
+    final token = await prefService.getToken();
+
+    if (token == null || token.isEmpty) {
+      if (mounted) {
+        Future.microtask(() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginScreen(
+                onLoginSuccess: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                  );
+                },
+              ),
+            ),
+          );
+        });
+      }
+      return;
+    }
+
     _loadAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ViewCartListProvider>().fetchCart();
     });
   }
+
   Future<void> _loadAddress() async {
     final address = await LocationService.getCachedAddress();
     if (mounted) {
@@ -40,6 +72,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,10 +149,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pushAndRemoveUntil(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => const QuickPickScreen()),
-                        (route) => false,
+
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -154,7 +187,6 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Items Section
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -173,124 +205,48 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                 .join(", ") ??
                             "";
 
-                        return Stack(
-                          children: [
-                            CheckoutItemWidget(
-                              image: item.image ?? "",
-                              title: item.productName ?? "",
-                              subtitle: attributes,
-                              price: item.product?.finalPrice.toString() ?? "0",
-                              quantity: item.quantity ?? 1,
-                              onIncrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
-                                  ? () {}
-                                  : () async {
-                                      final success = await updateProvider.updateCart(
-                                        cartId: item.id ?? "",
-                                        quantity: (item.quantity ?? 0) + 1,
-                                      );
-                                      if (success) {
-                                        // if (mounted) {
-                                        //   ScaffoldMessenger.of(context).showSnackBar(
-                                        //     SnackBar(
-                                        //       backgroundColor: const Color(0xFF7B2CBF),
-                                        //       behavior: SnackBarBehavior.floating,
-                                        //       shape: RoundedRectangleBorder(
-                                        //         borderRadius: BorderRadius.circular(10),
-                                        //       ),
-                                        //       content: const Text(
-                                        //         'Cart updated successfully',
-                                        //         style: TextStyle(
-                                        //           color: Colors.white,
-                                        //           fontWeight: FontWeight.w500,
-                                        //         ),
-                                        //       ),
-                                        //     ),
-                                        //   );
-                                        // }
-                                          provider.fetchCart(showLoader: false);
-                                      }
-                                    },
-                              onDecrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
-                                  ? () {}
-                                  : () async {
-                                      if ((item.quantity ?? 0) > 1) {
-                                        final success = await updateProvider.updateCart(
-                                          cartId: item.id ?? "",
-                                          quantity: (item.quantity ?? 0) - 1,
-                                        );
-                                        if (success) {
-                                          // if (mounted) {
-                                          //   ScaffoldMessenger.of(context).showSnackBar(
-                                          //     SnackBar(
-                                          //       backgroundColor: const Color(0xFF7B2CBF),
-                                          //       behavior: SnackBarBehavior.floating,
-                                          //       shape: RoundedRectangleBorder(
-                                          //         borderRadius: BorderRadius.circular(10),
-                                          //       ),
-                                          //       content: const Text(
-                                          //         'Cart updated successfully',
-                                          //         style: TextStyle(
-                                          //           color: Colors.white,
-                                          //           fontWeight: FontWeight.w500,
-                                          //         ),
-                                          //       ),
-                                          //     ),
-                                          //   );
-                                          // }
-                                          provider.fetchCart(showLoader: false);
-                                        }
-                                      } else if ((item.quantity ?? 0) == 1) {
-                                        final success = await deleteProvider.deleteCart(
-                                          cartId: item.id ?? "",
-                                        );
-                                        if (success) {
-                                          // if (mounted) {
-                                          //   ScaffoldMessenger.of(context).showSnackBar(
-                                          //     SnackBar(
-                                          //       backgroundColor: const Color(0xFF7B2CBF),
-                                          //       behavior: SnackBarBehavior.floating,
-                                          //       shape: RoundedRectangleBorder(
-                                          //         borderRadius: BorderRadius.circular(10),
-                                          //       ),
-                                          //       content: const Text(
-                                          //         'item delete successfully',
-                                          //         style: TextStyle(
-                                          //           color: Colors.white,
-                                          //           fontWeight: FontWeight.w500,
-                                          //         ),
-                                          //       ),
-                                          //     ),
-                                          //   );
-                                          // }
-                                          provider.fetchCart(showLoader: false);
-                                        }
-                                      }
-                                    },
-                            ),
-                            // if (updateProvider.isUpdating || deleteProvider.isDeleting)
-                            //   Positioned.fill(
-                            //     child: Container(
-                            //       color: Colors.white.withOpacity(0.3),
-                            //       child: const Center(
-                            //         child: SizedBox(
-                            //           width: 20,
-                            //           height: 20,
-                            //           child: CircularProgressIndicator(
-                            //             strokeWidth: 2,
-                            //             valueColor: AlwaysStoppedAnimation<Color>(Color(0XFF9333ea)),
-                            //           ),
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   ),
-                          ],
+                        return CheckoutItemWidget(
+                          image: item.image ?? "",
+                          title: item.productName ?? "",
+                          subtitle: attributes,
+                          price: item.product?.finalPrice.toString() ?? "0",
+                          quantity: item.quantity ?? 1,
+                          onIncrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
+                              ? () {}
+                              : () async {
+                                  final success = await updateProvider.updateCart(
+                                    cartId: item.id ?? "",
+                                    quantity: (item.quantity ?? 0) + 1,
+                                  );
+                                  if (success) {
+                                    provider.fetchCart(showLoader: false);
+                                  }
+                                },
+                          onDecrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
+                              ? () {}
+                              : () async {
+                                  if ((item.quantity ?? 0) > 1) {
+                                    final success = await updateProvider.updateCart(
+                                      cartId: item.id ?? "",
+                                      quantity: (item.quantity ?? 0) - 1,
+                                    );
+                                    if (success) {
+                                      provider.fetchCart(showLoader: false);
+                                    }
+                                  } else if ((item.quantity ?? 0) == 1) {
+                                    final success = await deleteProvider.deleteCart(
+                                      cartId: item.id ?? "",
+                                    );
+                                    if (success) {
+                                      provider.fetchCart(showLoader: false);
+                                    }
+                                  }
+                                },
                         );
                       },
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Bill Details Section
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -368,151 +324,38 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           if (totalItems == 0) return const SizedBox.shrink();
 
           return FloatingCartBar(
-            itemCount: cartData.totalItems??0,
+            itemCount: cartData.totalItems ?? 0,
             label: 'Proceed to',
-
-              onTap: () async {
-                final success = await context.read<OrderProvider>().placeOrder();
-                if (success) {
+            onTap: () async {
+              final success = await context.read<OrderProvider>().placeOrder();
+              if (success) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Order placed successfully")),
+                  );
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ItemOrderScreen(),
+                    ),
+                  );
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Order placed successfully")),
-                    );
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ItemOrderScreen(),
-                      ),
-                    );
-                    if (mounted) {
-                      context.read<ViewCartListProvider>().fetchCart();
-                    }
-                  }
-                } else {
-                  if (mounted) {
-                    final error = context.read<OrderProvider>().errorMessage;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(error ?? "Failed to place order")),
-                    );
+                    context.read<ViewCartListProvider>().fetchCart();
                   }
                 }
-              },
-
+              } else {
+                if (mounted) {
+                  final error = context.read<OrderProvider>().errorMessage;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(error ?? "Failed to place order")),
+                  );
+                }
+              }
+            },
           );
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      // bottomNavigationBar: Container(
-      //   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      //   decoration: const BoxDecoration(
-      //     color: Colors.white,
-      //     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      //     boxShadow: [
-      //       BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 1),
-      //     ],
-      //   ),
-      //   child: Column(
-      //     mainAxisSize: MainAxisSize.min,
-      //     children: [
-      //       Row(
-      //         children: [
-      //           Container(
-      //             padding: const EdgeInsets.all(8),
-      //             decoration: BoxDecoration(
-      //               color: Colors.purple.shade50,
-      //               borderRadius: BorderRadius.circular(8),
-      //             ),
-      //             child: const Icon(Icons.home_outlined, color: Color(0XFF9333ea)),
-      //           ),
-      //           const SizedBox(width: 12),
-      //           const Expanded(
-      //             child: Column(
-      //               crossAxisAlignment: CrossAxisAlignment.start,
-      //               children: [
-      //                 Text(
-      //                   'Delivering to Home',
-      //                   style: TextStyle(fontWeight: FontWeight.bold),
-      //                 ),
-      //                 Text(
-      //                   'Floor 1st, 9F Abdul biryani center,...',
-      //                   style: TextStyle(color: Colors.grey, fontSize: 12),
-      //                   overflow: TextOverflow.ellipsis,
-      //                 ),
-      //               ],
-      //             ),
-      //           ),
-      //           TextButton(
-      //             onPressed: () {},
-      //             child: const Text(
-      //               'Change',
-      //               style: TextStyle(color: Colors.green),
-      //             ),
-      //           ),
-      //         ],
-      //       ),
-      //       const SizedBox(height: 16),
-      //       Row(
-      //         children: [
-      //           Expanded(
-      //             child: Column(
-      //               crossAxisAlignment: CrossAxisAlignment.start,
-      //               children: [
-      //                 const Text('Paying Type', style: TextStyle(fontSize: 12, color: Colors.grey)),
-      //                 Container(
-      //                   padding: const EdgeInsets.symmetric(horizontal: 12),
-      //                   decoration: BoxDecoration(
-      //                     border: Border.all(color: Colors.grey.shade300),
-      //                     borderRadius: BorderRadius.circular(8),
-      //                   ),
-      //                   child: DropdownButtonHideUnderline(
-      //                     child: DropdownButton<String>(
-      //                       value: selectedPayment,
-      //                       isExpanded: true,
-      //                       items: ['UPI Pay', 'Cash on Delivery'].map((String value) {
-      //                         return DropdownMenuItem<String>(
-      //                           value: value,
-      //                           child: Text(value),
-      //                         );
-      //                       }).toList(),
-      //                       onChanged: (newValue) {
-      //                         setState(() {
-      //                           selectedPayment = newValue!;
-      //                         });
-      //                       },
-      //                     ),
-      //                   ),
-      //                 ),
-      //               ],
-      //             ),
-      //           ),
-      //           const SizedBox(width: 16),
-      //           Expanded(
-      //             child: ElevatedButton(
-      //               onPressed: () {},
-      //               style: ElevatedButton.styleFrom(
-      //                 backgroundColor: const Color(0XFF9333ea),
-      //                 padding: const EdgeInsets.symmetric(vertical: 16),
-      //                 shape: RoundedRectangleBorder(
-      //                   borderRadius: BorderRadius.circular(12),
-      //                 ),
-      //               ),
-      //               child: const Row(
-      //                 mainAxisAlignment: MainAxisAlignment.center,
-      //                 children: [
-      //                   Text(
-      //                     'Place Order',
-      //                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      //                   ),
-      //                   Icon(Icons.chevron_right, color: Colors.white),
-      //                 ],
-      //               ),
-      //             ),
-      //           ),
-      //         ],
-      //       ),
-      //     ],
-      //   ),
-      // ),
     );
   }
 
@@ -526,7 +369,6 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Items Section Skeleton (Small Horizontal List of Column Containers)
               const Text("Items", style: TextStyle(backgroundColor: Colors.white)),
               const SizedBox(height: 12),
               SizedBox(
@@ -563,8 +405,6 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              
-              // Bill Details Section Skeleton (Slimmer)
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,

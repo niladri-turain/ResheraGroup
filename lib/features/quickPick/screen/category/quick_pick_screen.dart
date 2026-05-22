@@ -59,6 +59,7 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
       return;
     }
 
+
     setState(() {
       selectedIndex = index;
     });

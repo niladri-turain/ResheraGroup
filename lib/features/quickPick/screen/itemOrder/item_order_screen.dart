@@ -3,9 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:resheragroup/features/quickPick/provider/order_list_provider.dart';
 
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/service/location_service.dart';
+import '../../../../core/service/shared_pref_service.dart';
 import '../../../../widgets/custom_search_widget.dart';
+import '../../../login/screen/login_screen.dart';
+import '../../provider/view_cart_list_provider.dart';
 import '../../widgets/item_order_list.dart';
+import '../checkout/check_out_screen.dart';
 
 class ItemOrderScreen extends StatefulWidget {
   const ItemOrderScreen({super.key});
@@ -119,8 +124,40 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
   void initState() {
     super.initState();
     _loadAddress();
+    _checkLoginAndLoadData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrderListProvider>().fetchOrders();
+    });
+  }
+
+  Future<void> _checkLoginAndLoadData() async {
+    final prefService = sl<SharedPrefService>();
+    final token = await prefService.getToken();
+
+    if (token == null || token.isEmpty) {
+      if (mounted) {
+        Future.microtask(() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginScreen(
+                onLoginSuccess: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                  );
+                },
+              ),
+            ),
+          );
+        });
+      }
+      return;
+    }
+
+    _loadAddress();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ViewCartListProvider>().fetchCart();
     });
   }
 }
