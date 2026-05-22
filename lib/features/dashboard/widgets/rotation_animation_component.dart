@@ -54,7 +54,7 @@ class _CustomAnimatedDashboardCardState extends State<CustomAnimatedDashboardCar
         children: [
           // 1. Background Glow & Rotating Border
           Container(
-            width: AppSize.width(0.40),   // 👈 responsive
+            width: AppSize.width(0.44),   // 👈 responsive
             height: AppSize.height(0.22), // 👈 responsive
             decoration: BoxDecoration(
               color: const Color(0xFF1A1212),

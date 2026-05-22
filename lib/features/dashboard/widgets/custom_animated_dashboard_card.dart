@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_sizes.dart';
+
 class CustomRotationAnimation extends StatefulWidget {
   final String title;
   final String imagePath;
@@ -57,8 +59,8 @@ class _CustomRotationAnimationState extends State<CustomRotationAnimation>
 
         // 2. Main Card Body
         Container(
-          width: 154,
-          height: 178,
+          width: AppSize.width(0.44),   // 👈 responsive
+          height: AppSize.height(0.22), // 👈 responsive
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: const Color(0xFF121212),

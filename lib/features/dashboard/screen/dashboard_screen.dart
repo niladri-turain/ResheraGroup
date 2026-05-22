@@ -252,7 +252,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
 
-                  SizedBox(height: AppSize.height(0.01)),
+                  SizedBox(height: AppSize.height(0.02)),
 
                   GridView.count(
                     crossAxisCount: 2,
