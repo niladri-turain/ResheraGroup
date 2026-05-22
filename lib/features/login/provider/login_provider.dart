@@ -5,10 +5,12 @@ import '../../../core/service/api_service.dart';
 import '../../../core/service/shared_pref_service.dart';
 import '../../../core/di/injection_container.dart';
 import '../model/login_model.dart';
+import 'user_address_provider.dart';
 
 class LoginProvider with ChangeNotifier {
   final ApiService _apiService = sl<ApiService>();
   final SharedPrefService _prefService = sl<SharedPrefService>();
+  final UserAddressProvider _addressProvider = sl<UserAddressProvider>();
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -61,6 +63,10 @@ class LoginProvider with ChangeNotifier {
           phone: user.phone?.toString() ?? '',
         );
         _userName = user.name;
+        
+        // Fetch addresses immediately after successful login
+        await _addressProvider.fetchUserAddresses(data.token ?? '');
+
         notifyListeners();
         return true;
       } else {

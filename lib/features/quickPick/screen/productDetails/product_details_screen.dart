@@ -4,6 +4,7 @@ import 'package:resheragroup/features/login/provider/login_provider.dart';
 import 'package:resheragroup/main_screen.dart';
 import '../../../../core/service/location_service.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../login/screen/login_screen.dart';
 import '../../provider/product_details_provider.dart';
 import '../../provider/cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
@@ -161,7 +162,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 onVariantChanged: (variant) {
                   setState(() {
                     _selectedVariant = variant;
-                    _localQuantity = 0;
                   });
                 },
               );
@@ -204,7 +204,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const MainScreen(initialIndex: 3),
+                                      builder: (context) => LoginScreen(
+                                        onLoginSuccess: () {
+                                          Navigator.pop(context); // Go back to product details
+                                        },
+                                      ),
                                     ),
                                   );
                                   return;
@@ -253,7 +257,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const MainScreen(initialIndex: 3),
+                                      builder: (context) => LoginScreen(
+                                        onLoginSuccess: () {
+                                          Navigator.pop(context); // Go back to product details
+                                          setState(() {
+                                            _localQuantity = count;
+                                          });
+                                        },
+                                      ),
                                     ),
                                   );
                                   return;

@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import '../../features/login/provider/login_provider.dart';
+import '../../features/login/provider/user_address_provider.dart';
 import '../constants/api_end_points.dart';
 import '../service/api_service.dart';
 import '../service/shared_pref_service.dart';
@@ -12,5 +13,6 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SharedPrefService());
 
   // Providers
-  sl.registerFactory(() => LoginProvider());
+  sl.registerLazySingleton(() => LoginProvider());
+  sl.registerLazySingleton(() => UserAddressProvider());
 }

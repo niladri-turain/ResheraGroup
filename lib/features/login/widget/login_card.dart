@@ -9,7 +9,8 @@ import 'custom_login_text_field.dart';
 
 
 class LoginCard extends StatefulWidget {
-  const LoginCard({super.key});
+  final VoidCallback? onLoginSuccess;
+  const LoginCard({super.key, this.onLoginSuccess});
 
   @override
   State<LoginCard> createState() => _LoginCardState();
@@ -169,11 +170,15 @@ class _LoginCardState extends State<LoginCard> {
                           );
                           if (success) {
                             if (mounted) {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const MainScreen()),
-                                (route) => false,
-                              );
+                              if (widget.onLoginSuccess != null) {
+                                widget.onLoginSuccess!();
+                              } else {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const MainScreen()),
+                                  (route) => false,
+                                );
+                              }
                             }
                           } else {
                             if (mounted) {

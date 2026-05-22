@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resheragroup/features/quickPick/provider/order_provider.dart';
+import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/service/location_service.dart';
+import '../../../../main_screen.dart';
 import '../../provider/update_cart_provider.dart';
 import '../../provider/delete_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
@@ -103,7 +105,39 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
           final cartData = provider.cartData;
           if (cartData == null || cartData.data == null || cartData.data!.isEmpty) {
-            return const Center(child: Text("Your cart is empty"));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Your cart is empty",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const QuickPickScreen()),
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7B2CBF),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Continue Shopping",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
 
           final updateProvider = context.watch<UpdateCartProvider>();
