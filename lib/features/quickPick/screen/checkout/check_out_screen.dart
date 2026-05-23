@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resheragroup/features/login/provider/user_address_provider.dart';
 import 'package:resheragroup/features/quickPick/provider/order_provider.dart';
 import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
 import 'package:shimmer/shimmer.dart';
@@ -65,11 +66,23 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   }
 
   Future<void> _loadAddress() async {
-    final address = await LocationService.getCachedAddress();
-    if (mounted) {
-      setState(() {
-        cachedAddress = address;
-      });
+    final addressProvider = context.read<UserAddressProvider>();
+    final shippingAddresses = addressProvider.addressModel?.data?.shipping;
+
+    if (shippingAddresses != null && shippingAddresses.isNotEmpty) {
+      final addr = shippingAddresses.first;
+      if (mounted) {
+        setState(() {
+          cachedAddress = addr.address ?? "";
+        });
+      }
+    } else {
+      final address = await LocationService.getCachedAddress();
+      if (mounted) {
+        setState(() {
+          cachedAddress = address;
+        });
+      }
     }
   }
 

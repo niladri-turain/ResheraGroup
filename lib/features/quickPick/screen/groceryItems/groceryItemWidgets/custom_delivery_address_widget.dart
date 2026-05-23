@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:resheragroup/core/service/location_service.dart';
+import 'package:resheragroup/features/login/provider/user_address_provider.dart';
+import 'package:resheragroup/features/login/model/user_address_model.dart';
 
 class DeliverAddressWidget extends StatefulWidget {
   final String? address;
@@ -16,17 +19,44 @@ class DeliverAddressWidget extends StatefulWidget {
 
 class _DeliverAddressWidgetState
     extends State<DeliverAddressWidget> {
-  late String _selectedAddress;
+  String _selectedAddress = "Select Address";
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedAddress = widget.address ?? "Select Address";
+    if (widget.address != null) {
+      _selectedAddress = widget.address!;
+    }
+    _loadInitialAddress();
+  }
+
+  Future<void> _loadInitialAddress() async {
+    final addressProvider = context.read<UserAddressProvider>();
+    final shippingAddresses = addressProvider.addressModel?.data?.shipping;
+
+    if (shippingAddresses != null && shippingAddresses.isNotEmpty) {
+      final addr = shippingAddresses.first;
+      if (mounted) {
+        setState(() {
+          _selectedAddress = addr.address ?? "";
+        });
+      }
+    } else if (widget.address == null) {
+      final address = await LocationService.getCachedAddress();
+      if (mounted) {
+        setState(() {
+          _selectedAddress = widget.address!;
+        });
+      }
+    }
   }
 
   /// Opens Bottom Sheet
   void _openBottomSheet() {
+    final addressProvider = context.read<UserAddressProvider>();
+    final addresses = addressProvider.addressModel?.data?.shipping ?? [];
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -167,34 +197,49 @@ class _DeliverAddressWidgetState
                 const SizedBox(height: 10),
 
                 /// Saved Addresses
-                const Text(
-                  "Your saved addresses",
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 10),
-
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade100,
-                      borderRadius:
-                      BorderRadius.circular(10),
+                if (addresses.isNotEmpty) ...[
+                  const Text(
+                    "Your saved addresses",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 10),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.4,
                     ),
-                    child: const Icon(Icons.home,
-                        color: Colors.orange),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: addresses.length,
+                      itemBuilder: (context, index) {
+                        final addr = addresses[index];
+                        final addrString = addr.address ?? "";
+                        return ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade100,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                                addr.type?.toLowerCase() == 'home' ? Icons.home : Icons.business,
+                                color: Colors.orange),
+                          ),
+                          title: Text(
+                            addrString,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: () {
+                            setState(() {
+                              _selectedAddress = addrString;
+                            });
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
                   ),
-                  title: const Text(
-                    "Floor 1st, Tiljala, Kolkata",
-                  ),
-                  onTap: () {
-                    setState(() {
-                      _selectedAddress =
-                      "Tiljala, Kolkata";
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
+                ],
               ],
             ),
           ),
@@ -244,6 +289,7 @@ class _DeliverAddressWidgetState
                     Expanded(
                       child: Text(
                         _selectedAddress,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 14,

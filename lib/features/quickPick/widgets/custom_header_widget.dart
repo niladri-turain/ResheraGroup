@@ -9,6 +9,7 @@ class CustomHeaderWidget extends StatelessWidget {
   final String location;
   final VoidCallback onNotificationTap;
   final VoidCallback onProfileTap;
+  final VoidCallback? onLocationTap;
   final Function(String) onSearch;
 
   const CustomHeaderWidget({
@@ -17,6 +18,7 @@ class CustomHeaderWidget extends StatelessWidget {
     required this.location,
     required this.onNotificationTap,
     required this.onProfileTap,
+    this.onLocationTap,
     required this.onSearch,
   });
 
@@ -50,36 +52,37 @@ class CustomHeaderWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               /// Name + Location
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    userName,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: AppSize.width(0.045),
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userName,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: AppSize.width(0.045),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: AppSize.height(0.005)),
-                  Row(
-                    children: [
-                      Text(
-                        location,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: AppSize.width(0.032),
+                    SizedBox(height: AppSize.height(0.005)),
+                    GestureDetector(
+                      onTap: onLocationTap,
+                      child: SizedBox(
+                
+                        child: Text(
+                          location,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: AppSize.width(0.032),
+                          ),
+                          maxLines: 1,
+                
                         ),
                       ),
-                      SizedBox(width: AppSize.width(0.01)),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.white70,
-                        size: AppSize.width(0.04),
-                      )
-                    ],
-                  )
-                ],
+                    )
+                  ],
+                ),
               ),
 
               /// Icons

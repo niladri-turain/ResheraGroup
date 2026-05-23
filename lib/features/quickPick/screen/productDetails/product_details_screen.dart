@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resheragroup/features/login/provider/login_provider.dart';
+import 'package:resheragroup/features/login/provider/user_address_provider.dart';
 import 'package:resheragroup/main_screen.dart';
 import '../../../../core/service/location_service.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -55,11 +56,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   Future<void> _loadAddress() async {
-    final address = await LocationService.getCachedAddress();
-    if (mounted) {
-      setState(() {
-        cachedAddress = address;
-      });
+    final addressProvider = context.read<UserAddressProvider>();
+    final shippingAddresses = addressProvider.addressModel?.data?.shipping;
+
+    if (shippingAddresses != null && shippingAddresses.isNotEmpty) {
+      final addr = shippingAddresses.first;
+      if (mounted) {
+        setState(() {
+          cachedAddress = addr.address ?? "";
+        });
+      }
+    } else {
+      final address = await LocationService.getCachedAddress();
+      if (mounted) {
+        setState(() {
+          cachedAddress = address;
+        });
+      }
     }
   }
 
@@ -89,15 +102,18 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
             ),
             if (cachedAddress != null)
-              Text(
-                cachedAddress!,
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: AppSize.width(0.032),
-                  fontWeight: FontWeight.normal,
+              Padding(
+                padding: const EdgeInsets.only(right: 18.0),
+                child: Text(
+                  cachedAddress!,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: AppSize.width(0.032),
+                    fontWeight: FontWeight.normal,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
           ],
         ),

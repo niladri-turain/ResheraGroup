@@ -1,4 +1,5 @@
 import 'package:resheragroup/core/service/location_service.dart';
+import 'package:resheragroup/features/login/provider/user_address_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -89,11 +90,23 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
   }
 
   Future<void> _loadAddress() async {
-    final address = await LocationService.getCachedAddress();
-    if (mounted) {
-      setState(() {
-        cachedAddress = address;
-      });
+    final addressProvider = context.read<UserAddressProvider>();
+    final shippingAddresses = addressProvider.addressModel?.data?.shipping;
+
+    if (shippingAddresses != null && shippingAddresses.isNotEmpty) {
+      final addr = shippingAddresses.first;
+      if (mounted) {
+        setState(() {
+          cachedAddress = addr.address ?? "";
+        });
+      }
+    } else {
+      final address = await LocationService.getCachedAddress();
+      if (mounted) {
+        setState(() {
+          cachedAddress = address;
+        });
+      }
     }
   }
 
@@ -158,29 +171,36 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
               ),
             ),
             const SizedBox(width: 10,),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.vendorName??"Vendor Categories",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: AppSize.width(0.045),
-                  ),
-                ),
-                if (cachedAddress != null)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    cachedAddress!,
+                    widget.vendorName??"Vendor Categories",
                     style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: AppSize.width(0.032),
-                      fontWeight: FontWeight.normal,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppSize.width(0.045),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-              ],
+                  if (cachedAddress != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 18.0),
+                      child: Text(
+                        cachedAddress!,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: AppSize.width(0.032),
+                          fontWeight: FontWeight.normal,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
         ),
