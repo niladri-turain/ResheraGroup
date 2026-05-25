@@ -24,12 +24,20 @@ class LoginProvider with ChangeNotifier {
   String? _userName;
   String? get userName => _userName;
 
+  String? _userEmail;
+  String? get userEmail => _userEmail;
+
+  String? _userPhone;
+  String? get userPhone => _userPhone;
+
   LoginProvider() {
     _loadUserInfo();
   }
 
   Future<void> _loadUserInfo() async {
     _userName = await _prefService.getName();
+    _userEmail = await _prefService.getEmail();
+    _userPhone = await _prefService.getPhone();
     notifyListeners();
   }
 
@@ -63,6 +71,8 @@ class LoginProvider with ChangeNotifier {
           phone: user.phone?.toString() ?? '',
         );
         _userName = user.name;
+        _userEmail = user.email;
+        _userPhone = user.phone?.toString();
         
         // Fetch addresses immediately after successful login
         await _addressProvider.fetchUserAddresses(data.token ?? '');

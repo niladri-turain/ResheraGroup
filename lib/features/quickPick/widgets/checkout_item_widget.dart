@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_sizes.dart';
 
 class CheckoutItemWidget extends StatelessWidget {
   final String image;
@@ -23,7 +24,7 @@ class CheckoutItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: EdgeInsets.symmetric(vertical: AppSize.height(0.015)),
       child: Row(
         children: [
           ClipRRect(
@@ -31,40 +32,40 @@ class CheckoutItemWidget extends StatelessWidget {
             child: image.startsWith('http')
                 ? Image.network(
                     image,
-                    width: 60,
-                    height: 60,
+                    width: AppSize.width(0.15),
+                    height: AppSize.width(0.15),
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
-                      width: 60,
-                      height: 60,
+                      width: AppSize.width(0.15),
+                      height: AppSize.width(0.15),
                       color: Colors.grey[200],
                       child: const Icon(Icons.image_not_supported),
                     ),
                   )
                 : Image.asset(
                     image,
-                    width: 60,
-                    height: 60,
+                    width: AppSize.width(0.15),
+                    height: AppSize.width(0.15),
                     fit: BoxFit.cover,
                   ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: AppSize.width(0.03)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: AppSize.width(0.04),
                   ),
                 ),
                 Text(
                   subtitle,
                   style: TextStyle(
                     color: Colors.grey.shade600,
-                    fontSize: 12,
+                    fontSize: AppSize.width(0.03),
                   ),
                 ),
               ],
@@ -74,7 +75,7 @@ class CheckoutItemWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                height: 30,
+                height: AppSize.height(0.038),
 
                 decoration: BoxDecoration(
                   color: const Color(0XFF9333ea),
@@ -84,9 +85,12 @@ class CheckoutItemWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.remove, color: Colors.white, size: 16),
+                      icon: Icon(Icons.remove, color: Colors.white, size: AppSize.width(0.04)),
                       onPressed: onDecrease,
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      constraints: BoxConstraints(
+                        minWidth: AppSize.width(0.08),
+                        minHeight: AppSize.height(0.04),
+                      ),
                       padding: EdgeInsets.zero,
                     ),
                     Text(
@@ -94,20 +98,23 @@ class CheckoutItemWidget extends StatelessWidget {
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add, color: Colors.white, size: 16),
+                      icon: Icon(Icons.add, color: Colors.white, size: AppSize.width(0.04)),
                       onPressed: onIncrease,
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      constraints: BoxConstraints(
+                        minWidth: AppSize.width(0.08),
+                        minHeight: AppSize.height(0.04),
+                      ),
                       padding: EdgeInsets.zero,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: AppSize.height(0.005)),
               Text(
                 '₹$price',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: AppSize.width(0.04),
                 ),
               ),
             ],

@@ -14,6 +14,7 @@ import '../../provider/update_cart_provider.dart';
 import '../../provider/delete_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
 import '../../widgets/cart_widgets.dart';
+import '../../../login/provider/login_provider.dart';
 import '../../widgets/checkout_item_widget.dart';
 import '../itemOrder/item_order_screen.dart';
 
@@ -25,8 +26,9 @@ class CheckOutScreen extends StatefulWidget {
 }
 
 class _CheckOutScreenState extends State<CheckOutScreen> {
-  String selectedPayment = 'UPI Pay';
+  String selectedPayment = 'COD';
   String? cachedAddress;
+  String? billAddress;
 
   @override
   void initState() {
@@ -60,6 +62,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     }
 
     _loadAddress();
+    _loadBillingAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ViewCartListProvider>().fetchCart();
     });
@@ -94,11 +97,11 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         backgroundColor: const Color(0xFF7B2CBF),
         elevation: 0,
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(AppSize.width(0.02)),
           child: CircleAvatar(
             backgroundColor: const Color(0XFF9333ea),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              icon: Icon(Icons.arrow_back, color: Colors.white, size: AppSize.width(0.05)),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -159,7 +162,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     "Your cart is empty",
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: AppSize.height(0.025)),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pushReplacement(
@@ -171,7 +174,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF7B2CBF),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSize.width(0.08),
+                        vertical: AppSize.height(0.015),
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -197,7 +203,12 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
           return SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.fromLTRB(
+                AppSize.width(0.04),
+                AppSize.height(0.02),
+                AppSize.width(0.04),
+                AppSize.height(0.12),
+              ),
               child: Column(
                 children: [
                   Container(
@@ -205,7 +216,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(AppSize.width(0.01)),
                     child: ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -259,44 +270,44 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: AppSize.height(0.01)),
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(AppSize.width(0.04)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Bill details',
+                          'Order Summary',
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: AppSize.height(0.02)),
                         _buildBillRow(
                           icon: Icons.receipt_long_outlined,
                           label: 'Items total',
                           price: '₹${totalAmount.toStringAsFixed(2)}',
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: AppSize.height(0.015)),
                         _buildBillRow(
                           icon: Icons.shopping_bag_outlined,
                           label: 'Handling charge',
                           price: '₹5',
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: AppSize.height(0.015)),
                         _buildBillRow(
                           icon: Icons.pedal_bike,
                           label: 'Delivery charge',
                           price: '₹30',
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: AppSize.height(0.015)),
                         const Text(
                           'Shop for ₹50 more to get FREE delivery',
                           style: TextStyle(color: Colors.orange, fontSize: 12),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: AppSize.height(0.02)),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -316,6 +327,145 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       ],
                     ),
                   ),
+                  SizedBox(height: AppSize.height(0.01)),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: EdgeInsets.all(AppSize.width(0.04)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Billing Address',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        SizedBox(height: AppSize.height(0.02)),
+                        Consumer<LoginProvider>(
+                          builder: (context, loginProvider, child) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: AppSize.width(0.1),
+                                  height: AppSize.width(0.1),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF4B70F5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.description_outlined,
+                                    color: Colors.white,
+                                    size: AppSize.width(0.05),
+                                  ),
+                                ),
+                                SizedBox(width: AppSize.width(0.03)),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        billAddress ?? "",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      SizedBox(height: AppSize.height(0.005)),
+
+                                      Text(
+                                        "Phone: ${loginProvider.userPhone ?? ''}",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      SizedBox(height: AppSize.height(0.005)),
+                                      Text(
+                                        "Email: ${loginProvider.userEmail ?? ''}",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: AppSize.height(0.01)),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: EdgeInsets.all(AppSize.width(0.04)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Payment Method',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        SizedBox(height: AppSize.height(0.005)),
+                        InkWell(
+                          onTap: () => setState(() => selectedPayment = 'COD'),
+                          child: SizedBox(
+                            height: AppSize.height(0.04),
+                            child: Row(
+                              children: [
+                                Radio<String>(
+                                  value: 'COD',
+                                  groupValue: selectedPayment,
+                                  activeColor: const Color(0xFF7B2CBF),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedPayment = value!;
+                                    });
+                                  },
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                                ),
+                                SizedBox(width: AppSize.width(0.02)),
+                                const Text('Cash on Delivery (COD)'),
+                              ],
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => setState(() => selectedPayment = 'Online'),
+                          child: SizedBox(
+                            height: AppSize.height(0.04),
+                            child: Row(
+                              children: [
+                                Radio<String>(
+                                  value: 'Online',
+                                  groupValue: selectedPayment,
+                                  activeColor: const Color(0xFF7B2CBF),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedPayment = value!;
+                                    });
+                                  },
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                                ),
+                                SizedBox(width: AppSize.width(0.02)),
+                                const Text('Online Payment'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                 
                 ],
               ),
             ),
@@ -378,66 +528,71 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       highlightColor: Colors.grey[100]!,
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.fromLTRB(
+            AppSize.width(0.04),
+            AppSize.height(0.02),
+            AppSize.width(0.04),
+            AppSize.height(0.12),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("Items", style: TextStyle(backgroundColor: Colors.white)),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSize.height(0.015)),
               SizedBox(
-                height: 110,
+                height: AppSize.height(0.13),
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: 4,
-                  separatorBuilder: (context, index) => const SizedBox(width: 12),
+                  separatorBuilder: (context, index) => SizedBox(width: AppSize.width(0.03)),
                   itemBuilder: (context, index) => Container(
-                    width: 90,
+                    width: AppSize.width(0.23),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(AppSize.width(0.02)),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 40,
-                          height: 40,
+                          width: AppSize.width(0.1),
+                          height: AppSize.width(0.1),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Container(width: 60, height: 10, color: Colors.white),
-                        const SizedBox(height: 4),
-                        Container(width: 30, height: 8, color: Colors.white),
+                        SizedBox(height: AppSize.height(0.01)),
+                        Container(width: AppSize.width(0.15), height: AppSize.height(0.012), color: Colors.white),
+                        SizedBox(height: AppSize.height(0.005)),
+                        Container(width: AppSize.width(0.08), height: AppSize.height(0.01), color: Colors.white),
                       ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSize.height(0.025)),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(AppSize.width(0.03)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(width: 80, height: 14, color: Colors.white),
-                    const SizedBox(height: 12),
+                    Container(width: AppSize.width(0.2), height: AppSize.height(0.016), color: Colors.white),
+                    SizedBox(height: AppSize.height(0.015)),
                     ...List.generate(
                       2,
                       (index) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        padding: EdgeInsets.symmetric(vertical: AppSize.height(0.005)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(width: 60, height: 10, color: Colors.white),
-                            Container(width: 40, height: 10, color: Colors.white),
+                            Container(width: AppSize.width(0.15), height: AppSize.height(0.012), color: Colors.white),
+                            Container(width: AppSize.width(0.1), height: AppSize.height(0.012), color: Colors.white),
                           ],
                         ),
                       ),
@@ -446,8 +601,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(width: 60, height: 12, color: Colors.white),
-                        Container(width: 80, height: 12, color: Colors.white),
+                        Container(width: AppSize.width(0.15), height: AppSize.height(0.014), color: Colors.white),
+                        Container(width: AppSize.width(0.2), height: AppSize.height(0.014), color: Colors.white),
                       ],
                     ),
                   ],
@@ -468,8 +623,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Colors.grey),
-        const SizedBox(width: 8),
+        Icon(icon, size: AppSize.width(0.045), color: Colors.grey),
+        SizedBox(width: AppSize.width(0.02)),
         Text(label, style: const TextStyle(color: Colors.black87)),
         const Spacer(),
         if (oldPrice != null)
@@ -481,12 +636,28 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
               fontSize: 12,
             ),
           ),
-        if (oldPrice != null) const SizedBox(width: 4),
+        if (oldPrice != null) SizedBox(width: AppSize.width(0.01)),
         Text(
           price,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ],
     );
+  }
+
+  Future<void> _loadBillingAddress() async {
+    final addressProvider = context.read<UserAddressProvider>();
+    final billingAddresses = addressProvider.addressModel?.data?.billing;
+
+    if (billingAddresses != null && billingAddresses.address != null) {
+      if (mounted) {
+        setState(() {
+          billAddress =
+          "${billingAddresses.address ?? ""}, ${billingAddresses.city?.name ??
+              ""}, ${billingAddresses.pincode ?? ""},${billingAddresses.state?.name ??
+              ""}";
+        });
+      }
+    }
   }
 }
