@@ -23,17 +23,7 @@ class ItemOrderScreen extends StatefulWidget {
 }
 
 class _ItemOrderScreenState extends State<ItemOrderScreen> {
-  String currentLocation = "Fetching location...";
   String _searchQuery = '';
-
-  Future<void> _fetchLocation() async {
-    String address = await LocationService.getCurrentAddress();
-    if (mounted) {
-      setState(() {
-        currentLocation = address;
-      });
-    }
-  }
 
   void _showAddressBottomSheet() {
     showModalBottomSheet(
@@ -64,10 +54,7 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
         ),
         title: Consumer2<LoginProvider, UserAddressProvider>(
           builder: (context, loginProvider, addressProvider, child) {
-            String displayLocation = currentLocation;
-            if (addressProvider.selectedAddress != null) {
-              displayLocation = addressProvider.selectedAddress!.address ?? "";
-            }
+            String displayLocation = addressProvider.selectedAddress?.address ?? addressProvider.guestLocation ?? "Fetching location...";
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,30 +144,10 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchInitialData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrderListProvider>().fetchOrders();
+      context.read<ViewCartListProvider>().fetchCart();
     });
-  }
-
-  Future<void> _fetchInitialData() async {
-    final prefService = sl<SharedPrefService>();
-    final token = await prefService.getToken();
-
-    if (token != null && token.isNotEmpty) {
-      final addressProvider = context.read<UserAddressProvider>();
-      if (addressProvider.addressModel == null) {
-        await addressProvider.fetchUserAddresses(token);
-      }
-
-      final addresses = addressProvider.addressModel?.data?.shipping;
-      if (addresses != null && addresses.isNotEmpty && addressProvider.selectedAddress == null) {
-        addressProvider.setSelectedAddress(addresses.first);
-      }
-    }
-
-    _fetchLocation();
-    _checkLoginAndLoadData();
   }
 
   Future<void> _checkLoginAndLoadData() async {
@@ -207,10 +174,5 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
       }
       return;
     }
-
-    _fetchLocation();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ViewCartListProvider>().fetchCart();
-    });
   }
 }

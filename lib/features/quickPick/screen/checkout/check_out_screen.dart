@@ -13,6 +13,7 @@ import '../../../login/screen/login_screen.dart';
 import '../../provider/update_cart_provider.dart';
 import '../../provider/delete_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
+import '../../widgets/address_selection_sheet.dart';
 import '../../widgets/cart_widgets.dart';
 import '../../../login/provider/login_provider.dart';
 import '../../widgets/checkout_item_widget.dart';
@@ -61,32 +62,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       return;
     }
 
-    _loadAddress();
     _loadBillingAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ViewCartListProvider>().fetchCart();
     });
-  }
-
-  Future<void> _loadAddress() async {
-    final addressProvider = context.read<UserAddressProvider>();
-    final shippingAddresses = addressProvider.addressModel?.data?.shipping;
-
-    if (shippingAddresses != null && shippingAddresses.isNotEmpty) {
-      final addr = shippingAddresses.first;
-      if (mounted) {
-        setState(() {
-          cachedAddress = addr.address ?? "";
-        });
-      }
-    } else {
-      final address = await LocationService.getCachedAddress();
-      if (mounted) {
-        setState(() {
-          cachedAddress = address;
-        });
-      }
-    }
   }
 
   @override
@@ -108,30 +87,46 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         ),
         title: Consumer<UserAddressProvider>(
           builder: (context, addressProvider, child) {
-            final displayAddress = addressProvider.selectedAddress?.address ?? cachedAddress;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Checkout",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: AppSize.width(0.045),
+            final displayAddress = addressProvider.selectedAddress?.address ?? addressProvider.guestLocation;
+            return InkWell(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => AddressSelectionSheet(
+                    selectedAddress: addressProvider.selectedAddress,
+                    onAddressSelected: (address) {
+                      addressProvider.setSelectedAddress(address);
+                    },
                   ),
-                ),
-                if (displayAddress != null)
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    displayAddress,
+                    "Checkout",
                     style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: AppSize.width(0.032),
-                      fontWeight: FontWeight.normal,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppSize.width(0.045),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-              ],
+
+                  if (displayAddress != null)
+                    Text(
+                      displayAddress,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: AppSize.width(0.032),
+                        fontWeight: FontWeight.normal,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
             );
           },
         ),
@@ -403,6 +398,117 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         ),
                       ],
                     ),
+                  ),
+                  SizedBox(height: AppSize.height(0.01)),
+                  Consumer<UserAddressProvider>(
+                    builder: (context, addressProvider, child) {
+                      final shippingAddr = addressProvider.selectedAddress;
+                      final displayShippingAddress = shippingAddr?.address ?? addressProvider.guestLocation ?? "";
+                      final phone = shippingAddr?.phone ?? context.read<LoginProvider>().userPhone ?? '';
+                      final email = context.read<LoginProvider>().userEmail ?? '';
+
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: EdgeInsets.all(AppSize.width(0.04)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Shipping Address',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (context) => AddressSelectionSheet(
+                                        selectedAddress: addressProvider.selectedAddress,
+                                        onAddressSelected: (address) {
+                                          addressProvider.setSelectedAddress(address);
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      color: Colors.green,
+                                    ),
+                                    child: const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+                                      child: Text(
+                                        "Change Address",
+                                        style: TextStyle(color: Colors.white, fontSize: 12),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            SizedBox(height: AppSize.height(0.02)),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: AppSize.width(0.1),
+                                  height: AppSize.width(0.1),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF4B70F5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.local_shipping_outlined,
+                                    color: Colors.white,
+                                    size: AppSize.width(0.05),
+                                  ),
+                                ),
+                                SizedBox(width: AppSize.width(0.03)),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        displayShippingAddress,
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      SizedBox(height: AppSize.height(0.005)),
+                                      Text(
+                                        "Phone: $phone",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      if (email.isNotEmpty) ...[
+                                        SizedBox(height: AppSize.height(0.005)),
+                                        Text(
+                                          "Email: $email",
+                                          style: const TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(height: AppSize.height(0.01)),
                   Container(

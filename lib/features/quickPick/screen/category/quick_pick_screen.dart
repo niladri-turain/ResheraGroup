@@ -32,38 +32,10 @@ class QuickPickScreen extends StatefulWidget {
 
 class _QuickPickScreenState extends State<QuickPickScreen> {
   int selectedIndex = 1; // Category selected by default
-  String currentLocation = "Fetching location...";
-  ShippingAddress? _selectedShippingAddress;
 
   @override
   void initState() {
     super.initState();
-    _fetchInitialData();
-  }
-
-  Future<void> _fetchInitialData() async {
-    final prefService = sl<SharedPrefService>();
-    final token = await prefService.getToken();
-
-    if (token != null && token.isNotEmpty) {
-      if (mounted) {
-        context.read<UserAddressProvider>().fetchUserAddresses(token).then((_) {
-          final addressProvider = context.read<UserAddressProvider>();
-          final addresses = addressProvider.addressModel?.data?.shipping;
-          if (addresses != null && addresses.isNotEmpty) {
-            // Auto-select first address if none selected
-            if (addressProvider.selectedAddress == null) {
-              addressProvider.setSelectedAddress(addresses.first);
-            }
-          } else {
-            _fetchLocation();
-          }
-        });
-      }
-    } else {
-      _fetchLocation();
-    }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CategoryProvider>().fetchCategories();
     });
@@ -84,17 +56,6 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
       },
     );
   }
-
-  Future<void> _fetchLocation() async {
-    String address = await LocationService.getCurrentAddress();
-    if (mounted) {
-      setState(() {
-        currentLocation = address;
-      });
-    }
-  }
-
-
 
   void _onNavTap(int index) {
     if (index == 3) {
@@ -149,10 +110,7 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                 children: [
                   Consumer2<LoginProvider, UserAddressProvider>(
                     builder: (context, loginProvider, addressProvider, child) {
-                      String displayLocation = currentLocation;
-                      if (addressProvider.selectedAddress != null) {
-                        displayLocation = addressProvider.selectedAddress!.address ?? "";
-                      }
+                      String displayLocation = addressProvider.selectedAddress?.address ?? addressProvider.guestLocation ?? "Fetching location...";
 
                       return CustomHeaderWidget(
                         userName: loginProvider.userName ?? AppStrings.guestUser,

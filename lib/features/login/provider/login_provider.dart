@@ -99,6 +99,8 @@ class LoginProvider with ChangeNotifier {
     _userEmail = null;
     _userPhone = null;
     _addressProvider.clearAddresses();
+    // After logout, fetch guest location via UserAddressProvider
+    await _addressProvider.fetchGuestLocation();
     notifyListeners();
   }
 }

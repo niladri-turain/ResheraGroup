@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:resheragroup/core/constants/app_images_png.dart';
 import 'package:resheragroup/core/constants/app_strings.dart';
@@ -6,6 +7,11 @@ import 'package:resheragroup/core/constants/app_webp.dart';
 
 import 'package:resheragroup/features/dashboard/widgets/reusable_slider.dart';
 import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
+import '../../login/screen/login_screen.dart';
+import '../../login/provider/user_address_provider.dart';
+import '../../login/provider/login_provider.dart';
+import '../../../core/service/shared_pref_service.dart';
+import '../../../core/di/injection_container.dart';
 
 import '../../../core/constants/app_sizes.dart';
 
@@ -137,12 +143,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           title: "QUICK PICK",
                           imagePath: AppImagesWebp.food,
                           themeColor: const Color(0XFFc164de),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const QuickPickScreen()),
-                          );
+                        onTap: () async {
+                          final prefService = sl<SharedPrefService>();
+                          final token = await prefService.getToken();
+
+                          if (token == null || token.isEmpty) {
+                            if (context.mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LoginScreen(
+                                    onLoginSuccess: () {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => const QuickPickScreen()),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            }
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const QuickPickScreen()),
+                            );
+                          }
                         },),
                       const CustomAnimatedDashboardCard(
                           title: "HEAL AAJ",
@@ -327,9 +355,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _initData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showAnnouncementPopup(context);
     });
+  }
+
+  Future<void> _initData() async {
+    final addressProvider = context.read<UserAddressProvider>();
+    final prefService = sl<SharedPrefService>();
+    final token = await prefService.getToken();
+
+    if (token != null && token.isNotEmpty) {
+      addressProvider.fetchUserAddresses(token);
+    } else {
+      addressProvider.fetchGuestLocation();
+    }
   }
 
   void showAnnouncementPopup(BuildContext context) {
