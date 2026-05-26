@@ -106,29 +106,34 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             ),
           ),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Checkout",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: AppSize.width(0.045),
-              ),
-            ),
-            if (cachedAddress != null)
-              Text(
-                cachedAddress!,
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: AppSize.width(0.032),
-                  fontWeight: FontWeight.normal,
+        title: Consumer<UserAddressProvider>(
+          builder: (context, addressProvider, child) {
+            final displayAddress = addressProvider.selectedAddress?.address ?? cachedAddress;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Checkout",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: AppSize.width(0.045),
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-          ],
+                if (displayAddress != null)
+                  Text(
+                    displayAddress,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: AppSize.width(0.032),
+                      fontWeight: FontWeight.normal,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            );
+          },
         ),
       ),
       body: Consumer<ViewCartListProvider>(
@@ -490,6 +495,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             itemCount: cartData.totalItems ?? 0,
             label: 'Proceed to',
             onTap: () async {
+              final addressId = context.read<UserAddressProvider>().selectedAddress?.id;
               final success = await context.read<OrderProvider>().placeOrder();
               if (success) {
                 if (mounted) {

@@ -96,6 +96,9 @@ class LoginProvider with ChangeNotifier {
     await _prefService.clear();
     _loginModel = null;
     _userName = null;
+    _userEmail = null;
+    _userPhone = null;
+    _addressProvider.clearAddresses();
     notifyListeners();
   }
 }

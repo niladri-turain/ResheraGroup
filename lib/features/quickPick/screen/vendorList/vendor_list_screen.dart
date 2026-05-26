@@ -1,3 +1,8 @@
+import 'package:resheragroup/features/quickPick/widgets/address_selection_sheet.dart';
+import 'package:resheragroup/features/login/model/user_address_model.dart';
+import 'package:resheragroup/features/login/provider/login_provider.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/service/shared_pref_service.dart';
 import 'package:resheragroup/features/login/provider/user_address_provider.dart';
 import 'package:resheragroup/core/service/location_service.dart';
 import 'package:flutter/material.dart';
@@ -32,37 +37,60 @@ class VendorListScreen extends StatefulWidget {
 }
 
 class _VendorListScreenState extends State<VendorListScreen> {
-  String? cachedAddress;
+  String currentLocation = "Fetching location...";
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    _loadAddress();
+    _loadInitialData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<VendorProvider>().fetchVendorCategory(widget.categoryId, widget.subCategoryId);
     });
   }
 
-  Future<void> _loadAddress() async {
-    final addressProvider = context.read<UserAddressProvider>();
-    final shippingAddresses = addressProvider.addressModel?.data?.shipping;
+  Future<void> _loadInitialData() async {
+    final prefService = sl<SharedPrefService>();
+    final token = await prefService.getToken();
 
-    if (shippingAddresses != null && shippingAddresses.isNotEmpty) {
-      final addr = shippingAddresses.first;
-      if (mounted) {
-        setState(() {
-          cachedAddress = addr.address ?? "";
-        });
+    if (token != null && token.isNotEmpty) {
+      final addressProvider = context.read<UserAddressProvider>();
+      if (addressProvider.addressModel == null) {
+        await addressProvider.fetchUserAddresses(token);
       }
-    } else {
-      final address = await LocationService.getCachedAddress();
-      if (mounted) {
-        setState(() {
-          cachedAddress = address;
-        });
+      
+      final addresses = addressProvider.addressModel?.data?.shipping;
+      if (addresses != null && addresses.isNotEmpty && addressProvider.selectedAddress == null) {
+        addressProvider.setSelectedAddress(addresses.first);
       }
     }
+    
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    String address = await LocationService.getCurrentAddress();
+    if (mounted) {
+      setState(() {
+        currentLocation = address;
+      });
+    }
+  }
+
+  void _showAddressBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return AddressSelectionSheet(
+          selectedAddress: context.read<UserAddressProvider>().selectedAddress,
+          onAddressSelected: (addr) {
+            context.read<UserAddressProvider>().setSelectedAddress(addr);
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -80,32 +108,43 @@ class _VendorListScreenState extends State<VendorListScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Vendor List",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            if (cachedAddress != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 18.0),
-                child: Text(
-                  cachedAddress!,
+        title: Consumer2<LoginProvider, UserAddressProvider>(
+          builder: (context, loginProvider, addressProvider, child) {
+            String displayLocation = currentLocation;
+            if (addressProvider.selectedAddress != null) {
+              displayLocation = addressProvider.selectedAddress!.address ?? "";
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Vendor List",
                   style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: AppSize.width(0.032),
-                    fontWeight: FontWeight.normal,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-          ],
+                GestureDetector(
+                  onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 18.0),
+                    child: Text(
+                      displayLocation,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: AppSize.width(0.032),
+                        fontWeight: FontWeight.normal,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         actions: [
           // Padding(

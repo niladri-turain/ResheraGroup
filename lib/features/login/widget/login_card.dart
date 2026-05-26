@@ -4,6 +4,8 @@ import '../../../../core/constants/app_images_png.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../main_screen.dart';
 import '../provider/login_provider.dart';
+import '../provider/user_address_provider.dart';
+import '../../quickPick/widgets/address_selection_sheet.dart';
 import '../../dashboard/screen/dashboard_screen.dart';
 import 'custom_login_text_field.dart';
 
@@ -170,15 +172,33 @@ class _LoginCardState extends State<LoginCard> {
                           );
                           if (success) {
                             if (mounted) {
-                              if (widget.onLoginSuccess != null) {
-                                widget.onLoginSuccess!();
-                              } else {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const MainScreen()),
-                                  (route) => false,
-                                );
-                              }
+                              final addressProvider = context.read<UserAddressProvider>();
+                              
+                              // Show address selection sheet after successful login and address fetch
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => AddressSelectionSheet(
+                                  selectedAddress: addressProvider.selectedAddress,
+                                  onAddressSelected: (addr) {
+                                    addressProvider.setSelectedAddress(addr);
+                                  },
+                                ),
+                              ).then((_) {
+                                // Navigate only after the address popup is dismissed
+                                if (mounted) {
+                                  if (widget.onLoginSuccess != null) {
+                                    widget.onLoginSuccess!();
+                                  } else {
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const MainScreen()),
+                                      (route) => false,
+                                    );
+                                  }
+                                }
+                              });
                             }
                           } else {
                             if (mounted) {

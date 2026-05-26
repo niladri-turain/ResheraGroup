@@ -17,6 +17,14 @@ class UserAddressProvider with ChangeNotifier {
   UserAddressModel? _addressModel;
   UserAddressModel? get addressModel => _addressModel;
 
+  ShippingAddress? _selectedAddress;
+  ShippingAddress? get selectedAddress => _selectedAddress;
+
+  void setSelectedAddress(ShippingAddress address) {
+    _selectedAddress = address;
+    notifyListeners();
+  }
+
   Future<void> fetchUserAddresses(String token) async {
     _isLoading = true;
     _errorMessage = null;
@@ -44,6 +52,7 @@ class UserAddressProvider with ChangeNotifier {
 
   void clearAddresses() {
     _addressModel = null;
+    _selectedAddress = null;
     notifyListeners();
   }
 }

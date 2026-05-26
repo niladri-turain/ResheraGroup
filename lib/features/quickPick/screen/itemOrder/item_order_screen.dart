@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resheragroup/features/quickPick/provider/order_list_provider.dart';
+import 'package:resheragroup/features/quickPick/widgets/address_selection_sheet.dart';
+import 'package:resheragroup/features/login/provider/login_provider.dart';
+import 'package:resheragroup/features/login/provider/user_address_provider.dart';
 
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/di/injection_container.dart';
@@ -20,15 +23,32 @@ class ItemOrderScreen extends StatefulWidget {
 }
 
 class _ItemOrderScreenState extends State<ItemOrderScreen> {
-  String? cachedAddress;
+  String currentLocation = "Fetching location...";
   String _searchQuery = '';
-  Future<void> _loadAddress() async {
-    final address = await LocationService.getCachedAddress();
+
+  Future<void> _fetchLocation() async {
+    String address = await LocationService.getCurrentAddress();
     if (mounted) {
       setState(() {
-        cachedAddress = address;
+        currentLocation = address;
       });
     }
+  }
+
+  void _showAddressBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return AddressSelectionSheet(
+          selectedAddress: context.read<UserAddressProvider>().selectedAddress,
+          onAddressSelected: (addr) {
+            context.read<UserAddressProvider>().setSelectedAddress(addr);
+          },
+        );
+      },
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -42,29 +62,43 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Order Summary",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            if (cachedAddress != null)
-              Text(
-                cachedAddress!,
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: AppSize.width(0.032),
-                  fontWeight: FontWeight.normal,
+        title: Consumer2<LoginProvider, UserAddressProvider>(
+          builder: (context, loginProvider, addressProvider, child) {
+            String displayLocation = currentLocation;
+            if (addressProvider.selectedAddress != null) {
+              displayLocation = addressProvider.selectedAddress!.address ?? "";
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Order Summary",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-          ],
+                GestureDetector(
+                  onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 18.0),
+                    child: Text(
+                      displayLocation,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: AppSize.width(0.032),
+                        fontWeight: FontWeight.normal,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         actions: [
           // Padding(
@@ -123,11 +157,30 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAddress();
-    _checkLoginAndLoadData();
+    _fetchInitialData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrderListProvider>().fetchOrders();
     });
+  }
+
+  Future<void> _fetchInitialData() async {
+    final prefService = sl<SharedPrefService>();
+    final token = await prefService.getToken();
+
+    if (token != null && token.isNotEmpty) {
+      final addressProvider = context.read<UserAddressProvider>();
+      if (addressProvider.addressModel == null) {
+        await addressProvider.fetchUserAddresses(token);
+      }
+
+      final addresses = addressProvider.addressModel?.data?.shipping;
+      if (addresses != null && addresses.isNotEmpty && addressProvider.selectedAddress == null) {
+        addressProvider.setSelectedAddress(addresses.first);
+      }
+    }
+
+    _fetchLocation();
+    _checkLoginAndLoadData();
   }
 
   Future<void> _checkLoginAndLoadData() async {
@@ -155,7 +208,7 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
       return;
     }
 
-    _loadAddress();
+    _fetchLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ViewCartListProvider>().fetchCart();
     });
