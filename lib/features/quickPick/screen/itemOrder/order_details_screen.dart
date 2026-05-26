@@ -110,11 +110,37 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             return const Center(child: Text("Order not found"));
           }
 
-          return OrderDetailsWidget(
-            order: order,
-            onCancelOrder: () {
-              // Handle logic
-            },
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                OrderDetailsWidget(
+                  order: order,
+                  onCancelOrder: () {
+                    // Handle logic
+                  },
+                ),
+                const SizedBox(height: 15,),
+                Container(
+                  width: AppSize.screenWidth*0.5,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+
+                        Text("Download Invoice",style: TextStyle(fontSize: 14,fontWeight: FontWeight.w500),),
+                        Icon(Icons.download_outlined,color: Colors.orange,),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 50,)
+              ],
+            ),
           );
         },
       ),

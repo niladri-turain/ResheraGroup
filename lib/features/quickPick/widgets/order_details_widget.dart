@@ -244,7 +244,7 @@ class OrderDetailsWidget extends StatelessWidget {
           _summaryRow("Item Total", "₹${order.itemsTotal ?? 0}"),
           _summaryRow("Discount", "-₹${order.discountAmount ?? 0}", valueColor: Colors.green),
           _summaryRow("Platform charge", "₹${order.platformCharge ?? 0}", valueColor: Colors.green),
-          _summaryRow("Delivery charge", "₹${order.deliveryCharge ?? 0}", valueColor: Colors.green),
+
           const Divider(height: 24, thickness: 1, color: Color(0xFFEEEEEE)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
