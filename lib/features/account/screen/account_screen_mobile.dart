@@ -41,10 +41,74 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
   }
 
   Future<void> _handleLogout() async {
-    await context.read<LoginProvider>().logout();
-    if (mounted) {
-      await context.read<ViewCartListProvider>().clearCartLocal();
-    }
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            "Log Out?",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          content: const Text(
+            "Are you sure want to log out?",
+            style: TextStyle(fontSize: 16, color: Colors.black54),
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[300],
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await context.read<LoginProvider>().logout();
+                      if (mounted) {
+                        await context.read<ViewCartListProvider>().clearCartLocal();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7B2CBF),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Log out",
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -140,16 +204,16 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
                           _buildMenuItem(Icons.home_outlined, "Home", onTap: () {}),
                           _buildMenuItem(Icons.dashboard_customize_outlined, "My Dashboard", onTap: () {}),
                           _buildMenuItem(Icons.person_outline, "My Profile", onTap: () {}),
-                          _buildMenuItem(Icons.verified_user_outlined, "Member Registration", onTap: () {}),
-                          _buildMenuItem(Icons.account_balance_wallet_outlined, "Deposit", onTap: () {}),
-                          _buildMenuItem(Icons.confirmation_number_outlined, "Ticket", onTap: () {}),
-                          _buildMenuItem(Icons.directions_car_outlined, "My Dream Car", onTap: () {}),
-                          _buildMenuItem(Icons.storefront_outlined, "My Network", hasDropdown: true),
-                          _buildMenuItem(Icons.description_outlined, "BA BV Report", onTap: () {}),
-                          _buildMenuItem(Icons.person_add_alt_1_outlined, "Franchisee Registration", onTap: () {}),
-                          _buildMenuItem(Icons.track_changes_outlined, "Commissions", hasDropdown: true),
-                          _buildMenuItem(Icons.lightbulb_outline, "Lead Generation", onTap: () {}),
-                          _buildMenuItem(Icons.favorite_border, "Wish Request", onTap: () {}),
+                          // _buildMenuItem(Icons.verified_user_outlined, "Member Registration", onTap: () {}),
+                          // _buildMenuItem(Icons.account_balance_wallet_outlined, "Deposit", onTap: () {}),
+                          // _buildMenuItem(Icons.confirmation_number_outlined, "Ticket", onTap: () {}),
+                          // _buildMenuItem(Icons.directions_car_outlined, "My Dream Car", onTap: () {}),
+                          // _buildMenuItem(Icons.storefront_outlined, "My Network", hasDropdown: true),
+                          // _buildMenuItem(Icons.description_outlined, "BA BV Report", onTap: () {}),
+                          // _buildMenuItem(Icons.person_add_alt_1_outlined, "Franchisee Registration", onTap: () {}),
+                          // _buildMenuItem(Icons.track_changes_outlined, "Commissions", hasDropdown: true),
+                          // _buildMenuItem(Icons.lightbulb_outline, "Lead Generation", onTap: () {}),
+                          // _buildMenuItem(Icons.favorite_border, "Wish Request", onTap: () {}),
                           _buildMenuItem(Icons.lock_open_outlined, "Logout", onTap: _handleLogout),
                           SizedBox(height: AppSize.height(0.05)),
                         ],
@@ -166,20 +230,23 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
   }
 
   Widget _buildMenuItem(IconData icon, String title, {VoidCallback? onTap, bool hasDropdown = false}) {
-    return ListTile(
+    return GestureDetector(
       onTap: onTap,
-      leading: Icon(icon, color: Colors.white60, size: 22),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
+      child: ListTile(
+
+        leading: Icon(icon, color: Colors.white60, size: 22),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
         ),
+        trailing: hasDropdown ? const Icon(Icons.keyboard_arrow_down, color: Colors.white30, size: 18) : null,
+        dense: true,
+        visualDensity: const VisualDensity(vertical: -2),
       ),
-      trailing: hasDropdown ? const Icon(Icons.keyboard_arrow_down, color: Colors.white30, size: 18) : null,
-      dense: true,
-      visualDensity: const VisualDensity(vertical: -2),
     );
   }
 }
