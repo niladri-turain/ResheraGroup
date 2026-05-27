@@ -37,8 +37,14 @@ class OrderDetailsWidget extends StatelessWidget {
     final isCancelled = statusLower == 'cancelled';
 
     bool isReached(String target) {
-      final stages = ['pending', 'confirmed', 'processing', 'delivered'];
-      int currentIdx = stages.indexOf(statusLower);
+      // Remove 'processing' as requested. Map 'confirmed' or 'processing' to 'delivered' status for UI.
+      String effectiveStatus = statusLower;
+      if (statusLower == 'confirmed' || statusLower == 'processing') {
+        effectiveStatus = 'delivered';
+      }
+
+      final stages = ['pending', 'confirmed', 'delivered'];
+      int currentIdx = stages.indexOf(effectiveStatus);
       int targetIdx = stages.indexOf(target.toLowerCase());
       if (currentIdx == -1) return target.toLowerCase() == 'pending';
       return currentIdx >= targetIdx;
@@ -82,8 +88,6 @@ class OrderDetailsWidget extends StatelessWidget {
                 _buildStepIndicator("Pending", true),
                 _buildLine(isReached('confirmed')),
                 _buildStepIndicator("Confirmed", isReached('confirmed')),
-                _buildLine(isReached('processing')),
-                _buildStepIndicator("Processing", isReached('processing')),
                 _buildLine(isReached('delivered')),
                 _buildStepIndicator("Delivered", isReached('delivered')),
               ],
