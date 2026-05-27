@@ -51,6 +51,7 @@ dependencies:
   open_filex: ^4.5.0
   permission_handler: ^11.3.1
   device_info_plus: ^11.1.0
+  intl: ^0.20.2
 
 
 dev_dependencies:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:resheragroup/features/quickPick/model/order_list_model.dart';
@@ -7,6 +8,35 @@ import 'package:resheragroup/features/quickPick/screen/itemOrder/order_details_s
 
 class ItemOrderList extends StatelessWidget {
   const ItemOrderList({super.key});
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    try {
+      DateTime dt = DateTime.parse(dateStr);
+      return DateFormat('d\'${_getDayOfMonthSuffix(dt.day)}\' MMMM, yyyy').format(dt);
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  String _getDayOfMonthSuffix(int dayNum) {
+    if (!(dayNum >= 1 && dayNum <= 31)) {
+      throw Exception('Invalid day of month');
+    }
+    if (dayNum >= 11 && dayNum <= 13) {
+      return 'th';
+    }
+    switch (dayNum % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +100,35 @@ class OrderItemCard extends StatelessWidget {
         return Colors.green.shade600;
       default:
         return Colors.blue.shade600;
+    }
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    try {
+      DateTime dt = DateTime.parse(dateStr);
+      return DateFormat('d\'${_getDayOfMonthSuffix(dt.day)}\' MMMM, yyyy').format(dt);
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  String _getDayOfMonthSuffix(int dayNum) {
+    if (!(dayNum >= 1 && dayNum <= 31)) {
+      throw Exception('Invalid day of month');
+    }
+    if (dayNum >= 11 && dayNum <= 13) {
+      return 'th';
+    }
+    switch (dayNum % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
     }
   }
 
@@ -157,6 +216,11 @@ class OrderItemCard extends StatelessWidget {
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          "Date: ${_formatDate(order.createdAt)}",
+                          style: const TextStyle(color: Colors.grey, fontSize: 12),
                         ),
                         const SizedBox(height: 5),
                         Row(

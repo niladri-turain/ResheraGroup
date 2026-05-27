@@ -129,8 +129,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         : () {
                           downloadProvider.downloadInvoice(
                             context, 
-                            "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", 
-                            "Invoice_${widget.orderId}.pdf"
+                            widget.orderId
                           );
                         },
                       child: Container(

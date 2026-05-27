@@ -1,77 +1,51 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import '../../../core/constants/api_end_points.dart';
+import '../../../core/constants/app_strings.dart';
+import '../../../core/service/shared_pref_service.dart';
 
 class DownloadInvoiceProvider with ChangeNotifier {
+  final SharedPrefService _prefService = GetIt.I<SharedPrefService>();
+
   bool _isDownloading = false;
   bool get isDownloading => _isDownloading;
 
   double _downloadProgress = 0;
   double get downloadProgress => _downloadProgress;
 
-  Future<void> downloadInvoice(BuildContext context, String url, String fileName) async {
+  Future<void> downloadInvoice(BuildContext context, String orderId) async {
+    final String url = "${ApiEndPoints.baseUrl}${ApiEndPoints.createOrder}/$orderId/${ApiEndPoints.invoice}";
+    final String fileName = "Invoice_$orderId.pdf";
+
     _isDownloading = true;
     _downloadProgress = 0;
     notifyListeners();
 
     try {
-      // 1. Request Permission
-      bool hasPermission = false;
-      if (Platform.isAndroid) {
-        final deviceInfo = DeviceInfoPlugin();
-        final androidInfo = await deviceInfo.androidInfo;
-
-        if (androidInfo.version.sdkInt >= 33) {
-          // Android 13+ doesn't use generic storage permission for PDFs.
-          // Writing to getExternalStorageDirectory() is always allowed.
-          // Writing to public Downloads might be restricted without Scoped Storage API,
-          // but we'll attempt a safe approach.
-          hasPermission = true; 
-        } else {
-          var status = await Permission.storage.status;
-          if (!status.isGranted) {
-            status = await Permission.storage.request();
-          }
-          hasPermission = status.isGranted;
-        }
-      } else {
-        hasPermission = true; 
-      }
-
-      if (!hasPermission) {
-        _isDownloading = false;
-        notifyListeners();
-        _showSnackBar(context, "Storage permission denied");
-        return;
-      }
-
-      // 2. Get Directory
-      Directory? directory;
-      if (Platform.isAndroid) {
-        // Attempt to save to public Downloads folder
-        directory = Directory('/storage/emulated/0/Download');
-        if (!await directory.exists()) {
-          directory = await getExternalStorageDirectory();
-        }
-      } else {
-        directory = await getApplicationDocumentsDirectory();
-      }
-
-      if (directory == null) {
-        throw Exception("Could not determine download directory");
-      }
-
+      // 1. Get Directory - Use app-specific directory to avoid permission issues
+      final Directory directory = await getApplicationDocumentsDirectory();
       final String filePath = "${directory.path}/$fileName";
 
-      // 3. Download File
+      // 2. Download File
       Dio dio = Dio();
-      await dio.download(
+      final token = await _prefService.getToken();
+      
+      final response = await dio.download(
         url,
         filePath,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'X-API-TOKEN': AppStrings.xApiTokenForAll,
+         //   if (token != null) 'Authorization': 'Bearer $token',
+          },
+          // Ensure we only download if the status is 200
+          validateStatus: (status) => status == 200,
+        ),
         onReceiveProgress: (received, total) {
           if (total != -1) {
             _downloadProgress = received / total;
@@ -80,14 +54,18 @@ class DownloadInvoiceProvider with ChangeNotifier {
         },
       );
 
-      _isDownloading = false;
-      _downloadProgress = 1.0;
-      notifyListeners();
+      if (response.statusCode == 200) {
+        _isDownloading = false;
+        _downloadProgress = 1.0;
+        notifyListeners();
 
-      _showSnackBar(context, "Invoice downloaded: $fileName");
+        _showSnackBar(context, "Invoice downloaded successfully");
 
-      // 4. Open File
-      await OpenFilex.open(filePath);
+        // 3. Open File Automatically
+        await OpenFilex.open(filePath);
+      } else {
+        throw Exception("Failed to download: Status ${response.statusCode}");
+      }
 
     } catch (e) {
       _isDownloading = false;

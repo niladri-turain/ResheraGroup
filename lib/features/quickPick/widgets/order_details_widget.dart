@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../login/provider/login_provider.dart';
 import '../model/order_list_model.dart';
@@ -12,6 +13,35 @@ class OrderDetailsWidget extends StatelessWidget {
     required this.order,
     this.onCancelOrder,
   });
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    try {
+      DateTime dt = DateTime.parse(dateStr);
+      return DateFormat('d\'${_getDayOfMonthSuffix(dt.day)}\' MMMM, yyyy').format(dt);
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  String _getDayOfMonthSuffix(int dayNum) {
+    if (!(dayNum >= 1 && dayNum <= 31)) {
+      throw Exception('Invalid day of month');
+    }
+    if (dayNum >= 11 && dayNum <= 13) {
+      return 'th';
+    }
+    switch (dayNum % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +93,8 @@ class OrderDetailsWidget extends StatelessWidget {
             children: [
               Text(order.orderNo ?? order.id ?? '',
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              Text("Date: ${order.placedAt ?? ''}", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text("Date: ${_formatDate(order.placedAt ?? order.createdAt)}",
+                  style: const TextStyle(color: Colors.grey, fontSize: 12)),
             ],
           ),
           const SizedBox(height: 20),
@@ -256,8 +287,17 @@ class OrderDetailsWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      "₹${item.finalPrice}",
+                      "₹${item.finalPrice?.toStringAsFixed(2) ?? '0.00'}",
                       style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    const Spacer(),
+                    const Text(
+                      "Total price : ",
+                      style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+                    ),
+                    Text(
+                      "₹${item.subtotal?.toStringAsFixed(2) ?? '0.00'}",
+                      style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
