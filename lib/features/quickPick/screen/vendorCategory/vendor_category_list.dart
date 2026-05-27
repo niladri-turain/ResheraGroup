@@ -278,10 +278,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 return const Center(child: Text("No categories found"));
               }
 
-              if (widget.categoryName == "Fashion & Lifestyle") {
-                return _buildFashionLayout(catProvider);
-              }
-              return _buildStandardLayout(catProvider);
+              return _buildMainLayout(catProvider);
             },
           ),
           Positioned(
@@ -357,110 +354,15 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
     );
   }
 
-  Widget _buildStandardLayout(VendorCategoryProvider catProvider) {
-    return ListView.builder(
-      itemCount: catProvider.categories.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return const Column(
-            children: [
-              SizedBox(height: 10),
-              MainVendorSliderWidget(),
-              SizedBox(height: 10),
-            ],
-          );
-        }
-        final category = catProvider.categories[index - 1];
-        return Column(
-          children: [
-            Consumer2<ProductProvider, PromotionalVendorBannerProvider>(
-              builder: (context, productProvider, promoProvider, child) {
-                final products = productProvider.getProductsByCategory(category.id);
-                final banners = promoProvider.bannerModel?.data ?? [];
+  Widget _buildMainLayout(VendorCategoryProvider catProvider) {
+    bool isFashion = widget.categoryName == "Fashion & Lifestyle" || 
+                     widget.categoryName.toLowerCase().contains("fashion");
 
-                return ExpansionTile(
-                  initiallyExpanded: true,
-                  title: Text(
-                    category.name,
-                    style: TextStyle(
-                      fontSize: AppSize.width(0.045),
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  shape: const Border(),
-                  childrenPadding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
-                  children: [
-                    if (products.isEmpty && !productProvider.isLoading)
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: AppSize.height(0.02)),
-                        child: const Text("No products found in this category"),
-                      )
-                    else ...[
-                      for (int i = 0; i < products.length; i++) ...[
-                        StandardProductCard(
-                          id: products[i].productId,
-                          title: products[i].name,
-                          subtitle: products[i].description ?? "No description available",
-                          price: "₹${products[i].finalPrice}",
-                          imageUrl: products[i].image ??
-                              "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                          categoryId: category.id,
-                          businessCategoryId: widget.categoryId,
-                          businessSubCategoryId: widget.subCategoryId,
-                          businessId: products[i].business?.businessId ?? "",
-                          quantity: _itemQuantities[products[i].productId] ?? 0,
-                          onAdd: () => _updateQuantity(products[i].productId, 1),
-                          onRemove: () => _updateQuantity(products[i].productId, -1),
-                        ),
-                        if ((i + 1) % 2 == 0 && banners.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Container(
-                              width: double.infinity,
-                              height: 200,
-                              margin: EdgeInsets.symmetric(
-                                horizontal: AppSize.width(0.03),
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  AppSize.width(0.04),
-                                ),
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                    banners[((i + 1) ~/ 2 - 1) % banners.length].image ?? "",
-                                  ),
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                      ],
-                    ],
-                  ],
-                );
-              },
-            ),
-            Container(
-              height: 8,
-              width: double.infinity,
-              color: Colors.grey.shade100,
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildFashionLayout(VendorCategoryProvider catProvider) {
     return ListView(
       children: [
-
         // show main banner slider
-        const SizedBox(height: 10,),
+        const SizedBox(height: 10),
         const MainVendorSliderWidget(),
-
 
         // Horizontal circular categories
         Container(
@@ -493,7 +395,8 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                             width: 2,
                           ),
                           image: DecorationImage(
-                            image: NetworkImage(category.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp"),
+                            image: NetworkImage(category.image ??
+                                "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp"),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -536,7 +439,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
             ],
           ),
         ),
-        // Grid of products
+        // Grid or List of products
         Consumer2<ProductProvider, PromotionalVendorBannerProvider>(
           builder: (context, productProvider, promoProvider, child) {
             final products = _selectedCategoryId == null
@@ -560,19 +463,28 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
             final banners = promoProvider.bannerModel?.data ?? [];
 
             // logic to interleave products and banners
-            // every 2 products (one row), 1 banner (full width)
-            List<dynamic> uiRows = [];
-            for (int i = 0; i < products.length; i += 2) {
-              // Add a row of products
-              if (i + 1 < products.length) {
-                uiRows.add([products[i], products[i + 1]]);
-                // Add a banner if available
-                if (banners.isNotEmpty) {
-                  int bannerIndex = (i ~/ 2) % banners.length;
-                  uiRows.add(banners[bannerIndex]);
+            List<dynamic> uiItems = [];
+            if (isFashion) {
+              // Grid logic: every 2 products (one row), 1 banner (full width)
+              for (int i = 0; i < products.length; i += 2) {
+                if (i + 1 < products.length) {
+                  uiItems.add([products[i], products[i + 1]]);
+                  if (banners.isNotEmpty) {
+                    int bannerIndex = (i ~/ 2) % banners.length;
+                    uiItems.add(banners[bannerIndex]);
+                  }
+                } else {
+                  uiItems.add([products[i]]);
                 }
-              } else {
-                uiRows.add([products[i]]);
+              }
+            } else {
+              // List logic: every 2 products, 1 banner (full width)
+              for (int i = 0; i < products.length; i++) {
+                uiItems.add(products[i]);
+                if ((i + 1) % 2 == 0 && banners.isNotEmpty) {
+                  int bannerIndex = ((i + 1) ~/ 2 - 1) % banners.length;
+                  uiItems.add(banners[bannerIndex]);
+                }
               }
             }
 
@@ -580,9 +492,9 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
-              itemCount: uiRows.length,
+              itemCount: uiItems.length,
               itemBuilder: (context, index) {
-                final item = uiRows[index];
+                final item = uiItems[index];
 
                 if (item is PromotionalBannerData) {
                   return Padding(
@@ -604,57 +516,78 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                   );
                 }
 
-                // It's a list of 1 or 2 products (a row)
-                final productPair = item as List<dynamic>;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: FashionProductCard(
-                          businessId: productPair[0].business?.businessId ?? "",
-                          id: productPair[0].productId,
-                          title: productPair[0].name,
-                          price: "₹${productPair[0].finalPrice}",
-                          imageUrl: productPair[0].image ??
-                              "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                          description: productPair[0].description ?? "",
-                          categoryId: _selectedCategoryId!,
-                          businessCategoryId: widget.categoryId,
-                          businessSubCategoryId: widget.subCategoryId,
-                          onCountChanged: (count) {
-                            _updateQuantity(productPair[0].productId,
-                                count - (_itemQuantities[productPair[0].productId] ?? 0));
-                          },
-                          initialCount: _itemQuantities[productPair[0].productId] ?? 0,
+                if (isFashion && item is List<dynamic>) {
+                  // It's a row of products for Fashion grid
+                  final productPair = item;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: FashionProductCard(
+                            businessId: productPair[0].business?.businessId ?? "",
+                            id: productPair[0].productId,
+                            title: productPair[0].name,
+                            price: "₹${productPair[0].finalPrice}",
+                            imageUrl: productPair[0].image ??
+                                "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                            description: productPair[0].description ?? "",
+                            categoryId: _selectedCategoryId!,
+                            businessCategoryId: widget.categoryId,
+                            businessSubCategoryId: widget.subCategoryId,
+                            onCountChanged: (count) {
+                              _updateQuantity(productPair[0].productId,
+                                  count - (_itemQuantities[productPair[0].productId] ?? 0));
+                            },
+                            initialCount: _itemQuantities[productPair[0].productId] ?? 0,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: AppSize.width(0.04)),
-                      Expanded(
-                        child: productPair.length > 1
-                            ? FashionProductCard(
-                                businessId: productPair[1].business?.businessId ?? "",
-                                id: productPair[1].productId,
-                                title: productPair[1].name,
-                                price: "₹${productPair[1].finalPrice}",
-                                imageUrl: productPair[1].image ??
-                                    "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                                description: productPair[1].description ?? "",
-                                categoryId: _selectedCategoryId!,
-                                businessCategoryId: widget.categoryId,
-                                businessSubCategoryId: widget.subCategoryId,
-                                onCountChanged: (count) {
-                                  _updateQuantity(productPair[1].productId,
-                                      count - (_itemQuantities[productPair[1].productId] ?? 0));
-                                },
-                                initialCount: _itemQuantities[productPair[1].productId] ?? 0,
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                );
+                        SizedBox(width: AppSize.width(0.04)),
+                        Expanded(
+                          child: productPair.length > 1
+                              ? FashionProductCard(
+                                  businessId: productPair[1].business?.businessId ?? "",
+                                  id: productPair[1].productId,
+                                  title: productPair[1].name,
+                                  price: "₹${productPair[1].finalPrice}",
+                                  imageUrl: productPair[1].image ??
+                                      "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                                  description: productPair[1].description ?? "",
+                                  categoryId: _selectedCategoryId!,
+                                  businessCategoryId: widget.categoryId,
+                                  businessSubCategoryId: widget.subCategoryId,
+                                  onCountChanged: (count) {
+                                    _updateQuantity(productPair[1].productId,
+                                        count - (_itemQuantities[productPair[1].productId] ?? 0));
+                                  },
+                                  initialCount: _itemQuantities[productPair[1].productId] ?? 0,
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (!isFashion) {
+                  // It's a single product for Standard list
+                  final p = item;
+                  return StandardProductCard(
+                    id: p.productId,
+                    title: p.name,
+                    subtitle: p.description ?? "No description available",
+                    price: "₹${p.finalPrice}",
+                    imageUrl: p.image ??
+                        "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                    categoryId: _selectedCategoryId!,
+                    businessCategoryId: widget.categoryId,
+                    businessSubCategoryId: widget.subCategoryId,
+                    businessId: p.business?.businessId ?? "",
+                    quantity: _itemQuantities[p.productId] ?? 0,
+                    onAdd: () => _updateQuantity(p.productId, 1),
+                    onRemove: () => _updateQuantity(p.productId, -1),
+                  );
+                }
+                return const SizedBox.shrink();
               },
             );
           },

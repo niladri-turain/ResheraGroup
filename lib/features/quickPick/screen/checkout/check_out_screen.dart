@@ -303,10 +303,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                           price: '0',
                         ),
                         SizedBox(height: AppSize.height(0.015)),
-                        const Text(
-                          'Shop for ₹50 more to get FREE delivery',
-                          style: TextStyle(color: Colors.orange, fontSize: 12),
-                        ),
+                        // const Text(
+                        //   'Shop for ₹50 more to get FREE delivery',
+                        //   style: TextStyle(color: Colors.orange, fontSize: 12),
+                        // ),
                         SizedBox(height: AppSize.height(0.02)),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

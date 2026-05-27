@@ -283,7 +283,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
                             itemBuilder: (context, index) {
                               final vendor = filteredVendors[index];
                               return VendorCard(
-                                logo: vendor.kycDetail?.ownerPhoto?.url ?? "",
+                                logo: vendor.kycDetail?.shopPhoto?.url ?? "",
                                 title: vendor.businessName,
                                 vendorId: vendor.user?.vendorId ??"",
                                 backgroundImage: vendor.kycDetail?.shopPhoto?.url ?? "",
@@ -297,7 +297,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
                                         subCategoryId: widget.subCategoryId,
                                         vendorId: vendor.id,
                                         categoryName: widget.categoryName,
-                                        bannerLogo: vendor.kycDetail?.ownerPhoto?.url ?? "",
+                                        bannerLogo: vendor.kycDetail?.shopPhoto?.url ?? "",
                                         vendorName: vendor.businessName,
                                       ),
                                     ),
