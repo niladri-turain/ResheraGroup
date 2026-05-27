@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:resheragroup/core/constants/app_strings.dart';
@@ -6,6 +7,7 @@ import '../../../core/constants/api_end_points.dart';
 import '../../../core/service/api_service.dart';
 import '../../../core/service/shared_pref_service.dart';
 import '../model/cart_list_model.dart';
+import '../model/product_details_model.dart';
 
 class ViewCartListProvider with ChangeNotifier {
   final ApiService _apiService = GetIt.I<ApiService>();
@@ -25,8 +27,12 @@ class ViewCartListProvider with ChangeNotifier {
   int _totalItems = 0;
   int get totalItems => _totalItems;
 
+  Map<String, dynamic> _localCart = {};
+  Map<String, dynamic> get localCart => _localCart;
+
   ViewCartListProvider() {
     _loadCartCount();
+    _loadLocalCart();
   }
 
   Future<void> _loadCartCount() async {
@@ -42,11 +48,79 @@ class ViewCartListProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _loadLocalCart() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? localCartJson = prefs.getString("local_cart_items");
+    if (localCartJson != null) {
+      try {
+        _localCart = json.decode(localCartJson);
+      } catch (e) {
+        _localCart = {};
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<void> _saveLocalCart() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("local_cart_items", json.encode(_localCart));
+  }
+
+  void updateLocalCartItem({
+    required String productId,
+    required String businessCategoryId,
+    required String variantId,
+    required int quantity,
+    required List<Attribute> attributes,
+  }) {
+    if (quantity <= 0) {
+      _localCart.remove(productId);
+    } else {
+      _localCart[productId] = {
+        'productId': productId,
+        'businessCategoryId': businessCategoryId,
+        'variantId': variantId,
+        'quantity': quantity,
+        'attributes': attributes.map((a) => {
+          'attribute_id': a.attributeId,
+          'attribute_name': a.attributeName,
+          'value_id': a.valueId,
+          'value': a.value,
+        }).toList(),
+      };
+    }
+    _saveLocalCart();
+    notifyListeners();
+  }
+
+  int getLocalQuantity(String productId) {
+    return _localCart[productId]?['quantity'] ?? 0;
+  }
+
+  void clearLocalCart() {
+    _localCart.clear();
+    _saveLocalCart();
+    notifyListeners();
+  }
+
+  int get totalUniqueItems {
+    Set<String> uniqueIds = {};
+    if (_cartData?.data != null) {
+      for (var item in _cartData!.data!) {
+        if (item.productId != null) uniqueIds.add(item.productId!);
+      }
+    }
+    uniqueIds.addAll(_localCart.keys);
+    return uniqueIds.length;
+  }
+
   Future<void> clearCartLocal() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_cartCountKey);
+    await prefs.remove("local_cart_items");
     _cartData = null;
     _totalItems = 0;
+    _localCart = {};
     notifyListeners();
   }
 

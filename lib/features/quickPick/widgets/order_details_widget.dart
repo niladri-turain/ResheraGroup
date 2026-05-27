@@ -32,9 +32,18 @@ class OrderDetailsWidget extends StatelessWidget {
   }
 
   Widget _buildStatusCard() {
-    final status = order.orderStatusLabel ?? 'Pending';
-    final isCancelled = status.toLowerCase() == 'cancelled';
-    
+    final statusLabel = order.orderStatusLabel ?? 'Pending';
+    final statusLower = statusLabel.toLowerCase();
+    final isCancelled = statusLower == 'cancelled';
+
+    bool isReached(String target) {
+      final stages = ['pending', 'confirmed', 'processing', 'delivered'];
+      int currentIdx = stages.indexOf(statusLower);
+      int targetIdx = stages.indexOf(target.toLowerCase());
+      if (currentIdx == -1) return target.toLowerCase() == 'pending';
+      return currentIdx >= targetIdx;
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -46,7 +55,8 @@ class OrderDetailsWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(order.orderNo ?? order.id ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(order.orderNo ?? order.id ?? '',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               Text("Date: ${order.placedAt ?? ''}", style: const TextStyle(color: Colors.grey, fontSize: 12)),
             ],
           ),
@@ -57,7 +67,7 @@ class OrderDetailsWidget extends StatelessWidget {
                 const Icon(Icons.cancel, color: Colors.red, size: 48),
                 const SizedBox(height: 8),
                 Text(
-                  "Order $status",
+                  "Order $statusLabel",
                   style: const TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
@@ -70,17 +80,17 @@ class OrderDetailsWidget extends StatelessWidget {
             Row(
               children: [
                 _buildStepIndicator("Pending", true),
-                _buildLine(status == 'Confirmed' || status == 'Processing' || status == 'Delivered'),
-                _buildStepIndicator("Confirmed", status == 'Confirmed' || status == 'Processing' || status == 'Delivered'),
-                _buildLine(status == 'Processing' || status == 'Delivered'),
-                _buildStepIndicator("Processing", status == 'Processing' || status == 'Delivered'),
-                _buildLine(status == 'Delivered'),
-                _buildStepIndicator("Delivered", status == 'Delivered'),
+                _buildLine(isReached('confirmed')),
+                _buildStepIndicator("Confirmed", isReached('confirmed')),
+                _buildLine(isReached('processing')),
+                _buildStepIndicator("Processing", isReached('processing')),
+                _buildLine(isReached('delivered')),
+                _buildStepIndicator("Delivered", isReached('delivered')),
               ],
             ),
           const SizedBox(height: 20),
           Text(
-            order.notes ?? "Your order has been placed and is ${status.toLowerCase()}.",
+            order.notes ?? "Your order has been placed and is ${statusLabel.toLowerCase()}.",
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
@@ -121,6 +131,15 @@ class OrderDetailsWidget extends StatelessWidget {
   }
 
   Widget _buildDeliveryDetails() {
+    String shippingAddr = "Address not available";
+    if (order.addresses != null && order.addresses!.isNotEmpty) {
+      final firstAddr = order.addresses!.first;
+      if (firstAddr is Map) {
+        shippingAddr =
+            firstAddr['shipping_address'] ?? firstAddr['billing_address'] ?? "Address not available";
+      }
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -155,7 +174,9 @@ class OrderDetailsWidget extends StatelessWidget {
             children: [
               const Icon(Icons.home_outlined, color: Colors.orange, size: 20),
               const SizedBox(width: 8),
-              Expanded(child: Text("Address not available in response", style: const TextStyle(fontSize: 13, color: Colors.black87))),
+              Expanded(
+                  child: Text(shippingAddr,
+                      style: const TextStyle(fontSize: 13, color: Colors.black87))),
             ],
           ),
         ],

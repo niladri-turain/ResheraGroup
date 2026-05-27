@@ -591,14 +591,16 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           }
 
           int totalItems = 0;
-          for (var item in cartData.data!) {
-            totalItems += (item.quantity ?? 0);
+          if (cartData != null && cartData.data != null) {
+            for (var item in cartData.data!) {
+              totalItems += (item.quantity ?? 0);
+            }
           }
 
           if (totalItems == 0) return const SizedBox.shrink();
 
           return FloatingCartBar(
-            itemCount: cartData.totalItems ?? 0,
+            itemCount: cartData?.totalItems ?? 0,
             label: 'Proceed to',
             onTap: () async {
               final addressProvider = context.read<UserAddressProvider>();
@@ -625,6 +627,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Order placed successfully")),
                   );
+                  
+                  // Clear cart local state after successful order
+                  context.read<ViewCartListProvider>().clearCartLocal();
+
                   await Navigator.push(
                     context,
                     MaterialPageRoute(

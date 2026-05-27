@@ -40,7 +40,6 @@ class ProductDetailsScreen extends StatefulWidget {
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   String currentLocation = "Fetching location...";
-  int _localQuantity = 0;
   Variant? _selectedVariant;
 
   @override
@@ -168,25 +167,35 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: IconButton(
                 icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
                 onPressed: () async {
-                  if (_localQuantity > 0 && _selectedVariant != null) {
-                    final success = await context.read<CartProvider>().addToCart(
-                      productId: widget.productId,
-                      businessCategoryId: widget.businessCategoryId,
-                      variantId: _selectedVariant!.variantId ?? "",
-                      quantity: _localQuantity,
-                      attributes: _selectedVariant!.attributes ?? [],
-                    );
-                    if (!success) return;
+                  final cartListProvider = context.read<ViewCartListProvider>();
+                  final localItems = Map.from(cartListProvider.localCart);
+
+                  if (localItems.isNotEmpty) {
+                    final cartProvider = context.read<CartProvider>();
+                    for (var entry in localItems.entries) {
+                      final item = entry.value;
+                      await cartProvider.addToCart(
+                        productId: item['productId'],
+                        businessCategoryId: item['businessCategoryId'],
+                        variantId: item['variantId'],
+                        quantity: item['quantity'],
+                        attributes: (item['attributes'] as List).map((a) => Attribute(
+                          attributeId: a['attribute_id'],
+                          attributeName: a['attribute_name'],
+                          valueId: a['value_id'],
+                          value: a['value'],
+                        )).toList(),
+                      );
+                    }
+                    cartListProvider.clearLocalCart();
                   }
+
                   if (!mounted) return;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const CheckOutScreen()),
                   );
                   if (mounted) {
-                    setState(() {
-                      _localQuantity = 0;
-                    });
                     context.read<ViewCartListProvider>().fetchCart(showLoader: false);
                   }
                 },
@@ -242,15 +251,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Consumer2<ViewCartListProvider, LoginProvider>(
-                    builder: (context, cartProvider, loginProvider, child) {
+                    builder: (context, cartListProvider, loginProvider, child) {
+                      int totalUniqueDisplay = cartListProvider.totalUniqueItems;
+
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (cartProvider.totalItems > 0 || _localQuantity > 0)
+                          if (totalUniqueDisplay > 0)
                             FloatingCartBar(
-                              itemCount: cartProvider.totalItems + _localQuantity,
+                              itemCount: totalUniqueDisplay,
+                              label: "View cart",
                               onTap: () async {
-                                // 1. Check if logged in
                                 if (loginProvider.userName == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text("Please login to proceed")),
@@ -260,7 +271,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     MaterialPageRoute(
                                       builder: (context) => LoginScreen(
                                         onLoginSuccess: () {
-                                          Navigator.pop(context); // Go back to product details
+                                          Navigator.pop(context);
                                         },
                                       ),
                                     ),
@@ -268,16 +279,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   return;
                                 }
 
-                                if (_localQuantity > 0 && _selectedVariant != null) {
-                                  // Call addToCart API only when navigating to checkout
-                                  final success = await context.read<CartProvider>().addToCart(
-                                        productId: widget.productId,
-                                        businessCategoryId: widget.businessCategoryId,
-                                        variantId: _selectedVariant!.variantId ?? "",
-                                        quantity: _localQuantity,
-                                        attributes: _selectedVariant!.attributes ?? [],
-                                      );
-                                  if (!success) return;
+                                final localItems = Map.from(cartListProvider.localCart);
+                                if (localItems.isNotEmpty) {
+                                  final cartProvider = context.read<CartProvider>();
+                                  for (var entry in localItems.entries) {
+                                    final item = entry.value;
+                                    await cartProvider.addToCart(
+                                      productId: item['productId'],
+                                      businessCategoryId: item['businessCategoryId'],
+                                      variantId: item['variantId'],
+                                      quantity: item['quantity'],
+                                      attributes: (item['attributes'] as List).map((a) => Attribute(
+                                        attributeId: a['attribute_id'],
+                                        attributeName: a['attribute_name'],
+                                        valueId: a['value_id'],
+                                        value: a['value'],
+                                      )).toList(),
+                                    );
+                                  }
+                                  cartListProvider.clearLocalCart();
                                 }
 
                                 if (!mounted) return;
@@ -290,9 +310,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 );
 
                                 if (mounted) {
-                                  setState(() {
-                                    _localQuantity = 0; // Reset to "Add to cart" when coming back
-                                  });
                                   context.read<ViewCartListProvider>().fetchCart(showLoader: false);
                                 }
                               },
@@ -301,7 +318,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                             color: Colors.white,
                             child: CartCounterWidget(
-                              initialCount: _localQuantity,
+                              initialCount: cartListProvider.getLocalQuantity(widget.productId),
                               initialLabel: "Add to cart",
                               onCountChanged: (count) {
                                 if (loginProvider.userName == null && count > 0) {
@@ -313,19 +330,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     MaterialPageRoute(
                                       builder: (context) => LoginScreen(
                                         onLoginSuccess: () {
-                                          Navigator.pop(context); // Go back to product details
-                                          setState(() {
-                                            _localQuantity = count;
-                                          });
+                                          Navigator.pop(context);
                                         },
                                       ),
                                     ),
                                   );
                                   return;
                                 }
-                                setState(() {
-                                  _localQuantity = count;
-                                });
+                                
+                                if (_selectedVariant != null) {
+                                  cartListProvider.updateLocalCartItem(
+                                    productId: widget.productId,
+                                    businessCategoryId: widget.businessCategoryId,
+                                    variantId: _selectedVariant!.variantId ?? "",
+                                    quantity: count,
+                                    attributes: _selectedVariant!.attributes ?? [],
+                                  );
+                                }
                               },
                             ),
                           ),
