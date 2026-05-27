@@ -8,6 +8,7 @@ import '../../../../core/di/injection_container.dart';
 import '../../../../core/service/location_service.dart';
 import '../../../../core/service/shared_pref_service.dart';
 import '../../provider/order_details_provider.dart';
+import '../../provider/download_invoice_provider.dart';
 import '../../widgets/order_details_widget.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -120,23 +121,49 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   },
                 ),
                 const SizedBox(height: 15,),
-                Container(
-                  width: AppSize.screenWidth*0.5,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 6),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-
-                        Text("Download Invoice",style: TextStyle(fontSize: 14,fontWeight: FontWeight.w500),),
-                        Icon(Icons.download_outlined,color: Colors.orange,),
-                      ],
-                    ),
-                  ),
+                Consumer<DownloadInvoiceProvider>(
+                  builder: (context, downloadProvider, child) {
+                    return GestureDetector(
+                      onTap: downloadProvider.isDownloading 
+                        ? null 
+                        : () {
+                          downloadProvider.downloadInvoice(
+                            context, 
+                            "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", 
+                            "Invoice_${widget.orderId}.pdf"
+                          );
+                        },
+                      child: Container(
+                        width: AppSize.screenWidth * 0.5,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                downloadProvider.isDownloading 
+                                  ? "Downloading... ${(downloadProvider.downloadProgress * 100).toStringAsFixed(0)}%" 
+                                  : "Download Invoice",
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(width: 8),
+                              downloadProvider.isDownloading
+                                ? const SizedBox(
+                                    width: 15,
+                                    height: 15,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange),
+                                  )
+                                : const Icon(Icons.download_outlined, color: Colors.orange),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 50,)
               ],

@@ -7,6 +7,9 @@ import 'package:resheragroup/core/constants/app_webp.dart';
 
 import 'package:resheragroup/features/dashboard/widgets/reusable_slider.dart';
 import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
 import '../../login/screen/login_screen.dart';
 import '../../login/provider/user_address_provider.dart';
 import '../../login/provider/login_provider.dart';
@@ -362,14 +365,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _initData() async {
-    final addressProvider = context.read<UserAddressProvider>();
-    final prefService = sl<SharedPrefService>();
-    final token = await prefService.getToken();
-
-    if (token != null && token.isNotEmpty) {
-      addressProvider.fetchUserAddresses(token);
+    // Request permissions first
+    if (Platform.isAndroid) {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      
+      if (androidInfo.version.sdkInt >= 33) {
+        // Android 13+ doesn't use generic storage permission for files
+        await [
+          Permission.location,
+          Permission.notification,
+          // Request photos/videos if you were dealing with media, 
+          // but for PDF/Downloads, we handle it differently in the provider.
+        ].request();
+      } else {
+        await [
+          Permission.location,
+          Permission.storage,
+          Permission.notification,
+        ].request();
+      }
     } else {
-      addressProvider.fetchGuestLocation();
+      await [
+        Permission.location,
+        Permission.notification,
+      ].request();
+    }
+
+    if (context.mounted) {
+      final addressProvider = context.read<UserAddressProvider>();
+      final prefService = sl<SharedPrefService>();
+      final token = await prefService.getToken();
+
+      if (token != null && token.isNotEmpty) {
+        addressProvider.fetchUserAddresses(token);
+      } else {
+        addressProvider.fetchGuestLocation();
+      }
     }
   }
 
