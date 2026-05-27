@@ -4,6 +4,7 @@ import '../../../core/service/api_service.dart';
 import '../../../core/service/shared_pref_service.dart';
 import '../../../core/di/injection_container.dart';
 import '../model/order_model.dart';
+import '../../login/model/user_address_model.dart';
 
 class OrderProvider with ChangeNotifier {
   final ApiService _apiService = sl<ApiService>();
@@ -19,7 +20,14 @@ class OrderProvider with ChangeNotifier {
   OrderModel? get orderData => _orderData;
 
   // For placing a new order
-  Future<bool> placeOrder() async {
+  Future<bool> placeOrder({
+    required double itemsTotal,
+    required double grandTotal,
+    required double discountAmount,
+    required String paymentMethod,
+    required BillingAddress? billing,
+    required ShippingAddress? shipping,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -32,6 +40,23 @@ class OrderProvider with ChangeNotifier {
         ApiEndPoints.createOrder,
         body: {
           'user_id': userId,
+          'billing_address': billing?.address ?? '',
+          'billing_city_id': billing?.city?.id ?? '',
+          'billing_state_id': billing?.state?.id ?? '',
+          'billing_pincode': billing?.pincode ?? '',
+          'shipping_address_id': shipping?.id ?? '',
+          'shipping_address': shipping?.address ?? '',
+          'shipping_city_id': shipping?.city?.id ?? '',
+          'shipping_state_id': shipping?.state?.id ?? '',
+          'shipping_pincode': shipping?.pincode ?? '',
+          'platformCharge': 0,
+          'deliveryCharge': 0,
+          'taxAmount': 0,
+          'discountAmount': discountAmount,
+          'itemsTotal': itemsTotal,
+          'grandTotal': grandTotal,
+          'payment_method': paymentMethod.toUpperCase(),
+          'loyalty_points': 0,
         },
         token: token,
       );

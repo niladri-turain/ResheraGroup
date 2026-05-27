@@ -33,6 +33,8 @@ class OrderDetailsWidget extends StatelessWidget {
 
   Widget _buildStatusCard() {
     final status = order.orderStatusLabel ?? 'Pending';
+    final isCancelled = status.toLowerCase() == 'cancelled';
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -49,15 +51,33 @@ class OrderDetailsWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              _buildStepIndicator("Pending", true),
-              _buildLine(status == 'Processing' || status == 'Delivered'),
-              _buildStepIndicator("Processing", status == 'Processing' || status == 'Delivered'),
-              _buildLine(status == 'Delivered'),
-              _buildStepIndicator("Delivered", status == 'Delivered'),
-            ],
-          ),
+          if (isCancelled)
+            Column(
+              children: [
+                const Icon(Icons.cancel, color: Colors.red, size: 48),
+                const SizedBox(height: 8),
+                Text(
+                  "Order $status",
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                _buildStepIndicator("Pending", true),
+                _buildLine(status == 'Confirmed' || status == 'Processing' || status == 'Delivered'),
+                _buildStepIndicator("Confirmed", status == 'Confirmed' || status == 'Processing' || status == 'Delivered'),
+                _buildLine(status == 'Processing' || status == 'Delivered'),
+                _buildStepIndicator("Processing", status == 'Processing' || status == 'Delivered'),
+                _buildLine(status == 'Delivered'),
+                _buildStepIndicator("Delivered", status == 'Delivered'),
+              ],
+            ),
           const SizedBox(height: 20),
           Text(
             order.notes ?? "Your order has been placed and is ${status.toLowerCase()}.",

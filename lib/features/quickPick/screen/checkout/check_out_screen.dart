@@ -294,13 +294,13 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         _buildBillRow(
                           icon: Icons.shopping_bag_outlined,
                           label: 'Handling charge',
-                          price: '₹5',
+                          price: '₹0',
                         ),
                         SizedBox(height: AppSize.height(0.015)),
                         _buildBillRow(
                           icon: Icons.pedal_bike,
                           label: 'Delivery charge',
-                          price: '₹30',
+                          price: '0',
                         ),
                         SizedBox(height: AppSize.height(0.015)),
                         const Text(
@@ -316,7 +316,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              'Grand total ₹${(totalAmount + 5 + 30).toStringAsFixed(2)}',
+                              'Grand total ₹${(totalAmount).toStringAsFixed(2)}',
                               style: const TextStyle(
                                 color: Color(0XFF9333ea),
                                 fontWeight: FontWeight.bold,
@@ -601,8 +601,25 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             itemCount: cartData.totalItems ?? 0,
             label: 'Proceed to',
             onTap: () async {
-              final addressId = context.read<UserAddressProvider>().selectedAddress?.id;
-              final success = await context.read<OrderProvider>().placeOrder();
+              final addressProvider = context.read<UserAddressProvider>();
+              final orderProvider = context.read<OrderProvider>();
+
+              // Calculate totalAmount here as well for the API call
+              double currentTotal = 0;
+              for (var item in cartData.data!) {
+                final price = double.tryParse(item.product?.finalPrice.toString() ?? '0') ?? 0;
+                currentTotal += price * (item.quantity ?? 0);
+              }
+
+              final success = await orderProvider.placeOrder(
+                itemsTotal: currentTotal,
+                grandTotal: currentTotal, // Static charges are 0 as per instruction
+                discountAmount: 0,
+                paymentMethod: selectedPayment,
+                billing: addressProvider.addressModel?.data?.billing,
+                shipping: addressProvider.selectedAddress,
+              );
+
               if (success) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
