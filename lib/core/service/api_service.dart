@@ -29,9 +29,16 @@ class ApiService {
   // GET Request
   Future<dynamic> get(String endpoint, {String? token, String? xApiToken, dynamic body}) async {
     try {
+      final url = _getUri(endpoint);
+      final headers = _getHeaders(token: token, xApiToken: xApiToken);
+      
+      print('--- API GET Request ---');
+      print('URL: $url');
+      print('Headers: $headers');
+
       final response = await http.get(
-        _getUri(endpoint),
-        headers: _getHeaders(token: token, xApiToken: xApiToken),
+        url,
+        headers: headers,
       );
       return _processResponse(response);
     } on SocketException {
@@ -44,9 +51,17 @@ class ApiService {
   // POST Request
   Future<dynamic> post(String endpoint, {dynamic body, String? token, String? xApiToken}) async {
     try {
+      final url = _getUri(endpoint);
+      final headers = _getHeaders(token: token, xApiToken: xApiToken);
+      
+      print('--- API POST Request ---');
+      print('URL: $url');
+      print('Headers: $headers');
+      print('Body: ${jsonEncode(body)}');
+
       final response = await http.post(
-        _getUri(endpoint),
-        headers: _getHeaders(token: token, xApiToken: xApiToken),
+        url,
+        headers: headers,
         body: jsonEncode(body),
       );
       return _processResponse(response);
@@ -124,6 +139,11 @@ class ApiService {
   // Response handling logic
   dynamic _processResponse(http.Response response) {
     final responseBody = response.body;
+    
+    print('--- API Response ---');
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: $responseBody');
+    print('--------------------');
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       try {
