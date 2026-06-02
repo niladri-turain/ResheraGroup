@@ -58,8 +58,8 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
     super.initState();
     _loadInitialData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // context.read<MainVendorBannerProvider>().fetchMainVendorBanners();
-      context.read<PromotionalVendorBannerProvider>().fetchPromotionalBanners();
+      context.read<MainVendorBannerProvider>().fetchMainVendorBanners(businessId: widget.vendorId);
+      context.read<PromotionalVendorBannerProvider>().fetchPromotionalBanners(businessId: widget.vendorId);
       // Sync initial cart quantities
       final cartProvider = context.read<ViewCartListProvider>();
       if (cartProvider.cartData?.data != null) {

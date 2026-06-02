@@ -5,7 +5,6 @@ class AppStrings {
   static const guestUser = "Guest User";
   static const searchBycate = "Shop by Category";
    static const token = "";
-  static const businessId = "VolejRejNm";
   static const mainBannerType = "main_banner";
   static const promotionalBannerType = "promotional_banner";
   static const xApiTokenForAll="vY8mK2xQp9LsD4nF7aBcE1gHjK5mNpQrTuWxYz123456789";

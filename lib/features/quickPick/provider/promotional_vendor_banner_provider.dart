@@ -19,14 +19,17 @@ class PromotionalVendorBannerProvider with ChangeNotifier {
   PromotionalVendorBannerModel? _bannerModel;
   PromotionalVendorBannerModel? get bannerModel => _bannerModel;
 
-  Future<void> fetchPromotionalBanners() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  Future<void> fetchPromotionalBanners({String? businessId, bool isSilent = false}) async {
+    if (!isSilent) {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       final token = await _prefService.getToken();
-      final String endpoint = "${ApiEndPoints.vendorBanner}?business_id=VolejRejNm&banner_type=promotional_banner";
+      final effectiveBusinessId = businessId;
+      final String endpoint = "${ApiEndPoints.vendorBanner}?business_id=$effectiveBusinessId&banner_type=promotional_banner";
       
       final response = await _apiService.get(
         endpoint,

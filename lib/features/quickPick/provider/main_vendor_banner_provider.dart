@@ -17,14 +17,17 @@ class MainVendorBannerProvider with ChangeNotifier {
   MainVendorBannerModel? _bannerModel;
   MainVendorBannerModel? get bannerModel => _bannerModel;
 
-  Future<void> fetchMainVendorBanners() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  Future<void> fetchMainVendorBanners({String? businessId, bool isSilent = false}) async {
+    if (!isSilent) {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
-      // business_id and banner_type as per requirements
-      final String endpoint = "${ApiEndPoints.vendorBanner}?business_id=${AppStrings.businessId}&banner_type=${AppStrings.mainBannerType}";
+      // Use passed businessId if available, otherwise fallback to AppStrings.businessId
+      final effectiveBusinessId = businessId ;
+      final String endpoint = "${ApiEndPoints.vendorBanner}?business_id=$effectiveBusinessId&banner_type=${AppStrings.mainBannerType}";
       
       final response = await _apiService.get(
         endpoint,
