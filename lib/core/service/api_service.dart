@@ -1,7 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../../features/login/provider/login_provider.dart';
+import '../../features/login/screen/login_screen.dart';
+import '../di/injection_container.dart';
+import '../utils/navigation_service.dart';
 import '../constants/app_strings.dart';
+import '../constants/api_end_points.dart';
 
 class ApiService {
   final String baseUrl;
@@ -66,7 +71,7 @@ class ApiService {
       );
       return _processResponse(response);
     } on SocketException {
-      throw Exception('No Internet connection');
+      throw Exception('Something went wrong');
     } catch (e) {
       rethrow;
     }
@@ -82,7 +87,7 @@ class ApiService {
       );
       return _processResponse(response);
     } on SocketException {
-      throw Exception('No Internet connection');
+      throw Exception('Something went wrong');
     } catch (e) {
       rethrow;
     }
@@ -97,7 +102,7 @@ class ApiService {
       );
       return _processResponse(response);
     } on SocketException {
-      throw Exception('No Internet connection');
+      throw Exception('Something went wrong');
     } catch (e) {
       rethrow;
     }
@@ -130,7 +135,7 @@ class ApiService {
       final response = await http.Response.fromStream(streamedResponse);
       return _processResponse(response);
     } on SocketException {
-      throw Exception('No Internet connection');
+      throw Exception('Something went wrong');
     } catch (e) {
       rethrow;
     }
@@ -151,6 +156,12 @@ class ApiService {
       } catch (e) {
         throw Exception('Invalid JSON response');
       }
+    } else if (response.statusCode == 401) {
+      // Handle Unauthorized error only for address endpoint
+      if (response.request?.url.toString().contains(ApiEndPoints.address) ?? false) {
+        _handleUnauthorized();
+      }
+      throw Exception('Session expired. Please login again.');
     } else {
       String errorMessage = 'Something went wrong';
       try {
@@ -161,5 +172,11 @@ class ApiService {
       }
       throw Exception(errorMessage);
     }
+  }
+
+  void _handleUnauthorized() {
+    // Clear user data and navigate to login screen
+    sl<LoginProvider>().logout();
+    NavigationService.navigateToAndRemoveUntil(const LoginScreen());
   }
 }

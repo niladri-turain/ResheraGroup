@@ -201,213 +201,79 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             totalAmount += price * (item.quantity ?? 0);
           }
 
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                AppSize.width(0.04),
-                AppSize.height(0.02),
-                AppSize.width(0.04),
-                AppSize.height(0.12),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.all(AppSize.width(0.01)),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: cartData.data!.length,
-                      separatorBuilder: (context, index) => const Divider(),
-                      itemBuilder: (context, index) {
-                        final item = cartData.data![index];
-                        final attributes = item.attributes
-                                ?.map((e) => "${e.attributeName}: ${e.attributeValue}")
-                                .join(", ") ??
-                            "";
-
-                        return CheckoutItemWidget(
-                          image: item.image ?? "",
-                          title: item.productName ?? "",
-                          subtitle: attributes,
-                          price: item.product?.finalPrice.toString() ?? "0",
-                          quantity: item.quantity ?? 1,
-                          onIncrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
-                              ? () {}
-                              : () async {
-                                  final success = await updateProvider.updateCart(
-                                    cartId: item.id ?? "",
-                                    quantity: (item.quantity ?? 0) + 1,
-                                  );
-                                  if (success) {
-                                    provider.fetchCart(showLoader: false);
-                                  }
-                                },
-                          onDecrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
-                              ? () {}
-                              : () async {
-                                  if ((item.quantity ?? 0) > 1) {
-                                    final success = await updateProvider.updateCart(
-                                      cartId: item.id ?? "",
-                                      quantity: (item.quantity ?? 0) - 1,
-                                    );
-                                    if (success) {
-                                      provider.fetchCart(showLoader: false);
-                                    }
-                                  } else if ((item.quantity ?? 0) == 1) {
-                                    final success = await deleteProvider.deleteCart(
-                                      cartId: item.id ?? "",
-                                    );
-                                    if (success) {
-                                      provider.fetchCart(showLoader: false);
-                                    }
-                                  }
-                                },
-                        );
-                      },
-                    ),
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSize.width(0.04),
+                    AppSize.height(0.02),
+                    AppSize.width(0.04),
+                    AppSize.height(0.12),
                   ),
-                  SizedBox(height: AppSize.height(0.01)),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.all(AppSize.width(0.04)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Order Summary',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        SizedBox(height: AppSize.height(0.02)),
-                        _buildBillRow(
-                          icon: Icons.receipt_long_outlined,
-                          label: 'Items total',
-                          price: '₹${totalAmount.toStringAsFixed(2)}',
-                        ),
-                        SizedBox(height: AppSize.height(0.015)),
-                        _buildBillRow(
-                          icon: Icons.shopping_bag_outlined,
-                          label: 'Handling charge',
-                          price: '₹0',
-                        ),
-                        SizedBox(height: AppSize.height(0.015)),
-                        _buildBillRow(
-                          icon: Icons.pedal_bike,
-                          label: 'Delivery charge',
-                          price: '0',
-                        ),
-                        SizedBox(height: AppSize.height(0.015)),
-                        // const Text(
-                        //   'Shop for ₹50 more to get FREE delivery',
-                        //   style: TextStyle(color: Colors.orange, fontSize: 12),
-                        // ),
-                        SizedBox(height: AppSize.height(0.02)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Items - ${cartData.totalItems ?? cartData.data!.length}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              'Grand total ₹${(totalAmount).toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                color: Color(0XFF9333ea),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: AppSize.height(0.01)),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.all(AppSize.width(0.04)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Billing Address',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                        SizedBox(height: AppSize.height(0.02)),
-                        Consumer<LoginProvider>(
-                          builder: (context, loginProvider, child) {
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: AppSize.width(0.1),
-                                  height: AppSize.width(0.1),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF4B70F5),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.description_outlined,
-                                    color: Colors.white,
-                                    size: AppSize.width(0.05),
-                                  ),
-                                ),
-                                SizedBox(width: AppSize.width(0.03)),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        billAddress ?? "",
-                                        style: const TextStyle(
-                                          color: Colors.black87,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      SizedBox(height: AppSize.height(0.005)),
+                        padding: EdgeInsets.all(AppSize.width(0.01)),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: cartData.data!.length,
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemBuilder: (context, index) {
+                            final item = cartData.data![index];
+                            final attributes = item.attributes
+                                    ?.map((e) => "${e.attributeName}: ${e.attributeValue}")
+                                    .join(", ") ??
+                                "";
 
-                                      Text(
-                                        "Phone: ${loginProvider.userPhone ?? ''}",
-                                        style: const TextStyle(
-                                          color: Colors.black87,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      SizedBox(height: AppSize.height(0.005)),
-                                      Text(
-                                        "Email: ${loginProvider.userEmail ?? ''}",
-                                        style: const TextStyle(
-                                          color: Colors.black87,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            return CheckoutItemWidget(
+                              image: item.image ?? "",
+                              title: item.productName ?? "",
+                              subtitle: attributes,
+                              price: item.product?.finalPrice.toString() ?? "0",
+                              quantity: item.quantity ?? 1,
+                              onIncrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
+                                  ? () {}
+                                  : () async {
+                                      final success = await updateProvider.updateCart(
+                                        cartId: item.id ?? "",
+                                        quantity: (item.quantity ?? 0) + 1,
+                                      );
+                                      if (success) {
+                                        provider.fetchCart(showLoader: false);
+                                      }
+                                    },
+                              onDecrease: (updateProvider.isUpdating || deleteProvider.isDeleting)
+                                  ? () {}
+                                  : () async {
+                                      if ((item.quantity ?? 0) > 1) {
+                                        final success = await updateProvider.updateCart(
+                                          cartId: item.id ?? "",
+                                          quantity: (item.quantity ?? 0) - 1,
+                                        );
+                                        if (success) {
+                                          provider.fetchCart(showLoader: false);
+                                        }
+                                      } else if ((item.quantity ?? 0) == 1) {
+                                        final success = await deleteProvider.deleteCart(
+                                          cartId: item.id ?? "",
+                                        );
+                                        if (success) {
+                                          provider.fetchCart(showLoader: false);
+                                        }
+                                      }
+                                    },
                             );
                           },
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: AppSize.height(0.01)),
-                  Consumer<UserAddressProvider>(
-                    builder: (context, addressProvider, child) {
-                      final shippingAddr = addressProvider.selectedAddress;
-                      final displayShippingAddress = shippingAddr?.address ?? addressProvider.guestLocation ?? "";
-                      final phone = shippingAddr?.phone ?? context.read<LoginProvider>().userPhone ?? '';
-                      final email = context.read<LoginProvider>().userEmail ?? '';
-
-                      return Container(
+                      ),
+                      SizedBox(height: AppSize.height(0.01)),
+                      Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
@@ -416,244 +282,425 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const Text(
+                              'Order Summary',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            SizedBox(height: AppSize.height(0.02)),
+                            _buildBillRow(
+                              icon: Icons.receipt_long_outlined,
+                              label: 'Items total',
+                              price: '₹${totalAmount.toStringAsFixed(2)}',
+                            ),
+                            SizedBox(height: AppSize.height(0.015)),
+                            _buildBillRow(
+                              icon: Icons.shopping_bag_outlined,
+                              label: 'Handling charge',
+                              price: '₹0',
+                            ),
+                            SizedBox(height: AppSize.height(0.015)),
+                            _buildBillRow(
+                              icon: Icons.pedal_bike,
+                              label: 'Delivery charge',
+                              price: '0',
+                            ),
+                            SizedBox(height: AppSize.height(0.015)),
+                            SizedBox(height: AppSize.height(0.02)),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
-                                  'Shipping Address',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                Text(
+                                  'Items - ${cartData.totalItems ?? cartData.data!.length}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                InkWell(
-                                  onTap: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                      builder: (context) => AddressSelectionSheet(
-                                        selectedAddress: addressProvider.selectedAddress,
-                                        onAddressSelected: (address) {
-                                          addressProvider.setSelectedAddress(address);
-                                        },
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      color: Colors.green,
-                                    ),
-                                    child: const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
-                                      child: Text(
-                                        "Change Address",
-                                        style: TextStyle(color: Colors.white, fontSize: 12),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            SizedBox(height: AppSize.height(0.02)),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: AppSize.width(0.1),
-                                  height: AppSize.width(0.1),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF4B70F5),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.local_shipping_outlined,
-                                    color: Colors.white,
-                                    size: AppSize.width(0.05),
-                                  ),
-                                ),
-                                SizedBox(width: AppSize.width(0.03)),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        displayShippingAddress,
-                                        style: const TextStyle(
-                                          color: Colors.black87,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      SizedBox(height: AppSize.height(0.005)),
-                                      Text(
-                                        "Phone: $phone",
-                                        style: const TextStyle(
-                                          color: Colors.black87,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      if (email.isNotEmpty) ...[
-                                        SizedBox(height: AppSize.height(0.005)),
-                                        Text(
-                                          "Email: $email",
-                                          style: const TextStyle(
-                                            color: Colors.black87,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
+                                Text(
+                                  'Grand total ₹${(totalAmount).toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Color(0XFF9333ea),
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: AppSize.height(0.01)),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.all(AppSize.width(0.04)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Payment Method',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      SizedBox(height: AppSize.height(0.01)),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        SizedBox(height: AppSize.height(0.005)),
-                        InkWell(
-                          onTap: () => setState(() => selectedPayment = 'COD'),
-                          child: SizedBox(
-                            height: AppSize.height(0.04),
-                            child: Row(
+                        padding: EdgeInsets.all(AppSize.width(0.04)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Billing Address',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            SizedBox(height: AppSize.height(0.02)),
+                            Consumer<LoginProvider>(
+                              builder: (context, loginProvider, child) {
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: AppSize.width(0.1),
+                                      height: AppSize.width(0.1),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF4B70F5),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.description_outlined,
+                                        color: Colors.white,
+                                        size: AppSize.width(0.05),
+                                      ),
+                                    ),
+                                    SizedBox(width: AppSize.width(0.03)),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            billAddress ?? "",
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          SizedBox(height: AppSize.height(0.005)),
+
+                                          Text(
+                                            "Phone: ${loginProvider.userPhone ?? ''}",
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          SizedBox(height: AppSize.height(0.005)),
+                                          Text(
+                                            "Email: ${loginProvider.userEmail ?? ''}",
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: AppSize.height(0.01)),
+                      Consumer<UserAddressProvider>(
+                        builder: (context, addressProvider, child) {
+                          final shippingAddr = addressProvider.selectedAddress;
+                          final displayShippingAddress = shippingAddr?.address ?? addressProvider.guestLocation ?? "";
+                          final phone = shippingAddr?.phone ?? context.read<LoginProvider>().userPhone ?? '';
+                          final email = context.read<LoginProvider>().userEmail ?? '';
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            padding: EdgeInsets.all(AppSize.width(0.04)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Radio<String>(
-                                  value: 'COD',
-                                  groupValue: selectedPayment,
-                                  activeColor: const Color(0xFF7B2CBF),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedPayment = value!;
-                                    });
-                                  },
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Shipping Address',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        showModalBottomSheet(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          builder: (context) => AddressSelectionSheet(
+                                            selectedAddress: addressProvider.selectedAddress,
+                                            onAddressSelected: (address) {
+                                              addressProvider.setSelectedAddress(address);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(16),
+                                          color: Colors.green,
+                                        ),
+                                        child: const Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+                                          child: Text(
+                                            "Change Address",
+                                            style: TextStyle(color: Colors.white, fontSize: 12),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                                SizedBox(width: AppSize.width(0.02)),
-                                const Text('Cash on Delivery (COD)'),
+                                SizedBox(height: AppSize.height(0.02)),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: AppSize.width(0.1),
+                                      height: AppSize.width(0.1),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF4B70F5),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.local_shipping_outlined,
+                                        color: Colors.white,
+                                        size: AppSize.width(0.05),
+                                      ),
+                                    ),
+                                    SizedBox(width: AppSize.width(0.03)),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            displayShippingAddress,
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          SizedBox(height: AppSize.height(0.005)),
+                                          Text(
+                                            "Phone: $phone",
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          if (email.isNotEmpty) ...[
+                                            SizedBox(height: AppSize.height(0.005)),
+                                            Text(
+                                              "Email: $email",
+                                              style: const TextStyle(
+                                                color: Colors.black87,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
-                          ),
+                          );
+                        },
+                      ),
+                      SizedBox(height: AppSize.height(0.01)),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        InkWell(
-                          onTap: () => setState(() => selectedPayment = 'Online'),
-                          child: SizedBox(
-                            height: AppSize.height(0.04),
-                            child: Row(
-                              children: [
-                                Radio<String>(
-                                  value: 'Online',
-                                  groupValue: selectedPayment,
-                                  activeColor: const Color(0xFF7B2CBF),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedPayment = value!;
-                                    });
-                                  },
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-                                ),
-                                SizedBox(width: AppSize.width(0.02)),
-                                const Text('Online Payment'),
-                              ],
+                        padding: EdgeInsets.all(AppSize.width(0.04)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Payment Method',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                             ),
-                          ),
+                            SizedBox(height: AppSize.height(0.005)),
+                            InkWell(
+                              onTap: () => setState(() => selectedPayment = 'COD'),
+                              child: SizedBox(
+                                height: AppSize.height(0.04),
+                                child: Row(
+                                  children: [
+                                    Radio<String>(
+                                      value: 'COD',
+                                      groupValue: selectedPayment,
+                                      activeColor: const Color(0xFF7B2CBF),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedPayment = value!;
+                                        });
+                                      },
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                                    ),
+                                    SizedBox(width: AppSize.width(0.02)),
+                                    const Text('Cash on Delivery (COD)'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () => setState(() => selectedPayment = 'Online'),
+                              child: SizedBox(
+                                height: AppSize.height(0.04),
+                                child: Row(
+                                  children: [
+                                    Radio<String>(
+                                      value: 'Online',
+                                      groupValue: selectedPayment,
+                                      activeColor: const Color(0xFF7B2CBF),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedPayment = value!;
+                                        });
+                                      },
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                                    ),
+                                    SizedBox(width: AppSize.width(0.02)),
+                                    const Text('Online Payment'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: AppSize.height(0.01)),
+                    ],
                   ),
-                 
-                ],
+                ),
               ),
-            ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSize.width(0.04),
+                    vertical: AppSize.height(0.02),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: AppSize.height(0.06),
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF7B2CBF)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              backgroundColor: Colors.white,
+                            ),
+                            child: const Text(
+                              "Cancel Items",
+                              style: TextStyle(
+                                color: Color(0xFF7B2CBF),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: AppSize.width(0.03)),
+                      Expanded(
+                        child: SizedBox(
+                          height: AppSize.height(0.06),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final addressProvider = context.read<UserAddressProvider>();
+                              final orderProvider = context.read<OrderProvider>();
+
+                              double currentTotal = 0;
+                              if (cartData != null && cartData.data != null) {
+                                for (var item in cartData.data!) {
+                                  final price = double.tryParse(item.product?.finalPrice.toString() ?? '0') ?? 0;
+                                  currentTotal += price * (item.quantity ?? 0);
+                                }
+                              }
+
+                              final success = await orderProvider.placeOrder(
+                                itemsTotal: currentTotal,
+                                grandTotal: currentTotal,
+                                discountAmount: 0,
+                                paymentMethod: selectedPayment,
+                                billing: addressProvider.addressModel?.data?.billing,
+                                shipping: addressProvider.selectedAddress,
+                              );
+
+                              if (success) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Order placed successfully")),
+                                  );
+
+                                  context.read<ViewCartListProvider>().clearCartLocal();
+
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ItemOrderScreen(),
+                                    ),
+                                  );
+                                  if (mounted) {
+                                    context.read<ViewCartListProvider>().fetchCart();
+                                  }
+                                }
+                              } else {
+                                if (mounted) {
+                                  final error = context.read<OrderProvider>().errorMessage;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(error ?? "Failed to place order")),
+                                  );
+                                }
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF7B2CBF),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              "Proceed (${cartData.totalItems ?? 0} Items)",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),
-      floatingActionButton: Consumer<ViewCartListProvider>(
-        builder: (context, provider, child) {
-          final cartData = provider.cartData;
-          if (cartData == null || cartData.data == null || cartData.data!.isEmpty) {
-            return const SizedBox.shrink();
-          }
-
-          int totalItems = 0;
-          if (cartData != null && cartData.data != null) {
-            for (var item in cartData.data!) {
-              totalItems += (item.quantity ?? 0);
-            }
-          }
-
-          if (totalItems == 0) return const SizedBox.shrink();
-
-          return FloatingCartBar(
-            itemCount: cartData?.totalItems ?? 0,
-            label: 'Proceed to',
-            onTap: () async {
-              final addressProvider = context.read<UserAddressProvider>();
-              final orderProvider = context.read<OrderProvider>();
-
-              // Calculate totalAmount here as well for the API call
-              double currentTotal = 0;
-              for (var item in cartData.data!) {
-                final price = double.tryParse(item.product?.finalPrice.toString() ?? '0') ?? 0;
-                currentTotal += price * (item.quantity ?? 0);
-              }
-
-              final success = await orderProvider.placeOrder(
-                itemsTotal: currentTotal,
-                grandTotal: currentTotal, // Static charges are 0 as per instruction
-                discountAmount: 0,
-                paymentMethod: selectedPayment,
-                billing: addressProvider.addressModel?.data?.billing,
-                shipping: addressProvider.selectedAddress,
-              );
-
-              if (success) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Order placed successfully")),
-                  );
-                  
-                  // Clear cart local state after successful order
-                  context.read<ViewCartListProvider>().clearCartLocal();
-
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ItemOrderScreen(),
-                    ),
-                  );
-                  if (mounted) {
-                    context.read<ViewCartListProvider>().fetchCart();
-                  }
-                }
-              } else {
-                if (mounted) {
-                  final error = context.read<OrderProvider>().errorMessage;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(error ?? "Failed to place order")),
-                  );
-                }
-              }
-            },
-          );
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

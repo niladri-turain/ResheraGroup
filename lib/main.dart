@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resheragroup/core/utils/navigation_service.dart';
 import 'package:resheragroup/features/quickPick/provider/vendor_provider.dart';
 import 'package:resheragroup/main_screen.dart';
 import 'core/di/injection_container.dart' as di;
@@ -62,6 +63,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Reshera Group',
       debugShowCheckedModeBanner: false,
+      navigatorKey: NavigationService.navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
