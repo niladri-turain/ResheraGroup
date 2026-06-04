@@ -121,9 +121,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   },
                 ),
                 const SizedBox(height: 15,),
-                Consumer<DownloadInvoiceProvider>(
-                  builder: (context, downloadProvider, child) {
-                    return GestureDetector(
+                if (order.orderStatusLabel?.toLowerCase() == 'confirmed' || order.orderStatusLabel?.toLowerCase() == 'confirmed')
+                  Consumer<DownloadInvoiceProvider>(
+                    builder: (context, downloadProvider, child) {
+                      return GestureDetector(
                       onTap: downloadProvider.isDownloading 
                         ? null 
                         : () {

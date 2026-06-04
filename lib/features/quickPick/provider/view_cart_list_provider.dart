@@ -94,7 +94,23 @@ class ViewCartListProvider with ChangeNotifier {
   }
 
   int getLocalQuantity(String productId) {
-    return _localCart[productId]?['quantity'] ?? 0;
+    // Check local cart first for immediate updates
+    if (_localCart.containsKey(productId)) {
+      return _localCart[productId]?['quantity'] ?? 0;
+    }
+    
+    // Check server cart data if not in local cart
+    if (_cartData?.data != null) {
+      for (var item in _cartData!.data!) {
+        final key = item.productVariantId != null 
+            ? "${item.productId}_${item.productVariantId}" 
+            : item.productId ?? "";
+        if (key == productId) {
+          return item.quantity ?? 0;
+        }
+      }
+    }
+    return 0;
   }
 
   void clearLocalCart() {
@@ -107,7 +123,11 @@ class ViewCartListProvider with ChangeNotifier {
     Set<String> uniqueIds = {};
     if (_cartData?.data != null) {
       for (var item in _cartData!.data!) {
-        if (item.productId != null) uniqueIds.add(item.productId!);
+        // Unique key for variant
+        final key = item.productVariantId != null 
+            ? "${item.productId}_${item.productVariantId}" 
+            : item.productId ?? "";
+        if (key.isNotEmpty) uniqueIds.add(key);
       }
     }
     uniqueIds.addAll(_localCart.keys);

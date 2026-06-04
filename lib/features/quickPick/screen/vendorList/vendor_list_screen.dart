@@ -327,7 +327,9 @@ class _VendorListScreenState extends State<VendorListScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const CheckOutScreen(),
+                        ),
                       );
                     },
                   );

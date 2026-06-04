@@ -12,7 +12,9 @@ import '../../../../core/constants/app_images_png.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../dashboard/widgets/reusable_slider.dart';
 import '../../model/promotional_vendor_banner_model.dart';
+import '../../model/vendor_list_model.dart';
 import '../../provider/main_vendor_banner_provider.dart';
+import '../../provider/vendor_provider.dart';
 import '../productDetails/product_details_screen.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/product_provider.dart';
@@ -295,7 +297,10 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const CheckOutScreen(),
+                          builder: (context) => CheckOutScreen(
+                            vendorName: widget.vendorName,
+                            vendorKycId: context.read<VendorProvider>().vendorCategory.firstWhere((v) => v.id == widget.vendorId, orElse: () => Vendor(id: '', businessName: '')).kycDetail?.id,
+                          ),
                         ),
                       );
                     },

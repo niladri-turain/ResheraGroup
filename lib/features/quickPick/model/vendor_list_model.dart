@@ -89,13 +89,15 @@ class VendorUser {
 }
 
 class VendorKycDetail {
+  final String? id;
   final KycImage? ownerPhoto;
   final KycImage? shopPhoto;
 
-  VendorKycDetail({this.ownerPhoto, this.shopPhoto});
+  VendorKycDetail({this.id, this.ownerPhoto, this.shopPhoto});
 
   factory VendorKycDetail.fromJson(Map<String, dynamic> json) {
     return VendorKycDetail(
+      id: json['id']?.toString(),
       ownerPhoto: json['owner_photo'] != null ? KycImage.fromJson(json['owner_photo']) : null,
       shopPhoto: json['shop_photo'] != null ? KycImage.fromJson(json['shop_photo']) : null,
     );

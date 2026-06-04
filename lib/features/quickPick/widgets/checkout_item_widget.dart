@@ -97,6 +97,7 @@ class CheckoutItemWidget extends StatelessWidget {
                       '$quantity',
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
+
                     IconButton(
                       icon: Icon(Icons.add, color: Colors.white, size: AppSize.width(0.04)),
                       onPressed: onIncrease,
@@ -110,11 +111,48 @@ class CheckoutItemWidget extends StatelessWidget {
                 ),
               ),
               SizedBox(height: AppSize.height(0.005)),
-              Text(
-                '₹$price',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: AppSize.width(0.04),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Price :',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                        fontSize: AppSize.width(0.04),
+                      ),
+                    ),
+                    TextSpan(
+                      text: '₹$price',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                        fontSize: AppSize.width(0.04),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Final Price : ',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                        fontSize: AppSize.width(0.04),
+                      ),
+                    ),
+                    TextSpan(
+                      text: '₹${((double.tryParse(price) ?? 0) * quantity).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                        fontSize: AppSize.width(0.04),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

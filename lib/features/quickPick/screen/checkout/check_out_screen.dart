@@ -20,7 +20,9 @@ import '../../widgets/checkout_item_widget.dart';
 import '../itemOrder/item_order_screen.dart';
 
 class CheckOutScreen extends StatefulWidget {
-  const CheckOutScreen({super.key});
+  final String? vendorName;
+  final String? vendorKycId;
+  const CheckOutScreen({super.key, this.vendorName, this.vendorKycId});
 
   @override
   State<CheckOutScreen> createState() => _CheckOutScreenState();
@@ -336,6 +338,77 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
+                              'Vendor Details',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            SizedBox(height: AppSize.height(0.02)),
+                            Consumer<LoginProvider>(
+                              builder: (context, loginProvider, child) {
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: AppSize.width(0.1),
+                                      height: AppSize.width(0.1),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF4B70F5),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.description_outlined,
+                                        color: Colors.white,
+                                        size: AppSize.width(0.05),
+                                      ),
+                                    ),
+                                    SizedBox(width: AppSize.width(0.03)),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Vendor Id: ${widget.vendorKycId ?? ''}",
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          SizedBox(height: AppSize.height(0.001)),
+                                          Text(
+                                            "vendor name: ${widget.vendorName ?? ''}",
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          Text(
+                                            billAddress ?? "",
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          SizedBox(height: AppSize.height(0.001)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: AppSize.height(0.01)),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: EdgeInsets.all(AppSize.width(0.04)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
                               'Billing Address',
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                             ),
@@ -613,7 +686,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                               backgroundColor: Colors.white,
                             ),
                             child: const Text(
-                              "Cancel Items",
+                              "Cancel Cart",
                               style: TextStyle(
                                 color: Color(0xFF7B2CBF),
                                 fontWeight: FontWeight.bold,

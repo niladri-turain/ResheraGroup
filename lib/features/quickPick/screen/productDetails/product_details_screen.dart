@@ -10,8 +10,11 @@ import 'package:resheragroup/main_screen.dart';
 import '../../../../core/service/location_service.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../login/screen/login_screen.dart';
+import '../../model/cart_list_model.dart';
 import '../../provider/product_details_provider.dart';
 import '../../provider/cart_provider.dart';
+import '../../provider/update_cart_provider.dart';
+import '../../provider/delete_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
 import '../../model/product_details_model.dart';
 import '../../widgets/cart_widgets.dart';
@@ -100,6 +103,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         );
       },
     );
+  }
+
+  String _getCartKey(String productId, String? variantId) {
+    return variantId != null ? "${productId}_$variantId" : productId;
   }
 
   @override
@@ -193,7 +200,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   if (!mounted) return;
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => CheckOutScreen(
+                        vendorName: context.read<ProductDetailsProvider>().productDetails?.business?.businessName,
+                        vendorKycId: context.read<ProductDetailsProvider>().productDetails?.business?.businessId,
+                      ),
+                    ),
                   );
                   if (mounted) {
                     context.read<ViewCartListProvider>().fetchCart(showLoader: false);
@@ -305,7 +317,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const CheckOutScreen(),
+                                    builder: (context) => CheckOutScreen(
+                                      vendorName: context.read<ProductDetailsProvider>().productDetails?.business?.businessName,
+                                      vendorKycId: context.read<ProductDetailsProvider>().productDetails?.business?.businessId,
+                                    ),
                                   ),
                                 );
 
@@ -318,9 +333,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                             color: Colors.white,
                             child: CartCounterWidget(
-                              initialCount: cartListProvider.getLocalQuantity(widget.productId),
+                              key: ValueKey(_getCartKey(widget.productId, _selectedVariant?.variantId)),
+                              initialCount: cartListProvider.getLocalQuantity(_getCartKey(widget.productId, _selectedVariant?.variantId)),
                               initialLabel: "Add to cart",
-                              onCountChanged: (count) {
+                              onCountChanged: (count) async {
                                 if (loginProvider.userName == null && count > 0) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text("Please login to add items to cart")),
@@ -339,13 +355,54 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 }
                                 
                                 if (_selectedVariant != null) {
+                                  final cartKey = _getCartKey(widget.productId, _selectedVariant!.variantId);
+                                  final cartListProvider = context.read<ViewCartListProvider>();
+                                  int oldCount = cartListProvider.getLocalQuantity(cartKey);
+
                                   cartListProvider.updateLocalCartItem(
-                                    productId: widget.productId,
+                                    productId: cartKey,
                                     businessCategoryId: widget.businessCategoryId,
                                     variantId: _selectedVariant!.variantId ?? "",
                                     quantity: count,
                                     attributes: _selectedVariant!.attributes ?? [],
                                   );
+
+                                  if (loginProvider.userName != null) {
+                                    if (count > oldCount) {
+                                      // Increment: Use addToCart with the difference (usually 1)
+                                      // This avoids the "1 + 2 = 3" issue when clicking '+'
+                                      final cartProvider = context.read<CartProvider>();
+                                      await cartProvider.addToCart(
+                                        productId: widget.productId,
+                                        businessCategoryId: widget.businessCategoryId,
+                                        variantId: _selectedVariant!.variantId ?? "",
+                                        quantity: count - oldCount,
+                                        attributes: _selectedVariant!.attributes ?? [],
+                                      );
+                                    } else if (count < oldCount) {
+                                      // Decrement: Use updateCart or deleteCart
+                                      final cartItem = (cartListProvider.cartData?.data ?? []).cast<CartItem?>().firstWhere(
+                                        (item) => item?.productId == widget.productId && item?.productVariantId == _selectedVariant!.variantId,
+                                        orElse: () => null,
+                                      );
+
+                                      if (cartItem != null) {
+                                        if (count == 0) {
+                                          await context.read<DeleteCartProvider>().deleteCart(cartId: cartItem.id!);
+                                        } else {
+                                          await context.read<UpdateCartProvider>().updateCart(
+                                            cartId: cartItem.id!,
+                                            quantity: count,
+                                          );
+                                        }
+                                      }
+                                    }
+                                    
+                                    // Sync UI with server state
+                                    if (mounted) {
+                                      context.read<ViewCartListProvider>().fetchCart(showLoader: false);
+                                    }
+                                  }
                                 }
                               },
                             ),
