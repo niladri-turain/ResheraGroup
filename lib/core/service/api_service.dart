@@ -157,11 +157,17 @@ class ApiService {
         throw Exception('Invalid JSON response');
       }
     } else if (response.statusCode == 401) {
+      String errorMessage = '';
+      try {
+        final Map<String, dynamic> errorData = jsonDecode(responseBody);
+        errorMessage = errorData['message'] ?? errorMessage;
+      } catch (_) {}
+
       // Handle Unauthorized error only for address endpoint
       if (response.request?.url.toString().contains(ApiEndPoints.address) ?? false) {
         _handleUnauthorized();
       }
-      throw Exception('Session expired. Please login again.');
+      throw Exception(errorMessage);
     } else {
       String errorMessage = 'Something went wrong';
       try {
