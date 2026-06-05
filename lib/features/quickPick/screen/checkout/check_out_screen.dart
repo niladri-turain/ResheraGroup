@@ -5,16 +5,16 @@ import 'package:resheragroup/features/quickPick/provider/order_provider.dart';
 import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/service/location_service.dart';
-import '../../../../main_screen.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/service/shared_pref_service.dart';
 import '../../../login/screen/login_screen.dart';
 import '../../provider/update_cart_provider.dart';
 import '../../provider/delete_cart_provider.dart';
+import '../../provider/cancel_all_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
 import '../../widgets/address_selection_sheet.dart';
-import '../../widgets/cart_widgets.dart';
+
 import '../../../login/provider/login_provider.dart';
 import '../../widgets/checkout_item_widget.dart';
 import '../itemOrder/item_order_screen.dart';
@@ -676,23 +676,49 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       Expanded(
                         child: SizedBox(
                           height: AppSize.height(0.06),
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFF7B2CBF)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              backgroundColor: Colors.white,
-                            ),
-                            child: const Text(
-                              "Cancel Cart",
-                              style: TextStyle(
-                                color: Color(0xFF7B2CBF),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
+                          child: Consumer<CancelAllCartProvider>(
+                            builder: (context, cancelProvider, child) {
+                              return OutlinedButton(
+                                onPressed: cancelProvider.isLoading
+                                    ? null
+                                    : () async {
+                                        final success = await cancelProvider.cancelCart();
+                                        if (success) {
+                                          if (mounted) {
+                                            context.read<ViewCartListProvider>().clearCartLocal();
+                                            context.read<ViewCartListProvider>().fetchCart();
+                                          }
+                                        } else {
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text(cancelProvider.errorMessage ?? "Failed to cancel cart")),
+                                            );
+                                          }
+                                        }
+                                      },
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: Color(0xFF7B2CBF)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  backgroundColor: Colors.white,
+                                ),
+                                child: cancelProvider.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7B2CBF)),
+                                      )
+                                    : const Text(
+                                        "Cancel Cart",
+                                        style: TextStyle(
+                                          color: Color(0xFF7B2CBF),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                              );
+                            },
                           ),
                         ),
                       ),

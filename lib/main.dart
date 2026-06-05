@@ -23,6 +23,7 @@ import 'features/quickPick/provider/order_provider.dart';
 import 'features/quickPick/provider/order_list_provider.dart';
 import 'features/quickPick/provider/order_details_provider.dart';
 import 'features/quickPick/provider/download_invoice_provider.dart';
+import 'features/quickPick/provider/cancel_all_cart_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +50,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => OrderListProvider()),
         ChangeNotifierProvider(create: (_) => OrderDetailsProvider()),
         ChangeNotifierProvider(create: (_) => DownloadInvoiceProvider()),
+        ChangeNotifierProvider(create: (_) => CancelAllCartProvider()),
       ],
       child: const MyApp(),
     ),

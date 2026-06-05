@@ -14,6 +14,7 @@ class ApiEndPoints {
   static const String vendorBanner = "vendors/banners";
   static const String createOrder = "orders";
   static const String invoice = "invoice";
+  static const String cancelCart = "cart/user";
 
 
 
