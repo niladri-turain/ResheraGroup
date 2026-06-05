@@ -90,6 +90,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
             businessCategoryId: widget.categoryId,
             businessSubCategoryId: widget.subCategoryId,
             categoryId: category.id,
+            vendorId: widget.vendorId
           );
         }
       });

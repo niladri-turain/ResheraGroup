@@ -23,13 +23,15 @@ class ProductProvider with ChangeNotifier {
     required String businessCategoryId,
     required String businessSubCategoryId,
     required String categoryId,
+    required String vendorId,
+
   }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final endpoint = "${ApiEndPoints.productList}?business_category_id=$businessCategoryId&business_sub_category_id=$businessSubCategoryId&category_id=$categoryId";
+      final endpoint = "${ApiEndPoints.productList}?business_id=$vendorId";
       final response = await _apiService.get(endpoint);
 
       if (response['status'] == true) {
