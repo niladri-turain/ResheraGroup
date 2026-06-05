@@ -46,7 +46,7 @@ class _CustomRotationAnimationState extends State<CustomRotationAnimation>
           animation: _controller,
           builder: (context, child) {
             return CustomPaint(
-              size: const Size(160, 185),
+              size: const Size(175, 190),
               painter: GlowingBorderPainter(
                 animationValue: _controller.value,
                 baseColor: widget.themeColor,
@@ -57,8 +57,8 @@ class _CustomRotationAnimationState extends State<CustomRotationAnimation>
 
         // 2. Main Card Body
         Container(
-          width: 154,
-          height: 178,
+          width: 175,
+          height: 190,
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: const Color(0xFF121212),

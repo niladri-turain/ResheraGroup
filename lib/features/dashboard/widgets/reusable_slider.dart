@@ -36,9 +36,9 @@ class _ReusableImageSliderState extends State<ReusableImageSlider> {
         CarouselSlider(
           items: widget.imagePaths.map((img) {
             return Container(
-              width: AppSize.screenWidth,
+              width: double.infinity,
               margin: EdgeInsets.symmetric(
-                horizontal: AppSize.width(0.03),
+                horizontal: AppSize.width(0.01),
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(

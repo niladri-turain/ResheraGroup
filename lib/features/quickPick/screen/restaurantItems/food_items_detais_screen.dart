@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:resheragroup/features/quickPick/screen/restaurantItems/restaurantItemWidgets/momo_distance_address_widget.dart';
 import 'package:resheragroup/features/quickPick/screen/restaurantItems/restaurantItemWidgets/momo_list_item_widget.dart';
-
+import 'package:resheragroup/features/quickPick/provider/view_cart_list_provider.dart';
+import 'package:resheragroup/features/quickPick/widgets/cart_widgets.dart';
+import '../checkout/check_out_screen.dart';
 import '../groceryItems/groceryItemWidgets/custom_delivery_address_widget.dart';
 import 'models/momo_item_model.dart';
 
@@ -94,6 +97,7 @@ class _FoodItemsDetaisScreenState extends State<FoodItemsDetaisScreen> {
                       const Divider(thickness: 0.75,),
                       ListView.separated(
                         shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
                         itemCount: items.length,
                         separatorBuilder: (_, __) => const Divider(),
                         itemBuilder: (context, index) {
@@ -111,6 +115,24 @@ class _FoodItemsDetaisScreenState extends State<FoodItemsDetaisScreen> {
                   ),
                 ),
               ),
+            ),
+            Consumer<ViewCartListProvider>(
+              builder: (context, cartProvider, child) {
+                return Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FloatingCartBar(
+                    itemCount: cartProvider.totalItems,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CheckOutScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ],
         ),

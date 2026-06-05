@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:resheragroup/core/constants/app_images_png.dart';
 import 'package:resheragroup/core/constants/app_strings.dart';
 import 'package:resheragroup/core/constants/app_webp.dart';
 
 import 'package:resheragroup/features/dashboard/widgets/reusable_slider.dart';
-import 'package:resheragroup/features/quickPick/screen/quick_pick_screen.dart';
+import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
+import '../../login/screen/login_screen.dart';
+import '../../login/provider/user_address_provider.dart';
+import '../../login/provider/login_provider.dart';
+import '../../../core/service/shared_pref_service.dart';
+import '../../../core/di/injection_container.dart';
 
 import '../../../core/constants/app_sizes.dart';
 
@@ -137,12 +146,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           title: "QUICK PICK",
                           imagePath: AppImagesWebp.food,
                           themeColor: const Color(0XFFc164de),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const QuickPickScreen()),
-                          );
+                        onTap: () async {
+                          final prefService = sl<SharedPrefService>();
+                          final token = await prefService.getToken();
+
+                          if (token == null || token.isEmpty) {
+                            if (context.mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LoginScreen(
+                                    onLoginSuccess: () {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => const QuickPickScreen()),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            }
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const QuickPickScreen()),
+                            );
+                          }
                         },),
                       const CustomAnimatedDashboardCard(
                           title: "HEAL AAJ",
@@ -252,7 +283,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
 
-                  SizedBox(height: AppSize.height(0.01)),
+                  SizedBox(height: AppSize.height(0.02)),
 
                   GridView.count(
                     crossAxisCount: 2,
@@ -327,9 +358,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _initData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showAnnouncementPopup(context);
     });
+  }
+
+  Future<void> _initData() async {
+    // Request permissions first
+    if (Platform.isAndroid) {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      
+      if (androidInfo.version.sdkInt >= 33) {
+        // Android 13+ doesn't use generic storage permission for files
+        await [
+          Permission.location,
+          Permission.notification,
+          // Request photos/videos if you were dealing with media, 
+          // but for PDF/Downloads, we handle it differently in the provider.
+        ].request();
+      } else {
+        await [
+          Permission.location,
+          Permission.storage,
+          Permission.notification,
+        ].request();
+      }
+    } else {
+      await [
+        Permission.location,
+        Permission.notification,
+      ].request();
+    }
+
+    if (context.mounted) {
+      final addressProvider = context.read<UserAddressProvider>();
+      final prefService = sl<SharedPrefService>();
+      final token = await prefService.getToken();
+
+      if (token != null && token.isNotEmpty) {
+        addressProvider.fetchUserAddresses(token);
+      } else {
+        addressProvider.fetchGuestLocation();
+      }
+    }
   }
 
   void showAnnouncementPopup(BuildContext context) {

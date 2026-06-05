@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:resheragroup/features/quickPick/screen/itemOrder/item_order_screen.dart';
+import 'package:resheragroup/main_screen.dart';
+
+import '../../dashboard/screen/dashboard_screen.dart';
 
 class CustomTopNavigationBar extends StatelessWidget {
   final int selectedIndex;
@@ -29,20 +33,28 @@ class CustomTopNavigationBar extends StatelessWidget {
                 activeIcon: Icons.home,
                 label: "Home",
                 index: 0,
+                onTap: () => onItemSelected(0),
               ),
               _buildNavItem(
                 icon: Icons.grid_view_outlined,
                 activeIcon: Icons.grid_view,
                 label: "Category",
                 index: 1,
+                onTap: () => onItemSelected(1),
               ),
               _buildNavItem(
                 icon: Icons.shopping_bag_outlined,
                 activeIcon: Icons.shopping_bag,
-                label: "Shopping",
+                label: "Order",
                 index: 2,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ItemOrderScreen()),
+                  );
+                },
               ),
-              _buildResheraBadge(),
+              _buildResheraBadge(context),
             ],
           ),
         ),
@@ -55,6 +67,7 @@ class CustomTopNavigationBar extends StatelessWidget {
     required IconData activeIcon,
     required String label,
     required int index,
+    required VoidCallback onTap,
   }) {
     final bool isSelected = selectedIndex == index;
     final Color color =
@@ -62,7 +75,7 @@ class CustomTopNavigationBar extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(8),
-      onTap: () => onItemSelected(index),
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
@@ -90,12 +103,19 @@ class CustomTopNavigationBar extends StatelessWidget {
     );
   }
 
-  Widget _buildResheraBadge() {
-    final bool isSelected = selectedIndex == 3;
-
+  Widget _buildResheraBadge(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
-      onTap: () => onItemSelected(3),
+      onTap: () {  Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MainScreen(),
+        ),
+            (route) => false,
+      );
+        // Pop until we reach the MainScreen (Dashboard)
+
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(
             horizontal: 16, vertical: 8),
@@ -107,15 +127,6 @@ class CustomTopNavigationBar extends StatelessWidget {
             ],
           ),
           borderRadius: BorderRadius.circular(20),
-          boxShadow: isSelected
-              ? const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ]
-              : [],
         ),
         child: const Text(
           "Reshera",

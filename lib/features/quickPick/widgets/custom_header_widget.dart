@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_sizes.dart';
 
+import '../../../widgets/custom_search_widget.dart';
+
 class CustomHeaderWidget extends StatelessWidget {
   final String userName;
   final String location;
   final VoidCallback onNotificationTap;
   final VoidCallback onProfileTap;
+  final VoidCallback? onLocationTap;
   final Function(String) onSearch;
 
   const CustomHeaderWidget({
@@ -15,6 +18,7 @@ class CustomHeaderWidget extends StatelessWidget {
     required this.location,
     required this.onNotificationTap,
     required this.onProfileTap,
+    this.onLocationTap,
     required this.onSearch,
   });
 
@@ -48,46 +52,47 @@ class CustomHeaderWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               /// Name + Location
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    userName,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: AppSize.width(0.045),
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userName,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: AppSize.width(0.045),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: AppSize.height(0.005)),
-                  Row(
-                    children: [
-                      Text(
-                        location,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: AppSize.width(0.032),
+                    SizedBox(height: AppSize.height(0.005)),
+                    GestureDetector(
+                      onTap: onLocationTap,
+                      child: SizedBox(
+                
+                        child: Text(
+                          location,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: AppSize.width(0.032),
+                          ),
+                          maxLines: 1,
+                
                         ),
                       ),
-                      SizedBox(width: AppSize.width(0.01)),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.white70,
-                        size: AppSize.width(0.04),
-                      )
-                    ],
-                  )
-                ],
+                    )
+                  ],
+                ),
               ),
 
               /// Icons
               Row(
                 children: [
-                  _circleIcon(
-                    icon: Icons.notifications,
-                    onTap: onNotificationTap,
-                    showDot: true,
-                  ),
+                  // _circleIcon(
+                  //   icon: Icons.shopping_cart_outlined,
+                  //   onTap: onNotificationTap,
+                  //   showDot: true,
+                  // ),
                   SizedBox(width: AppSize.width(0.03)),
                   _circleIcon(
                     icon: Icons.person_outline,
@@ -98,41 +103,10 @@ class CustomHeaderWidget extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: AppSize.height(0.02)),
+
 
           /// 🔍 Search Bar
-          Container(
-            height: AppSize.height(0.055),
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSize.width(0.03),
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppSize.width(0.06)),
-            ),
-            child: TextField(
-              textAlignVertical: TextAlignVertical.center,
-
-              onChanged: onSearch,
-              style: TextStyle(
-                fontSize: AppSize.width(0.035),
-              ),
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
-                border: InputBorder.none,
-                hintText: 'Search "desired category"',
-                hintStyle: TextStyle(
-                  color: Colors.grey,
-                  fontSize: AppSize.width(0.032),
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  size: AppSize.width(0.05),
-                ),
-              ),
-            ),
-          ),
+          // CustomSearchWidget(onSearch: onSearch),
         ],
       ),
     );

@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:resheragroup/features/login/screen/login_screen.dart';
 import 'package:resheragroup/widgets/custom_bottom_navigation.dart';
 
-import 'features/account/screen/account_screen.dart';
+import 'features/account/screen/account_screen_mobile.dart';
 import 'features/dashboard/screen/dashboard_screen.dart';
 import 'features/home/screen/home_screen.dart';
 import 'features/order/screen/order_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+  const MainScreen({super.key, this.initialIndex = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   // List of screens
   final List<Widget> _pages = [
     const DashboardScreen(),
-    const HomeScreen(),
     const OrderScreen(),
-    const AccountScreen(),
+    const HomeScreen(),
+    const AccountScreenMobile(),
   ];
 
 

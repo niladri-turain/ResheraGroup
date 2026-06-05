@@ -1,23 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:resheragroup/core/utils/navigation_service.dart';
+import 'package:resheragroup/features/quickPick/provider/vendor_provider.dart';
 import 'package:resheragroup/main_screen.dart';
+import 'core/di/injection_container.dart' as di;
+import 'features/quickPick/provider/cart_provider.dart';
+import 'features/quickPick/provider/category_provider.dart';
 
-import 'features/dashboard/screen/dashboard_screen.dart';
+import 'features/quickPick/provider/sub_category_provider.dart';
+import 'features/quickPick/provider/vendor_category_provider.dart';
+import 'features/quickPick/provider/product_provider.dart';
+import 'features/quickPick/provider/product_details_provider.dart';
+import 'features/quickPick/provider/view_cart_list_provider.dart';
+import 'features/quickPick/provider/update_cart_provider.dart';
+import 'features/quickPick/provider/delete_cart_provider.dart';
+import 'features/quickPick/provider/main_vendor_banner_provider.dart';
+import 'features/quickPick/provider/promotional_vendor_banner_provider.dart';
+import 'features/login/provider/login_provider.dart';
+import 'features/login/provider/user_address_provider.dart';
+import 'features/home/provider/home_provider.dart';
+import 'features/quickPick/provider/order_provider.dart';
+import 'features/quickPick/provider/order_list_provider.dart';
+import 'features/quickPick/provider/order_details_provider.dart';
+import 'features/quickPick/provider/download_invoice_provider.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider(create: (_) => SubCategoryProvider()),
+        ChangeNotifierProvider(create: (_) => VendorProvider()),
+        ChangeNotifierProvider(create: (_) => VendorCategoryProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => ProductDetailsProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => ViewCartListProvider()),
+        ChangeNotifierProvider(create: (_) => UpdateCartProvider()),
+        ChangeNotifierProvider(create: (_) => DeleteCartProvider()),
+        ChangeNotifierProvider(create: (_) => MainVendorBannerProvider()),
+        ChangeNotifierProvider(create: (_) => PromotionalVendorBannerProvider()),
+        ChangeNotifierProvider(create: (_) => di.sl<LoginProvider>()),
+        ChangeNotifierProvider(create: (_) => di.sl<UserAddressProvider>()),
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => OrderListProvider()),
+        ChangeNotifierProvider(create: (_) => OrderDetailsProvider()),
+        ChangeNotifierProvider(create: (_) => DownloadInvoiceProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Reshera Group',
       debugShowCheckedModeBanner: false,
+      navigatorKey: NavigationService.navigatorKey,
       theme: ThemeData(
-
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -25,4 +72,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

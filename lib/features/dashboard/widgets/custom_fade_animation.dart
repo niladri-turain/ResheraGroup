@@ -52,8 +52,8 @@ class _CustomFadeAnimatedDashboardCardState extends State<CustomFadeAnimatedDash
 
         /// 1. Background
         Container(
-          width: AppSize.width(0.40),
-          height: AppSize.height(0.22),
+          width: AppSize.width(0.44),   // 👈 responsive
+          height: AppSize.height(0.22), // 👈 responsive
           decoration: BoxDecoration(
             color: const Color(0xFF1A1212),
             borderRadius: BorderRadius.circular(

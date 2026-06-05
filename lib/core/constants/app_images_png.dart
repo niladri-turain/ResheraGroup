@@ -22,6 +22,8 @@ class AppImagesPng {
   static const pharmacy = "assets/images/pharmacy.jpg";
   static const restuarant = "assets/images/restuarant.jpg";
   static const toy = "assets/images/toy.jpg";
+  static const logo = "assets/images/logo.png";
+
 
 
 
