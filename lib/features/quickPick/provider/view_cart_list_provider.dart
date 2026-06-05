@@ -135,13 +135,14 @@ class ViewCartListProvider with ChangeNotifier {
   }
 
   Future<void> clearCartLocal() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_cartCountKey);
-    await prefs.remove("local_cart_items");
     _cartData = null;
     _totalItems = 0;
     _localCart = {};
     notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_cartCountKey);
+    await prefs.remove("local_cart_items");
   }
 
   /// Fetches or Updates the cart.

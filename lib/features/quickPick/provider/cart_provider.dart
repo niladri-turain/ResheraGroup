@@ -16,7 +16,11 @@ class CartProvider with ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  bool _clearCartRequired = false;
+  bool get clearCartRequired => _clearCartRequired;
+
   Future<bool> addToCart({
+    required String businessId,
     required String productId,
     required String businessCategoryId,
     required String variantId,
@@ -25,6 +29,7 @@ class CartProvider with ChangeNotifier {
   }) async {
     _isSyncing = true;
     _errorMessage = null;
+    _clearCartRequired = false;
     notifyListeners();
 
     try {
@@ -34,6 +39,7 @@ class CartProvider with ChangeNotifier {
       // Building flat structure for Multipart form-data as per your requirement
       final Map<String, String> body = {
         'user_id': userId?.toString() ?? '',
+        'business_id': businessId,
         'product_id': productId,
         'business_category_id': businessCategoryId,
         'product_variant_id': variantId,
@@ -48,20 +54,41 @@ class CartProvider with ChangeNotifier {
 
       // Using multipartRequest for form-data support with POST method
       final response = await _apiService.multipartRequest(
-        ApiEndPoints.cart, 
+        ApiEndPoints.cart,
         method: 'POST',
-        body: body, 
-        // token: token ?? AppStrings.token
+        body: body,
       );
 
-      if (response['success'] == true) {
+      // API might return "success" or "status" as the boolean flag
+      final bool isSuccess = response['success'] == true ;
+
+      if (isSuccess) {
         return true;
       } else {
         _errorMessage = response['message'] ?? 'Failed to add to cart';
+        final String err = _errorMessage!.toLowerCase();
+        // Check for vendor conflict flag in the structured response or message
+        if (response['action_required'] == 'clear_cart' ||
+            err.contains('clear_cart') ||
+            err.contains('another shop') ||
+            err.contains('different vendor') ||
+            err.contains('another vendor') ||
+            err.contains('dishes from')) {
+          _clearCartRequired = true;
+        }
         return false;
       }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      final String err = _errorMessage!.toLowerCase();
+      // Even in catch block, check if the error message implies a vendor conflict
+      if (err.contains('clear_cart') ||
+          err.contains('another shop') ||
+          err.contains('different vendor') ||
+          err.contains('another vendor') ||
+          err.contains('dishes from')) {
+        _clearCartRequired = true;
+      }
       return false;
     } finally {
       _isSyncing = false;

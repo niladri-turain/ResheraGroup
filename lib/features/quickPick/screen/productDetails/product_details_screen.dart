@@ -16,6 +16,7 @@ import '../../provider/cart_provider.dart';
 import '../../provider/update_cart_provider.dart';
 import '../../provider/delete_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
+import '../../provider/cancel_all_cart_provider.dart';
 import '../../model/product_details_model.dart';
 import '../../widgets/cart_widgets.dart';
 import '../../widgets/product_details_item_widget.dart';
@@ -44,6 +45,7 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   String currentLocation = "Fetching location...";
   Variant? _selectedVariant;
+  bool _isAddingToCart = false;
 
   @override
   void initState() {
@@ -103,6 +105,197 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         );
       },
     );
+  }
+
+  void _showReplaceCartDialog({
+    required String businessId,
+    required String productId,
+    required String businessCategoryId,
+    required String variantId,
+    required int quantity,
+    required List<Attribute> attributes,
+    required String message,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(24.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        "Replace cart item?",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.black,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, size: 16, color: Colors.black54),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    height: 1.4,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 25),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color:  Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFF7B2CBF),),
+                          ),
+                          child: const Text(
+                            "No",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: const Color(0xFF7B2CBF),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          final cartListProvider = context.read<ViewCartListProvider>();
+                          // Clear locally immediately to hide the cart bar for instant UI feedback
+                          await cartListProvider.clearCartLocal();
+                          
+                          final cancelProvider = context.read<CancelAllCartProvider>();
+                          final success = await cancelProvider.cancelCart();
+                          if (success) {
+                            if (mounted) {
+                              // Sync with server (which is now empty) to ensure state consistency
+                              await cartListProvider.fetchCart(showLoader: false);
+                              
+                              // Add the new product
+                              await _handleAddToCart(
+                                businessId: businessId,
+                                productId: productId,
+                                businessCategoryId: businessCategoryId,
+                                variantId: variantId,
+                                quantity: quantity,
+                                attributes: attributes,
+                              );
+                            }
+                          } else {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(cancelProvider.errorMessage ?? "Failed to clear cart")),
+                              );
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7B2CBF),
+                            borderRadius: BorderRadius.circular(12),
+
+                          ),
+                          child: const Text(
+                            "Yes",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleAddToCart({
+    required String businessId,
+    required String productId,
+    required String businessCategoryId,
+    required String variantId,
+    required int quantity,
+    required List<Attribute> attributes,
+  }) async {
+    final cartProvider = context.read<CartProvider>();
+    final success = await cartProvider.addToCart(
+      businessId: businessId,
+      productId: productId,
+      businessCategoryId: businessCategoryId,
+      variantId: variantId,
+      quantity: quantity,
+      attributes: attributes,
+    );
+
+    if (mounted) {
+      if (success) {
+        context.read<ViewCartListProvider>().fetchCart(showLoader: false);
+      } else {
+        if (cartProvider.clearCartRequired) {
+          _showReplaceCartDialog(
+            businessId: businessId,
+            productId: productId,
+            businessCategoryId: businessCategoryId,
+            variantId: variantId,
+            quantity: quantity,
+            attributes: attributes,
+            message: cartProvider.errorMessage ?? "Your cart contains items from another vendor.",
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(cartProvider.errorMessage ?? "Failed to add to cart")),
+          );
+        }
+      }
+    }
   }
 
   String _getCartKey(String productId, String? variantId) {
@@ -182,6 +375,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     for (var entry in localItems.entries) {
                       final item = entry.value;
                       await cartProvider.addToCart(
+                        businessId: widget.businessId,
                         productId: item['productId'],
                         businessCategoryId: item['businessCategoryId'],
                         variantId: item['variantId'],
@@ -297,6 +491,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   for (var entry in localItems.entries) {
                                     final item = entry.value;
                                     await cartProvider.addToCart(
+                                      businessId: widget.businessId,
                                       productId: item['productId'],
                                       businessCategoryId: item['businessCategoryId'],
                                       variantId: item['variantId'],
@@ -336,6 +531,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               key: ValueKey(_getCartKey(widget.productId, _selectedVariant?.variantId)),
                               initialCount: cartListProvider.getLocalQuantity(_getCartKey(widget.productId, _selectedVariant?.variantId)),
                               initialLabel: "Add to cart",
+                              isLoading: _isAddingToCart,
                               onCountChanged: (count) async {
                                 if (loginProvider.userName == null && count > 0) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -359,20 +555,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   final cartListProvider = context.read<ViewCartListProvider>();
                                   int oldCount = cartListProvider.getLocalQuantity(cartKey);
 
-                                  cartListProvider.updateLocalCartItem(
-                                    productId: cartKey,
-                                    businessCategoryId: widget.businessCategoryId,
-                                    variantId: _selectedVariant!.variantId ?? "",
-                                    quantity: count,
-                                    attributes: _selectedVariant!.attributes ?? [],
-                                  );
-
                                   if (loginProvider.userName != null) {
                                     if (count > oldCount) {
-                                      // Increment: Use addToCart with the difference (usually 1)
-                                      // This avoids the "1 + 2 = 3" issue when clicking '+'
-                                      final cartProvider = context.read<CartProvider>();
-                                      await cartProvider.addToCart(
+                                      await _handleAddToCart(
+                                        businessId: widget.businessId,
                                         productId: widget.productId,
                                         businessCategoryId: widget.businessCategoryId,
                                         variantId: _selectedVariant!.variantId ?? "",
@@ -380,28 +566,37 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                         attributes: _selectedVariant!.attributes ?? [],
                                       );
                                     } else if (count < oldCount) {
-                                      // Decrement: Use updateCart or deleteCart
                                       final cartItem = (cartListProvider.cartData?.data ?? []).cast<CartItem?>().firstWhere(
                                         (item) => item?.productId == widget.productId && item?.productVariantId == _selectedVariant!.variantId,
                                         orElse: () => null,
                                       );
 
                                       if (cartItem != null) {
+                                        bool updateSuccess = false;
                                         if (count == 0) {
-                                          await context.read<DeleteCartProvider>().deleteCart(cartId: cartItem.id!);
+                                          updateSuccess = await context.read<DeleteCartProvider>().deleteCart(cartId: cartItem.id!);
                                         } else {
-                                          await context.read<UpdateCartProvider>().updateCart(
+                                          updateSuccess = await context.read<UpdateCartProvider>().updateCart(
                                             cartId: cartItem.id!,
                                             quantity: count,
                                           );
                                         }
+                                        if (mounted) {
+                                          if (updateSuccess) {
+                                            context.read<ViewCartListProvider>().fetchCart(showLoader: false);
+                                          }
+                                        }
                                       }
                                     }
-                                    
-                                    // Sync UI with server state
-                                    if (mounted) {
-                                      context.read<ViewCartListProvider>().fetchCart(showLoader: false);
-                                    }
+                                  } else {
+                                    // Local cart update for guest (though restricted above by login check for count > 0)
+                                    cartListProvider.updateLocalCartItem(
+                                      productId: cartKey,
+                                      businessCategoryId: widget.businessCategoryId,
+                                      variantId: _selectedVariant!.variantId ?? "",
+                                      quantity: count,
+                                      attributes: _selectedVariant!.attributes ?? [],
+                                    );
                                   }
                                 }
                               },
