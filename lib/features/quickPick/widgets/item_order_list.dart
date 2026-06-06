@@ -187,37 +187,37 @@ class OrderItemCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      firstItem?.image ?? 'https://via.placeholder.com/80',
-                      height: 80,
-                      width: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 80,
-                        width: 80,
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
+                  // ClipRRect(
+                  //   borderRadius: BorderRadius.circular(8),
+                  //   child: Image.network(
+                  //     firstItem?.image ?? 'https://via.placeholder.com/80',
+                  //     height: 80,
+                  //     width: 80,
+                  //     fit: BoxFit.cover,
+                  //     errorBuilder: (context, error, stackTrace) => Container(
+                  //       height: 80,
+                  //       width: 80,
+                  //       color: Colors.grey[200],
+                  //       child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          firstItem?.productName ?? 'Order #${order.orderNo}',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 5),
+                        // Text(
+                        //   firstItem?.productName ?? 'Order #${order.orderNo}',
+                        //   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        //   maxLines: 1,
+                        //   overflow: TextOverflow.ellipsis,
+                        // ),
+                        // const SizedBox(height: 5),
                         Text(
                           "Date: ${_formatDate(order.createdAt)}",
                           style: const TextStyle(color: Colors.grey, fontSize: 12),
