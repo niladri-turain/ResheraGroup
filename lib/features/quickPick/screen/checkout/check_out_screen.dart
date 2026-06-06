@@ -710,6 +710,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                 controller: _gstNumberController,
                                 label: 'GST Number',
                                 hint: 'Enter GST Number',
+                                maxLength: 15,
+                                textCapitalization: TextCapitalization.characters,
                               ),
                               SizedBox(height: AppSize.height(0.015)),
                               _buildTextField(
@@ -1016,6 +1018,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     required String label,
     required String hint,
     int maxLines = 1,
+    int? maxLength,
+    TextCapitalization textCapitalization = TextCapitalization.none,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1032,7 +1036,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         TextField(
           controller: controller,
           maxLines: maxLines,
+          maxLength: maxLength,
+          textCapitalization: textCapitalization,
           decoration: InputDecoration(
+            counterText: "",
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
