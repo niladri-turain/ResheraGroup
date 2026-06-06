@@ -296,6 +296,44 @@ class OrderDetailsWidget extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 8),
+
+                if (item.status != null || (item.cancelNote != null && item.cancelNote!.isNotEmpty)) ...[
+                  Row(
+                    children: [
+                      if (item.status != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: item.status?.toLowerCase() == 'cancelled'
+                                ? Colors.red.withOpacity(0.1)
+                                : Colors.blue.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            "Status: ${item.status}",
+                            style: TextStyle(
+                              color: item.status?.toLowerCase() == 'cancelled' ? Colors.red : Colors.blue,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(width: 8),
+                      if (item.cancelNote != null && item.cancelNote!.isNotEmpty)
+                        Expanded(
+                          child: Text(
+                            "Cancel Note: ${item.cancelNote}",
+                            style: const TextStyle(fontSize: 11, color: Colors.red, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )
+                      else
+                        const SizedBox(),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+
                 Row(
                   children: [
                     Container(
