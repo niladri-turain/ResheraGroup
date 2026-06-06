@@ -827,6 +827,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                 paymentMethod: selectedPayment,
                                 billing: addressProvider.addressModel?.data?.billing,
                                 shipping: addressProvider.selectedAddress,
+                                isGstBill: _isGstEnabled,
+                                gstNumber: _isGstEnabled ? _gstNumberController.text : null,
+                                gstName: _isGstEnabled ? _gstNameController.text : null,
+                                gstAddress: _isGstEnabled ? _gstAddressController.text : null,
                               );
 
                               if (success) {

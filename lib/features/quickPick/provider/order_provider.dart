@@ -27,7 +27,36 @@ class OrderProvider with ChangeNotifier {
     required String paymentMethod,
     required BillingAddress? billing,
     required ShippingAddress? shipping,
+    bool isGstBill = false,
+    String? gstNumber,
+    String? gstName,
+    String? gstAddress,
   }) async {
+    if (isGstBill) {
+      if (gstNumber == null || gstNumber.isEmpty) {
+        _errorMessage = 'GST Number is required';
+        notifyListeners();
+        return false;
+      }
+      // GST Validation Regex
+      final gstRegex = RegExp(r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$');
+      if (!gstRegex.hasMatch(gstNumber)) {
+        _errorMessage = 'Invalid GST Number format';
+        notifyListeners();
+        return false;
+      }
+      if (gstName == null || gstName.isEmpty) {
+        _errorMessage = 'GST Name is required';
+        notifyListeners();
+        return false;
+      }
+      if (gstAddress == null || gstAddress.isEmpty) {
+        _errorMessage = 'GST Address is required';
+        notifyListeners();
+        return false;
+      }
+    }
+
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -36,28 +65,36 @@ class OrderProvider with ChangeNotifier {
       final token = await _prefService.getToken();
       final userId = await _prefService.getUserId();
 
+      final Map<String, dynamic> body = {
+        'user_id': userId,
+        'billing_address': billing?.address ?? '',
+        'billing_city_id': billing?.city?.id ?? '',
+        'billing_state_id': billing?.state?.id ?? '',
+        'billing_pincode': billing?.pincode ?? '',
+        'shipping_address_id': shipping?.id ?? '',
+        'shipping_address': shipping?.address ?? '',
+        'shipping_city_id': shipping?.city?.id ?? '',
+        'shipping_state_id': shipping?.state?.id ?? '',
+        'shipping_pincode': shipping?.pincode ?? '',
+        'platformCharge': 0,
+        'deliveryCharge': 0,
+        'taxAmount': 0,
+        'discountAmount': discountAmount,
+        'itemsTotal': itemsTotal,
+        'grandTotal': grandTotal,
+        'payment_method': paymentMethod.toUpperCase(),
+        'loyalty_points': 0,
+        'is_gst_bill': isGstBill ? 1 : 0,
+        'gst_number': gstNumber ?? '',
+        'gst_name': gstName ?? '',
+        'gst_address': gstAddress ?? '',
+      };
+
+
+
       final response = await _apiService.post(
         ApiEndPoints.createOrder,
-        body: {
-          'user_id': userId,
-          'billing_address': billing?.address ?? '',
-          'billing_city_id': billing?.city?.id ?? '',
-          'billing_state_id': billing?.state?.id ?? '',
-          'billing_pincode': billing?.pincode ?? '',
-          'shipping_address_id': shipping?.id ?? '',
-          'shipping_address': shipping?.address ?? '',
-          'shipping_city_id': shipping?.city?.id ?? '',
-          'shipping_state_id': shipping?.state?.id ?? '',
-          'shipping_pincode': shipping?.pincode ?? '',
-          'platformCharge': 0,
-          'deliveryCharge': 0,
-          'taxAmount': 0,
-          'discountAmount': discountAmount,
-          'itemsTotal': itemsTotal,
-          'grandTotal': grandTotal,
-          'payment_method': paymentMethod.toUpperCase(),
-          'loyalty_points': 0,
-        },
+        body: body,
         token: token,
       );
 
