@@ -33,6 +33,11 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   String? cachedAddress;
   String? billAddress;
 
+  bool _isGstEnabled = false;
+  final TextEditingController _gstNumberController = TextEditingController();
+  final TextEditingController _gstNameController = TextEditingController();
+  final TextEditingController _gstAddressController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +73,14 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ViewCartListProvider>().fetchCart();
     });
+  }
+
+  @override
+  void dispose() {
+    _gstNumberController.dispose();
+    _gstNameController.dispose();
+    _gstAddressController.dispose();
+    super.dispose();
   }
 
   @override
@@ -648,6 +661,74 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         ),
                       ),
                       SizedBox(height: AppSize.height(0.01)),
+                      // Gst form
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSize.width(0.04),
+                          vertical: AppSize.height(0.01),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Enable GST',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            Switch(
+                              value: _isGstEnabled,
+                              activeColor: const Color(0xFF7B2CBF),
+                              onChanged: (value) {
+                                setState(() {
+                                  _isGstEnabled = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_isGstEnabled) ...[
+                        SizedBox(height: AppSize.height(0.01)),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: EdgeInsets.all(AppSize.width(0.04)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'GST Details',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              ),
+                              SizedBox(height: AppSize.height(0.015)),
+                              _buildTextField(
+                                controller: _gstNumberController,
+                                label: 'GST Number',
+                                hint: 'Enter GST Number',
+                              ),
+                              SizedBox(height: AppSize.height(0.015)),
+                              _buildTextField(
+                                controller: _gstNameController,
+                                label: 'GST Name',
+                                hint: 'Enter GST Name',
+                              ),
+                              SizedBox(height: AppSize.height(0.015)),
+                              _buildTextField(
+                                controller: _gstAddressController,
+                                label: 'GST Address',
+                                hint: 'Enter GST Address',
+                                maxLines: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      
                     ],
                   ),
                 ),
@@ -921,6 +1002,51 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         Text(
           price,
           style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: AppSize.height(0.008)),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[200]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[200]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF7B2CBF)),
+            ),
+          ),
         ),
       ],
     );
