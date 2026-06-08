@@ -25,6 +25,7 @@ import 'features/quickPick/provider/order_details_provider.dart';
 import 'features/quickPick/provider/download_invoice_provider.dart';
 import 'features/quickPick/provider/cancel_all_cart_provider.dart';
 import 'features/quickPick/provider/cancel_reason_provider.dart';
+import 'features/quickPick/provider/cancel_order_provider.dart';
 import 'core/service/api_service.dart';
 
 void main() async {
@@ -54,6 +55,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => DownloadInvoiceProvider()),
         ChangeNotifierProvider(create: (_) => CancelAllCartProvider()),
         ChangeNotifierProvider(create: (_) => CancelReasonProvider(apiService: di.sl<ApiService>())),
+        ChangeNotifierProvider(create: (_) => CancelOrderProvider(apiService: di.sl<ApiService>())),
       ],
       child: const MyApp(),
     ),

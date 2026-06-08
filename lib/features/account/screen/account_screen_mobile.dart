@@ -83,11 +83,16 @@ class _AccountScreenMobileState extends State<AccountScreenMobile> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () async {
+                      // 1. Capture references while context is still active
+                      final loginProvider = context.read<LoginProvider>();
+                      final cartProvider = context.read<ViewCartListProvider>();
+
+                      // 2. Now it is safe to pop the dialog
                       Navigator.pop(context);
-                      await context.read<LoginProvider>().logout();
-                      if (mounted) {
-                        await context.read<ViewCartListProvider>().clearCartLocal();
-                      }
+
+                      // 3. Perform async operations using the captured providers
+                      await loginProvider.logout();
+                      await cartProvider.clearCartLocal();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF7B2CBF),

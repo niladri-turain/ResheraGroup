@@ -5,6 +5,8 @@ import '../../login/provider/login_provider.dart';
 import '../model/order_list_model.dart';
 import '../provider/cancel_reason_provider.dart';
 import '../model/cancel_reason_model.dart';
+import '../provider/cancel_order_provider.dart';
+import '../provider/order_list_provider.dart';
 
 class OrderDetailsWidget extends StatelessWidget {
   final OrderData order;
@@ -45,13 +47,12 @@ class OrderDetailsWidget extends StatelessWidget {
     }
   }
 
-  void _showCancelBottomSheet(BuildContext context) {
+  void _showCancelBottomSheet(BuildContext context, String orderItemId) {
     CancelReason? selectedReason;
     final TextEditingController descriptionController = TextEditingController();
     
     // Fetch reasons when bottom sheet opens
     final cancelReasonProvider = Provider.of<CancelReasonProvider>(context, listen: false);
-    final loginProvider = Provider.of<LoginProvider>(context, listen: false);
     cancelReasonProvider.fetchCancelReasons();
 
     showModalBottomSheet(
@@ -70,8 +71,8 @@ class OrderDetailsWidget extends StatelessWidget {
             right: 20,
             top: 20,
           ),
-          child: Consumer<CancelReasonProvider>(
-            builder: (context, provider, child) {
+          child: Consumer2<CancelReasonProvider, CancelOrderProvider>(
+            builder: (context, reasonProvider, cancelProvider, child) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +103,7 @@ class OrderDetailsWidget extends StatelessWidget {
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 8),
-                  provider.isLoading
+                  reasonProvider.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -115,7 +116,7 @@ class OrderDetailsWidget extends StatelessWidget {
                               isExpanded: true,
                               hint: const Text("Select Reason"),
                               value: selectedReason,
-                              items: provider.reasons.map((CancelReason reason) {
+                              items: reasonProvider.reasons.map((CancelReason reason) {
                                 return DropdownMenuItem<CancelReason>(
                                   value: reason,
                                   child: Text(reason.reason ?? ''),
@@ -155,13 +156,41 @@ class OrderDetailsWidget extends StatelessWidget {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: selectedReason == null || provider.isLoading
+                      onPressed: selectedReason == null || reasonProvider.isLoading || cancelProvider.isLoading
                           ? null
-                          : () {
-                              // Here you would call your cancel API using selectedReason!.id
-                              Navigator.pop(context);
-                              if (onCancelOrder != null) {
-                                onCancelOrder!();
+                          : () async {
+                              try {
+                                final result = await cancelProvider.cancelOrderItem(
+                                  orderItemId: orderItemId,
+                                  cancelReasonId: selectedReason!.id!.toString(),
+                                  cancelNote: descriptionController.text,
+                                );
+                                
+                                if (result?.success == true) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(result?.message ?? "Order item cancelled successfully")),
+                                    );
+                                    // Refresh order list
+                                    Provider.of<OrderListProvider>(context, listen: false).fetchOrders();
+                                    // Pop bottom sheet
+                                    Navigator.pop(context);
+                                    // Pop order details screen to go back to order list
+                                    Navigator.pop(context);
+                                  }
+                                } else {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(result?.message ?? "Failed to cancel order item")),
+                                    );
+                                  }
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Error: $e")),
+                                  );
+                                }
                               }
                             },
                       style: ElevatedButton.styleFrom(
@@ -170,14 +199,16 @@ class OrderDetailsWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text(
-                        "Submit",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: cancelProvider.isLoading
+                          ? const Center(child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
+                          : const Text(
+                              "Submit",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -202,13 +233,13 @@ class OrderDetailsWidget extends StatelessWidget {
           _buildProductDetails(),
           const SizedBox(height: 12),
           _buildOrderSummary(),
-          if (order.orderStatusLabel?.toLowerCase() == 'pending') ...[
+          if (order.orderStatusLabel?.toLowerCase() == 'pending' && order.items != null && order.items!.isNotEmpty) ...[
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: () => _showCancelBottomSheet(context),
+                onPressed: () => _showCancelBottomSheet(context, order.items!.first.id ?? ''),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF7B2CBF),
                   shape: RoundedRectangleBorder(
@@ -468,42 +499,8 @@ class OrderDetailsWidget extends StatelessWidget {
                   ),
                 const SizedBox(height: 8),
 
-                if (item.status != null || (item.cancelNote != null && item.cancelNote!.isNotEmpty)) ...[
-                  Row(
-                    children: [
-                      if (item.status != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: item.status?.toLowerCase() == 'cancelled'
-                                ? Colors.red.withOpacity(0.1)
-                                : Colors.blue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            "Status: ${item.status}",
-                            style: TextStyle(
-                              color: item.status?.toLowerCase() == 'cancelled' ? Colors.red : Colors.blue,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      const SizedBox(width: 8),
-                      if (item.cancelNote != null && item.cancelNote!.isNotEmpty)
-                        Expanded(
-                          child: Text(
-                            "Cancel Note: ${item.cancelNote}",
-                            style: const TextStyle(fontSize: 11, color: Colors.red, fontWeight: FontWeight.w500),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        )
-                      else
-                        const SizedBox(),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
+                // Status and Cancel Note removed as per requirement: "item er moddhe list e kno cancel likhbe na"
+                const SizedBox(height: 8),
 
                 Row(
                   children: [
