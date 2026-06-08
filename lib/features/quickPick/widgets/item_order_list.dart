@@ -7,7 +7,8 @@ import 'package:resheragroup/features/quickPick/provider/order_list_provider.dar
 import 'package:resheragroup/features/quickPick/screen/itemOrder/order_details_screen.dart';
 
 class ItemOrderList extends StatelessWidget {
-  const ItemOrderList({super.key});
+  final String searchQuery;
+  const ItemOrderList({super.key, this.searchQuery = ''});
 
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'N/A';
@@ -50,7 +51,13 @@ class ItemOrderList extends StatelessWidget {
           return Center(child: Text(provider.errorMessage!));
         }
 
-        final orders = provider.orderListData?.data ?? [];
+        final allOrders = provider.orderListData?.data ?? [];
+        final orders = allOrders.where((order) {
+          final query = searchQuery.toLowerCase();
+          final orderNo = (order.orderNo ?? '').toLowerCase();
+          final orderId = (order.id ?? '').toLowerCase();
+          return orderNo.contains(query) || orderId.contains(query);
+        }).toList();
 
         if (orders.isEmpty) {
           return const Center(child: Text("No orders found"));
