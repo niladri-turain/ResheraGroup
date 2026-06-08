@@ -56,6 +56,31 @@ class OrderDetailsWidget extends StatelessWidget {
           _buildProductDetails(),
           const SizedBox(height: 12),
           _buildOrderSummary(),
+          if (order.orderStatusLabel?.toLowerCase() == 'pending') ...[
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: onCancelOrder,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7B2CBF),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  "Cancel Order",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
