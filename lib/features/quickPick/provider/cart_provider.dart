@@ -48,7 +48,7 @@ class CartProvider with ChangeNotifier {
 
       // Adding attributes in the format: attributes[i][attribute_id]
       for (int i = 0; i < attributes.length; i++) {
-        body['attributes[$i][attribute_id]'] = attributes[i].attributeId ?? "";
+        body['attributes[$i][attribute_master_id]'] = attributes[i].attributeId ?? "";
         body['attributes[$i][attribute_value_id]'] = attributes[i].valueId ?? "";
       }
 

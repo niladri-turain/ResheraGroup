@@ -363,14 +363,14 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                 ),
                 const SizedBox(height: 10),
 
-                const Text("Select Size",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                // const Text("Select Size",
+                //     style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 if (sizeKey.isEmpty)
                   const Padding(
-                    padding: EdgeInsets.only(bottom: 24.0),
-                    child: Text("No sizes available",
-                        style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    padding: EdgeInsets.only(bottom: 0.0),
+                    // child: Text("No sizes available",
+                    //     style: TextStyle(color: Colors.grey, fontSize: 12)),
                   )
                 else ...[
                   SizedBox(
