@@ -25,6 +25,7 @@ import '../../widgets/standard_product_card.dart';
 import '../../widgets/cart_widgets.dart';
 import '../../widgets/main_vendor_slider_widget.dart';
 import '../../provider/promotional_vendor_banner_provider.dart';
+import 'food_beverages_widget/food_beverages_layout.dart';
 
 class VendorCategoryList extends StatefulWidget {
   final String categoryId;
@@ -361,8 +362,21 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
   }
 
   Widget _buildMainLayout(VendorCategoryProvider catProvider) {
-    bool isFashion = widget.categoryName == "Fashion & Lifestyle" || 
-                     widget.categoryName.toLowerCase().contains("fashion");
+    bool isFashion = widget.categoryName == "Fashion & Lifestyle" ||
+        widget.categoryName.toLowerCase().contains("fashion");
+    bool isFood = widget.categoryName == "Food & Beverages" ||
+        widget.categoryName.toLowerCase().contains("food");
+
+    if (isFood) {
+      return FoodBeveragesLayout(
+        catProvider: catProvider,
+        businessCategoryId: widget.categoryId,
+        businessSubCategoryId: widget.subCategoryId,
+        vendorId: widget.vendorId,
+        itemQuantities: _itemQuantities,
+        onUpdateQuantity: _updateQuantity,
+      );
+    }
 
     return ListView(
       children: [

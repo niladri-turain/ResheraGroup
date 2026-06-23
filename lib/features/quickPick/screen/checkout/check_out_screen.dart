@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resheragroup/core/utils/navigation_service.dart';
 import 'package:resheragroup/features/login/provider/user_address_provider.dart';
 import 'package:resheragroup/features/quickPick/provider/order_provider.dart';
 import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
@@ -56,10 +57,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             MaterialPageRoute(
               builder: (context) => LoginScreen(
                 onLoginSuccess: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
-                  );
+                  NavigationService.navigateToReplacement(const CheckOutScreen());
                 },
               ),
             ),
@@ -85,8 +83,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         backgroundColor: const Color(0xFF7B2CBF),
         elevation: 0,
@@ -883,8 +883,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSkeleton() {
     return Shimmer.fromColors(

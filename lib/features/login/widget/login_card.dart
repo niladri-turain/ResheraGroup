@@ -166,39 +166,47 @@ class _LoginCardState extends State<LoginCard> {
                   onPressed: loginProvider.isLoading
                       ? null
                       : () async {
+                          // Capture the root navigator and essential providers before the async login call
+                          // This ensures we can navigate even after the widget is unmounted
+                          final rootNav = Navigator.of(context, rootNavigator: true);
+                          final addressProvider = context.read<UserAddressProvider>();
+                          final onLoginSuccessCallback = widget.onLoginSuccess;
+
                           final success = await loginProvider.login(
                             _usernameController.text.trim(),
                             _passwordController.text.trim(),
                           );
+                          
                           if (success) {
-                            if (mounted) {
-                              final addressProvider = context.read<UserAddressProvider>();
-                              
-                              // Show address selection sheet after successful login and address fetch
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (context) => AddressSelectionSheet(
-                                  selectedAddress: addressProvider.selectedAddress,
-                                  onAddressSelected: (addr) {
-                                    addressProvider.setSelectedAddress(addr);
-                                  },
-                                ),
-                              ).then((_) {
-                                // Navigate only after the address popup is dismissed
-                                if (mounted) {
-                                  if (widget.onLoginSuccess != null) {
-                                    widget.onLoginSuccess!();
-                                  } else {
-                                    Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const MainScreen()),
-                                      (route) => false,
-                                    );
-                                  }
-                                }
-                              });
+                            // Show the address selection sheet using the root navigator's context
+                            // We await the sheet to close before proceeding with redirection
+                            bool addressSelected = false;
+                            await showModalBottomSheet(
+                              context: rootNav.context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (sheetContext) => AddressSelectionSheet(
+                                selectedAddress: addressProvider.selectedAddress,
+                                onAddressSelected: (addr) {
+                                  addressProvider.setSelectedAddress(addr);
+                                  addressSelected = true;
+                                  // The sheet itself calls Navigator.pop(context) in its onTap
+                                },
+                              ),
+                            );
+
+                            if (addressSelected) {
+                              // Perform redirect to Dashboard (MainScreen index 0)
+                              // If there's a custom callback (like from Checkout), we use it.
+                              // Otherwise, we force reset to MainScreen at index 0 (Dashboard).
+                              if (onLoginSuccessCallback != null) {
+                                onLoginSuccessCallback();
+                              } else {
+                                rootNav.pushAndRemoveUntil(
+                                  MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 0)),
+                                  (route) => false,
+                                );
+                              }
                             }
                           } else {
                             if (mounted) {
