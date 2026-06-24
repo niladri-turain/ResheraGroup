@@ -7,10 +7,12 @@ import '../provider/main_vendor_banner_provider.dart';
 
 class MainVendorSliderWidget extends StatefulWidget {
   final double? height;
+  final String? businessId;
 
   const MainVendorSliderWidget({
     super.key,
     this.height,
+    this.businessId,
   });
 
   @override
@@ -24,7 +26,7 @@ class _MainVendorSliderWidgetState extends State<MainVendorSliderWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MainVendorBannerProvider>().fetchMainVendorBanners();
+      context.read<MainVendorBannerProvider>().fetchMainVendorBanners(businessId: widget.businessId);
     });
   }
 
@@ -61,16 +63,17 @@ class _MainVendorSliderWidgetState extends State<MainVendorSliderWidget> {
         return Stack(
           alignment: Alignment.bottomCenter,
           children: [
+
             CarouselSlider(
               items: banners.map((banner) {
                 return Container(
                   width: AppSize.screenWidth,
-                  margin: EdgeInsets.symmetric(
-                    horizontal: AppSize.width(0.03),
-                  ),
+                  // margin: EdgeInsets.symmetric(
+                  //   horizontal: AppSize.width(0.03),
+                  // ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(
-                      AppSize.width(0.04),
+                      AppSize.width(0.00),
                     ),
                     image: DecorationImage(
                       image: NetworkImage(banner.image ?? ""),

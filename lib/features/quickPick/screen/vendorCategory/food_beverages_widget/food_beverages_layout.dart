@@ -48,9 +48,9 @@ class _FoodBeveragesLayoutState extends State<FoodBeveragesLayout> {
           padding: EdgeInsets.zero,
           children: [
             // Top Slider/Banner
-            const MainVendorSliderWidget(),
+            MainVendorSliderWidget(businessId: widget.vendorId),
             
-            const SizedBox(height: 16),
+            const SizedBox(height: 5),
 
             // Categories as Expandable Banners
             ...widget.catProvider.categories.map((category) {
@@ -102,7 +102,7 @@ class _FoodBeveragesLayoutState extends State<FoodBeveragesLayout> {
                     offset: const Offset(0, -35),
                     child: Container(
                       width: double.infinity,
-                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      margin: const EdgeInsets.symmetric(horizontal: 0),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                       decoration: BoxDecoration(
                         color: Colors.white,

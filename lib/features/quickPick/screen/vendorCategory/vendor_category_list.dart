@@ -382,7 +382,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
       children: [
         // show main banner slider
         const SizedBox(height: 10),
-        const MainVendorSliderWidget(),
+        MainVendorSliderWidget(businessId: widget.vendorId),
 
         // Horizontal circular categories
         Container(
