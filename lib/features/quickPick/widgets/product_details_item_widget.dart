@@ -7,11 +7,13 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class ProductDetailsItemWidget extends StatefulWidget {
   final ProductData product;
+  final bool isFashion;
   final Function(Variant variant) onVariantChanged;
 
   const ProductDetailsItemWidget({
     super.key,
     required this.product,
+    this.isFashion = false,
     required this.onVariantChanged,
   });
 
@@ -200,10 +202,6 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
 
     // Get all available attributes from all variants
     final groups = _getAttributeGroups();
-    final sizeKey = groups.keys
-        .firstWhere((k) => k.toLowerCase().contains("size"), orElse: () => "");
-    final colorKey = groups.keys
-        .firstWhere((k) => k.toLowerCase().contains("color"), orElse: () => "");
 
     return SingleChildScrollView(
       child: Column(
@@ -363,167 +361,85 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                 ),
                 const SizedBox(height: 10),
 
-                // const Text("Select Size",
-                //     style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                if (sizeKey.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 0.0),
-                    // child: Text("No sizes available",
-                    //     style: TextStyle(color: Colors.grey, fontSize: 12)),
-                  )
-                else ...[
-                  SizedBox(
-                    height: 40,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: groups[sizeKey]!.length,
-                      itemBuilder: (context, index) {
-                        final size = groups[sizeKey]![index];
-                        final isSelected = _selectedAttributes[sizeKey] == size;
-                        final isAvailable =
-                            _isAttributeValueAvailable(sizeKey, size);
-                        return GestureDetector(
-                          onTap: isAvailable
-                              ? () => _updateVariantByAttribute(sizeKey, size)
-                              : null,
-                          child: Opacity(
-                            opacity: isAvailable ? 1.0 : 0.4,
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 12),
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? const Color(0xFF7B2CBF)
-                                    : Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: isSelected
-                                        ? const Color(0xFF7B2CBF)
-                                        : Colors.grey[300]!),
-                              ),
-                              alignment: Alignment.center,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Text(
-                                    size,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12,
-                                      decoration: isAvailable
-                                          ? TextDecoration.none
-                                          : TextDecoration.lineThrough,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                // Any attributes
+                ...groups.entries.map((entry) {
+                  final attributeName = entry.key;
+                  final isColor = attributeName.toLowerCase().contains("color");
+                  final isSize = attributeName.toLowerCase().contains("size");
+                  final isCircle = widget.isFashion && isSize;
 
-                if (colorKey.isNotEmpty) ...[
-                  Text(colorKey,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 45,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: groups[colorKey]!.length,
-                      itemBuilder: (context, index) {
-                        final colorValue = groups[colorKey]![index];
-                        final isSelected =
-                            _selectedAttributes[colorKey] == colorValue;
-                        final isAvailable =
-                            _isAttributeValueAvailable(colorKey, colorValue);
-
-                        return GestureDetector(
-                          onTap: () =>
-                              _updateVariantByAttribute(colorKey, colorValue),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isSelected
-                                    ? Colors.black
-                                    : Colors.transparent,
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: _getColorFromValue(colorValue),
-                                    shape: BoxShape.circle,
-                                    border: colorValue.toLowerCase() == 'white'
-                                        ? Border.all(color: Colors.grey[300]!)
-                                        : null,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Any other attributes
-                ...groups.entries
-                    .where((e) => e.key != sizeKey && e.key != colorKey)
-                    .map((entry) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(entry.key,
+                      Text(attributeName,
                           style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       SizedBox(
-                        height: 40,
+                        height: isColor ? 45 : 40,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: entry.value.length,
                           itemBuilder: (context, index) {
                             final val = entry.value[index];
                             final isSelected =
-                                _selectedAttributes[entry.key] == val;
+                                _selectedAttributes[attributeName] == val;
                             final isAvailable =
-                                _isAttributeValueAvailable(entry.key, val);
+                                _isAttributeValueAvailable(attributeName, val);
+
+                            if (isColor) {
+                              return GestureDetector(
+                                onTap: () => _updateVariantByAttribute(
+                                    attributeName, val),
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 12),
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? Colors.black
+                                          : Colors.transparent,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Container(
+                                    width: 34,
+                                    height: 34,
+                                    decoration: BoxDecoration(
+                                      color: _getColorFromValue(val),
+                                      shape: BoxShape.circle,
+                                      border: val.toLowerCase() == 'white'
+                                          ? Border.all(color: Colors.grey[300]!)
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
 
                             return GestureDetector(
                               onTap: isAvailable
-                                  ? () =>
-                                      _updateVariantByAttribute(entry.key, val)
+                                  ? () => _updateVariantByAttribute(
+                                      attributeName, val)
                                   : null,
                               child: Opacity(
                                 opacity: isAvailable ? 1.0 : 0.4,
                                 child: Container(
                                   margin: const EdgeInsets.only(right: 12),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: isCircle ? 0 : 16),
+                                  width: isCircle ? 40 : null,
+                                  height: 40,
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? const Color(0xFF7B2CBF)
                                         : Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
+                                    shape: isCircle
+                                        ? BoxShape.circle
+                                        : BoxShape.rectangle,
+                                    borderRadius: isCircle
+                                        ? null
+                                        : BorderRadius.circular(20),
                                     border: Border.all(
                                         color: isSelected
                                             ? const Color(0xFF7B2CBF)

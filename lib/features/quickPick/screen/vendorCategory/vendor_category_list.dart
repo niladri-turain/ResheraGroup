@@ -556,6 +556,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                             categoryId: _selectedCategoryId!,
                             businessCategoryId: widget.categoryId,
                             businessSubCategoryId: widget.subCategoryId,
+                            isFashion: isFashion,
                             onCountChanged: (count) {
                               _updateQuantity(productPair[0].productId,
                                   count - (_itemQuantities[productPair[0].productId] ?? 0));
@@ -577,6 +578,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                                   categoryId: _selectedCategoryId!,
                                   businessCategoryId: widget.categoryId,
                                   businessSubCategoryId: widget.subCategoryId,
+                                  isFashion: isFashion,
                                   onCountChanged: (count) {
                                     _updateQuantity(productPair[1].productId,
                                         count - (_itemQuantities[productPair[1].productId] ?? 0));
@@ -602,6 +604,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                     businessCategoryId: widget.categoryId,
                     businessSubCategoryId: widget.subCategoryId,
                     businessId: p.business?.businessId ?? "",
+                    isFashion: isFashion,
                     quantity: _itemQuantities[p.productId] ?? 0,
                     onAdd: () => _updateQuantity(p.productId, 1),
                     onRemove: () => _updateQuantity(p.productId, -1),

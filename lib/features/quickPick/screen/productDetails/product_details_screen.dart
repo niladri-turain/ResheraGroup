@@ -28,6 +28,7 @@ class ProductDetailsScreen extends StatefulWidget {
   final String categoryId;
   final String productId;
   final String businessId;
+  final bool isFashion;
 
   const ProductDetailsScreen({
     super.key,
@@ -36,6 +37,7 @@ class ProductDetailsScreen extends StatefulWidget {
     required this.categoryId,
     required this.productId,
     required  this.businessId,
+    this.isFashion = false,
   });
 
   @override
@@ -428,6 +430,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
               return ProductDetailsItemWidget(
                 product: provider.productDetails!,
+                isFashion: widget.isFashion,
                 onVariantChanged: (variant) {
                   setState(() {
                     _selectedVariant = variant;

@@ -12,6 +12,7 @@ class StandardProductCard extends StatelessWidget {
   final String businessCategoryId;
   final String businessSubCategoryId;
   final String businessId;
+  final bool isFashion;
   final int quantity;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
@@ -27,6 +28,7 @@ class StandardProductCard extends StatelessWidget {
     required this.businessCategoryId,
     required this.businessSubCategoryId,
     required this.businessId,
+    this.isFashion = false,
     required this.quantity,
     required this.onAdd,
     required this.onRemove,
@@ -45,6 +47,7 @@ class StandardProductCard extends StatelessWidget {
               categoryId: categoryId,
               productId: id,
               businessId: businessId,
+              isFashion: isFashion,
             ),
           ),
         );
@@ -69,6 +72,7 @@ class StandardProductCard extends StatelessWidget {
                         categoryId: categoryId,
                         productId: id,
                         businessId: businessId,
+                        isFashion: isFashion,
                       ),
                     ),
                   );
@@ -118,6 +122,7 @@ class StandardProductCard extends StatelessWidget {
                                   categoryId: categoryId,
                                   productId: id,
                                   businessId: businessId,
+                                  isFashion: isFashion,
                                 ),
                               ),
                             );

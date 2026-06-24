@@ -788,12 +788,17 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                         width: 20,
                                         child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7B2CBF)),
                                       )
-                                    : const Text(
-                                        "Cancel Cart",
-                                        style: TextStyle(
-                                          color: Color(0xFF7B2CBF),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
+                                    : const FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          "Cancel Cart",
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: TextStyle(
+                                            color: Color(0xFF7B2CBF),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
                                         ),
                                       ),
                               );
@@ -864,12 +869,17 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: Text(
-                              "Proceed (${cartData.totalItems ?? 0} Items)",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                "Proceed (${cartData.totalItems ?? 0} Items)",
+                                maxLines: 1,
+                                softWrap: false,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
                           ),
