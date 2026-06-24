@@ -64,9 +64,11 @@ class OrderProvider with ChangeNotifier {
     try {
       final token = await _prefService.getToken();
       final userId = await _prefService.getUserId();
+      final phoneNumber = await _prefService.getPhone();
 
       final Map<String, dynamic> body = {
         'user_id': userId,
+        'phone':phoneNumber??"",
         'billing_address': billing?.address ?? '',
         'billing_city_id': billing?.city?.id ?? '',
         'billing_state_id': billing?.state?.id ?? '',

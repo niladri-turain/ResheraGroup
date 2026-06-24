@@ -10,12 +10,14 @@ import '../provider/order_list_provider.dart';
 
 class OrderDetailsWidget extends StatelessWidget {
   final OrderData order;
+  final String orderId;
   final VoidCallback? onCancelOrder;
 
   const OrderDetailsWidget({
     super.key,
     required this.order,
     this.onCancelOrder,
+    required this.orderId
   });
 
   String _formatDate(String? dateStr) {
@@ -161,7 +163,7 @@ class OrderDetailsWidget extends StatelessWidget {
                           : () async {
                               try {
                                 final result = await cancelProvider.cancelOrderItem(
-                                  orderItemId: orderItemId,
+                                  orderItemId:orderId,
                                   cancelReasonId: selectedReason!.id!.toString(),
                                   cancelNote: descriptionController.text,
                                 );

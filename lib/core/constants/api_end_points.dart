@@ -15,7 +15,7 @@ class ApiEndPoints {
   static const String createOrder = "orders";
   static const String invoice = "invoice";
   static const String cancelCart = "cart/user";
-  static const String cancelItem="orders/cancel-item";
+  static const String cancelItem="orders/cancel-orders";
   static const String cancelReason="cancel-reasons";
 
 

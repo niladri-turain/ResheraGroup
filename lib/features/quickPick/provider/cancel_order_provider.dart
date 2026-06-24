@@ -25,7 +25,7 @@ class CancelOrderProvider with ChangeNotifier {
         ApiEndPoints.cancelItem,
         method: 'POST',
         body: {
-          'order_item_id': orderItemId,
+          'order_id': orderItemId,
           'cancel_reason_id': cancelReasonId,
           'cancel_note': cancelNote ?? '',
         },
