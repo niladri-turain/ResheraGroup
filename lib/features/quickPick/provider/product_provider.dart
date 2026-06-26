@@ -36,7 +36,10 @@ class ProductProvider with ChangeNotifier {
 
       if (response['status'] == true) {
         final productResponse = ProductListResponse.fromJson(response);
-        _categoryProducts[categoryId] = productResponse.data;
+        // Filter products by categoryId to ensure correct mapping for Men's/Women's etc.
+        _categoryProducts[categoryId] = productResponse.data
+            .where((product) => product.categoryId == categoryId)
+            .toList();
       } else {
         _errorMessage = response['message'] ?? 'Failed to fetch products';
       }
