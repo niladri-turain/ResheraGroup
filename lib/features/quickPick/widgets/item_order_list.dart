@@ -43,12 +43,8 @@ class ItemOrderList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
+        if (provider.isLoading && provider.orderListData == null) {
           return _buildSkeletonList();
-        }
-
-        if (provider.errorMessage != null) {
-          return Center(child: Text(provider.errorMessage!));
         }
 
         final allOrders = provider.orderListData?.data ?? [];
@@ -59,18 +55,47 @@ class ItemOrderList extends StatelessWidget {
           return orderNo.contains(query) || orderId.contains(query);
         }).toList();
 
-        if (orders.isEmpty) {
-          return const Center(child: Text("No orders found"));
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.all(10),
-          itemCount: orders.length,
-          itemBuilder: (context, index) {
-            final order = orders[index];
-            return OrderItemCard(order: order);
-          },
+        return RefreshIndicator(
+          onRefresh: () => provider.fetchOrders(showLoader: false),
+          color: const Color(0xFF7B2CBF),
+          child: _buildContent(provider, orders),
         );
+      },
+    );
+  }
+
+  Widget _buildContent(OrderListProvider provider, List<OrderData> orders) {
+    if (provider.errorMessage != null && provider.orderListData == null) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: 400,
+            child: Center(child: Text(provider.errorMessage!)),
+          ),
+        ],
+      );
+    }
+
+    if (orders.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(
+            height: 400,
+            child: Center(child: Text("No orders found")),
+          ),
+        ],
+      );
+    }
+
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(10),
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        return OrderItemCard(order: order);
       },
     );
   }
