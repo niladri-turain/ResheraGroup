@@ -102,14 +102,18 @@ class VendorCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (vendorId.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 4.0),
-                          child: Text(
-                            "($vendorId)",
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: AppSize.width(0.030),
-                              fontWeight: FontWeight.w400,
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 4.0),
+                            child: Text(
+                              "($vendorId)",
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: AppSize.width(0.030),
+                                fontWeight: FontWeight.w400,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),

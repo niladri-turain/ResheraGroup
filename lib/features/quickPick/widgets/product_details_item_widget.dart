@@ -319,7 +319,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                     ),
                     const SizedBox(width: 8),
                     const Text(
-                      "Delivery on Tuesday, 15th Dec 2023",
+                      "Delivery on Today",
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],

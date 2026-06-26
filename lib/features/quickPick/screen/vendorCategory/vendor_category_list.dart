@@ -452,10 +452,10 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.tune, color: Color(0xFF7B2CBF)),
-                onPressed: () => _showFilterBottomSheet(),
-              ),
+              // IconButton(
+              //   icon: const Icon(Icons.tune, color: Color(0xFF7B2CBF)),
+              //   onPressed: () => _showFilterBottomSheet(),
+              // ),
             ],
           ),
         ),
