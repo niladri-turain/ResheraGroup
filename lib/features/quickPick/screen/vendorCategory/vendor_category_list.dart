@@ -273,17 +273,54 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
       ),
       body: Stack(
         children: [
-          Consumer<VendorCategoryProvider>(
-            builder: (context, catProvider, child) {
-              if (catProvider.isLoading) {
-                return _buildSkeletonLoader();
+          RefreshIndicator(
+            onRefresh: () async {
+              final catProvider = context.read<VendorCategoryProvider>();
+              await catProvider.fetchVendorCategories(
+                widget.categoryId,
+                widget.subCategoryId,
+                widget.vendorId,
+              );
+              
+              if (catProvider.categories.isNotEmpty) {
+                if (_selectedCategoryId == null) {
+                  setState(() {
+                    _selectedCategoryId = catProvider.categories.first.id;
+                  });
+                }
+                
+                // Refresh products for all categories
+                for (var category in catProvider.categories) {
+                  await context.read<ProductProvider>().fetchProducts(
+                    businessCategoryId: widget.categoryId,
+                    businessSubCategoryId: widget.subCategoryId,
+                    categoryId: category.id,
+                    vendorId: widget.vendorId,
+                  );
+                }
               }
-              if (catProvider.categories.isEmpty) {
-                return const Center(child: Text("No categories found"));
-              }
-
-              return _buildMainLayout(catProvider);
+              
+              // Refresh banners
+              await context.read<MainVendorBannerProvider>().fetchMainVendorBanners(businessId: widget.vendorId);
+              await context.read<PromotionalVendorBannerProvider>().fetchPromotionalBanners(businessId: widget.vendorId);
             },
+            child: Consumer<VendorCategoryProvider>(
+              builder: (context, catProvider, child) {
+                if (catProvider.isLoading) {
+                  return _buildSkeletonLoader();
+                }
+                if (catProvider.categories.isEmpty) {
+                  return ListView(
+                    children: [
+                      SizedBox(height: AppSize.height(0.4)),
+                      const Center(child: Text("No categories found")),
+                    ],
+                  );
+                }
+
+                return _buildMainLayout(catProvider);
+              },
+            ),
           ),
           Positioned(
             bottom: 30,
@@ -379,6 +416,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
     }
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         // show main banner slider
         const SizedBox(height: 10),
