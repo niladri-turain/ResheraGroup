@@ -44,16 +44,17 @@ class _FoodBeveragesLayoutState extends State<FoodBeveragesLayout> {
   Widget build(BuildContext context) {
     return Consumer2<ProductProvider, PromotionalVendorBannerProvider>(
       builder: (context, productProvider, promoProvider, child) {
+        final promoBanners = promoProvider.bannerModel?.data ?? [];
+
         return ListView(
           padding: EdgeInsets.zero,
           children: [
             // Top Slider/Banner
             MainVendorSliderWidget(businessId: widget.vendorId),
-            
             const SizedBox(height: 5),
-
             // Categories as Expandable Banners
-            ...widget.catProvider.categories.map((category) {
+            ...List.generate(widget.catProvider.categories.length, (catIndex) {
+              final category = widget.catProvider.categories[catIndex];
               final isExpanded = _expandedState[category.id] ?? true;
               final products = productProvider.getProductsByCategory(category.id);
 
@@ -200,6 +201,22 @@ class _FoodBeveragesLayoutState extends State<FoodBeveragesLayout> {
                       ),
                     ),
                   ),
+                  
+                  // Show promotional banner after each category (if available)
+                  if (promoBanners.isNotEmpty) 
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          promoBanners[catIndex % promoBanners.length].image ?? "",
+                          width: double.infinity,
+                          height: 180,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
                 ],
               );
             }),
