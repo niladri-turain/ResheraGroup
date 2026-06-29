@@ -3,8 +3,9 @@ class CartListModel {
   String? message;
   int? totalItems;
   List<CartItem>? data;
+  VendorGstDetails? vendorGstDetails;
 
-  CartListModel({this.success, this.message, this.totalItems, this.data});
+  CartListModel({this.success, this.message, this.totalItems, this.data, this.vendorGstDetails});
 
   CartListModel.fromJson(Map<String, dynamic> json) {
     success = json['success'] ?? json['status'];
@@ -18,6 +19,23 @@ class CartListModel {
         data!.add(CartItem.fromJson(v));
       });
     }
+    vendorGstDetails = json['vendor_gst_details'] != null
+        ? VendorGstDetails.fromJson(json['vendor_gst_details'])
+        : null;
+  }
+}
+
+class VendorGstDetails {
+  String? gstNo;
+  String? gstStateCode;
+  String? gstAddress;
+
+  VendorGstDetails({this.gstNo, this.gstStateCode, this.gstAddress});
+
+  VendorGstDetails.fromJson(Map<String, dynamic> json) {
+    gstNo = json['gst_no'];
+    gstStateCode = json['gst_state_code']?.toString();
+    gstAddress = json['gst_address'];
   }
 }
 

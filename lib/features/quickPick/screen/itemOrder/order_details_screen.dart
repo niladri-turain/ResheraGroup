@@ -115,6 +115,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             child: Column(
               children: [
                 OrderDetailsWidget(
+                  orderId: widget.orderId,
                   order: order,
                   onCancelOrder: () {
                     // Handle logic

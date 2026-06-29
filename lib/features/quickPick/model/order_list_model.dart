@@ -146,6 +146,8 @@ class OrderItem {
   num? finalPrice;
   num? subtotal;
   num? loyaltyPoints;
+  String? status;
+  String? cancelNote;
   List<OrderAttribute>? attributes;
   ProductSnapshot? productSnapshot;
 
@@ -163,6 +165,8 @@ class OrderItem {
     this.finalPrice,
     this.subtotal,
     this.loyaltyPoints,
+    this.status,
+    this.cancelNote,
     this.attributes,
     this.productSnapshot,
   });
@@ -181,6 +185,8 @@ class OrderItem {
     finalPrice = json['final_price'];
     subtotal = json['subtotal'] ?? json['sub_total'];
     loyaltyPoints = json['loyalty_points'];
+    status = json['status']?.toString();
+    cancelNote = json['cancel_note'];
     if (json['attributes'] != null) {
       attributes = <OrderAttribute>[];
       json['attributes'].forEach((v) {

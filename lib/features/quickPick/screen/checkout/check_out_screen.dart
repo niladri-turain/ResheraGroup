@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resheragroup/core/utils/navigation_service.dart';
 import 'package:resheragroup/features/login/provider/user_address_provider.dart';
 import 'package:resheragroup/features/quickPick/provider/order_provider.dart';
 import 'package:resheragroup/features/quickPick/screen/category/quick_pick_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/service/location_service.dart';
-import '../../../../main_screen.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/service/shared_pref_service.dart';
 import '../../../login/screen/login_screen.dart';
 import '../../provider/update_cart_provider.dart';
 import '../../provider/delete_cart_provider.dart';
+import '../../provider/cancel_all_cart_provider.dart';
 import '../../provider/view_cart_list_provider.dart';
 import '../../widgets/address_selection_sheet.dart';
-import '../../widgets/cart_widgets.dart';
+
 import '../../../login/provider/login_provider.dart';
 import '../../widgets/checkout_item_widget.dart';
 import '../itemOrder/item_order_screen.dart';
@@ -32,6 +33,11 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   String selectedPayment = 'COD';
   String? cachedAddress;
   String? billAddress;
+
+  bool _isGstEnabled = false;
+  final TextEditingController _gstNumberController = TextEditingController();
+  final TextEditingController _gstNameController = TextEditingController();
+  final TextEditingController _gstAddressController = TextEditingController();
 
   @override
   void initState() {
@@ -51,10 +57,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             MaterialPageRoute(
               builder: (context) => LoginScreen(
                 onLoginSuccess: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const CheckOutScreen()),
-                  );
+                  NavigationService.navigateToReplacement(const CheckOutScreen());
                 },
               ),
             ),
@@ -71,9 +74,19 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   }
 
   @override
+  void dispose() {
+    _gstNumberController.dispose();
+    _gstNameController.dispose();
+    _gstAddressController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         backgroundColor: const Color(0xFF7B2CBF),
         elevation: 0,
@@ -328,7 +341,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         ),
                       ),
                       SizedBox(height: AppSize.height(0.01)),
-                      Container(
+                      cartData.vendorGstDetails?.gstNo!=null? Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
@@ -342,62 +355,58 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                             ),
                             SizedBox(height: AppSize.height(0.02)),
-                            Consumer<LoginProvider>(
-                              builder: (context, loginProvider, child) {
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: AppSize.width(0.1),
-                                      height: AppSize.width(0.1),
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFF4B70F5),
-                                        shape: BoxShape.circle,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: AppSize.width(0.1),
+                                  height: AppSize.width(0.1),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF4B70F5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.description_outlined,
+                                    color: Colors.white,
+                                    size: AppSize.width(0.05),
+                                  ),
+                                ),
+                                SizedBox(width: AppSize.width(0.03)),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "GST No: ${cartData.vendorGstDetails?.gstNo ?? ''}",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                      child: Icon(
-                                        Icons.description_outlined,
-                                        color: Colors.white,
-                                        size: AppSize.width(0.05),
+                                      SizedBox(height: AppSize.height(0.001)),
+                                      Text(
+                                        "GST State Code: ${cartData.vendorGstDetails?.gstStateCode ?? ''}",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(width: AppSize.width(0.03)),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Vendor Id: ${widget.vendorKycId ?? ''}",
-                                            style: const TextStyle(
-                                              color: Colors.black87,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          SizedBox(height: AppSize.height(0.001)),
-                                          Text(
-                                            "vendor name: ${widget.vendorName ?? ''}",
-                                            style: const TextStyle(
-                                              color: Colors.black87,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          Text(
-                                            billAddress ?? "",
-                                            style: const TextStyle(
-                                              color: Colors.black87,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          SizedBox(height: AppSize.height(0.001)),
-                                        ],
+                                      Text(
+                                        cartData.vendorGstDetails?.gstAddress ?? "",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              },
+                                      SizedBox(height: AppSize.height(0.001)),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ),
+                      ):SizedBox(),
                       SizedBox(height: AppSize.height(0.01)),
                       Container(
                         decoration: BoxDecoration(
@@ -615,7 +624,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                       visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
                                     ),
                                     SizedBox(width: AppSize.width(0.02)),
-                                    const Text('Cash on Delivery (COD)'),
+                                    const Text('By Hand'),
                                   ],
                                 ),
                               ),
@@ -648,6 +657,76 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         ),
                       ),
                       SizedBox(height: AppSize.height(0.01)),
+                      // Gst form
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSize.width(0.04),
+                          vertical: AppSize.height(0.01),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Enable GST',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            Switch(
+                              value: _isGstEnabled,
+                              activeColor: const Color(0xFF7B2CBF),
+                              onChanged: (value) {
+                                setState(() {
+                                  _isGstEnabled = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_isGstEnabled) ...[
+                        SizedBox(height: AppSize.height(0.01)),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: EdgeInsets.all(AppSize.width(0.04)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'GST Details',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              ),
+                              SizedBox(height: AppSize.height(0.015)),
+                              _buildTextField(
+                                controller: _gstNumberController,
+                                label: 'GST Number',
+                                hint: 'Enter GST Number',
+                                maxLength: 15,
+                                textCapitalization: TextCapitalization.characters,
+                              ),
+                              SizedBox(height: AppSize.height(0.015)),
+                              _buildTextField(
+                                controller: _gstNameController,
+                                label: 'GST Name',
+                                hint: 'Enter GST Name',
+                              ),
+                              SizedBox(height: AppSize.height(0.015)),
+                              _buildTextField(
+                                controller: _gstAddressController,
+                                label: 'GST Address',
+                                hint: 'Enter GST Address',
+                                maxLines: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      
                     ],
                   ),
                 ),
@@ -676,23 +755,54 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       Expanded(
                         child: SizedBox(
                           height: AppSize.height(0.06),
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFF7B2CBF)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              backgroundColor: Colors.white,
-                            ),
-                            child: const Text(
-                              "Cancel Cart",
-                              style: TextStyle(
-                                color: Color(0xFF7B2CBF),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
+                          child: Consumer<CancelAllCartProvider>(
+                            builder: (context, cancelProvider, child) {
+                              return OutlinedButton(
+                                onPressed: cancelProvider.isLoading
+                                    ? null
+                                    : () async {
+                                        final success = await cancelProvider.cancelCart();
+                                        if (success) {
+                                          if (mounted) {
+                                            context.read<ViewCartListProvider>().clearCartLocal();
+                                            context.read<ViewCartListProvider>().fetchCart();
+                                          }
+                                        } else {
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text(cancelProvider.errorMessage ?? "Failed to cancel cart")),
+                                            );
+                                          }
+                                        }
+                                      },
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: Color(0xFF7B2CBF)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  backgroundColor: Colors.white,
+                                ),
+                                child: cancelProvider.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7B2CBF)),
+                                      )
+                                    : const FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          "Cancel Cart",
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: TextStyle(
+                                            color: Color(0xFF7B2CBF),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -720,6 +830,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                 paymentMethod: selectedPayment,
                                 billing: addressProvider.addressModel?.data?.billing,
                                 shipping: addressProvider.selectedAddress,
+                                isGstBill: _isGstEnabled,
+                                gstNumber: _isGstEnabled ? _gstNumberController.text : null,
+                                gstName: _isGstEnabled ? _gstNameController.text : null,
+                                gstAddress: _isGstEnabled ? _gstAddressController.text : null,
                               );
 
                               if (success) {
@@ -755,12 +869,17 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: Text(
-                              "Proceed (${cartData.totalItems ?? 0} Items)",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                "Proceed (${cartData.totalItems ?? 0} Items)",
+                                maxLines: 1,
+                                softWrap: false,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
                           ),
@@ -774,8 +893,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSkeleton() {
     return Shimmer.fromColors(
@@ -895,6 +1015,56 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         Text(
           price,
           style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    int maxLines = 1,
+    int? maxLength,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: AppSize.height(0.008)),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          maxLength: maxLength,
+          textCapitalization: textCapitalization,
+          decoration: InputDecoration(
+            counterText: "",
+            hintText: hint,
+            hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[200]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[200]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF7B2CBF)),
+            ),
+          ),
         ),
       ],
     );

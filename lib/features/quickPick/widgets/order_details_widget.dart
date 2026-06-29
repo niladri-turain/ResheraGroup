@@ -3,15 +3,21 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../login/provider/login_provider.dart';
 import '../model/order_list_model.dart';
+import '../provider/cancel_reason_provider.dart';
+import '../model/cancel_reason_model.dart';
+import '../provider/cancel_order_provider.dart';
+import '../provider/order_list_provider.dart';
 
 class OrderDetailsWidget extends StatelessWidget {
   final OrderData order;
+  final String orderId;
   final VoidCallback? onCancelOrder;
 
   const OrderDetailsWidget({
     super.key,
     required this.order,
     this.onCancelOrder,
+    required this.orderId
   });
 
   String _formatDate(String? dateStr) {
@@ -43,6 +49,179 @@ class OrderDetailsWidget extends StatelessWidget {
     }
   }
 
+  void _showCancelBottomSheet(BuildContext context, String orderItemId) {
+    CancelReason? selectedReason;
+    final TextEditingController descriptionController = TextEditingController();
+    
+    // Fetch reasons when bottom sheet opens
+    final cancelReasonProvider = Provider.of<CancelReasonProvider>(context, listen: false);
+    cancelReasonProvider.fetchCancelReasons();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            left: 20,
+            right: 20,
+            top: 20,
+          ),
+          child: Consumer2<CancelReasonProvider, CancelOrderProvider>(
+            builder: (context, reasonProvider, cancelProvider, child) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Cancel Order",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Please select a reason for cancellation",
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Reason for cancellation",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 8),
+                  reasonProvider.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<CancelReason>(
+                              isExpanded: true,
+                              hint: const Text("Select Reason"),
+                              value: selectedReason,
+                              items: reasonProvider.reasons.map((CancelReason reason) {
+                                return DropdownMenuItem<CancelReason>(
+                                  value: reason,
+                                  child: Text(reason.reason ?? ''),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setModalState(() {
+                                  selectedReason = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Description (Optional)",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: descriptionController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: "Tell us more about your cancellation...",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: selectedReason == null || reasonProvider.isLoading || cancelProvider.isLoading
+                          ? null
+                          : () async {
+                              try {
+                                final result = await cancelProvider.cancelOrderItem(
+                                  orderItemId:orderId,
+                                  cancelReasonId: selectedReason!.id!.toString(),
+                                  cancelNote: descriptionController.text,
+                                );
+                                
+                                if (result?.success == true) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(result?.message ?? "Order item cancelled successfully")),
+                                    );
+                                    // Refresh order list
+                                    Provider.of<OrderListProvider>(context, listen: false).fetchOrders();
+                                    // Pop bottom sheet
+                                    Navigator.pop(context);
+                                    // Pop order details screen to go back to order list
+                                    Navigator.pop(context);
+                                  }
+                                } else {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(result?.message ?? "Failed to cancel order item")),
+                                    );
+                                  }
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Error: $e")),
+                                  );
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7B2CBF),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: cancelProvider.isLoading
+                          ? const Center(child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
+                          : const Text(
+                              "Submit",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -56,6 +235,31 @@ class OrderDetailsWidget extends StatelessWidget {
           _buildProductDetails(),
           const SizedBox(height: 12),
           _buildOrderSummary(),
+          if (order.orderStatusLabel?.toLowerCase() == 'pending' && order.items != null && order.items!.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () => _showCancelBottomSheet(context, order.items!.first.id ?? ''),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7B2CBF),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  "Cancel Order",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -296,6 +500,10 @@ class OrderDetailsWidget extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 8),
+
+                // Status and Cancel Note removed as per requirement: "item er moddhe list e kno cancel likhbe na"
+                const SizedBox(height: 8),
+
                 Row(
                   children: [
                     Container(
@@ -353,7 +561,7 @@ class OrderDetailsWidget extends StatelessWidget {
           const Text("Order Summary", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 16),
           _summaryRow("Invoice No", order.invoiceNo ?? 'N/A'),
-          _summaryRow("Payment Method", order.paymentMethodLabel ?? 'N/A'),
+          _summaryRow("Payment Method", order.paymentMethodLabel=="COD" ? "By Hand" : 'N/A'),
           _summaryRow("Total Quantity", "${order.totalItems ?? 0}"),
           _summaryRow("Item Total", "₹${order.itemsTotal ?? 0}"),
           _summaryRow("Discount", "-₹${order.discountAmount ?? 0}", valueColor: Colors.green),

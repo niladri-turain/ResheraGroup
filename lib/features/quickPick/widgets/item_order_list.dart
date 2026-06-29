@@ -7,7 +7,8 @@ import 'package:resheragroup/features/quickPick/provider/order_list_provider.dar
 import 'package:resheragroup/features/quickPick/screen/itemOrder/order_details_screen.dart';
 
 class ItemOrderList extends StatelessWidget {
-  const ItemOrderList({super.key});
+  final String searchQuery;
+  const ItemOrderList({super.key, this.searchQuery = ''});
 
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'N/A';
@@ -42,28 +43,94 @@ class ItemOrderList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
+        if (provider.isLoading && provider.orders.isEmpty) {
           return _buildSkeletonList();
         }
 
-        if (provider.errorMessage != null) {
-          return Center(child: Text(provider.errorMessage!));
-        }
+        final allOrders = provider.orders;
+        final orders = allOrders.where((order) {
+          final query = searchQuery.toLowerCase();
+          final orderNo = (order.orderNo ?? '').toLowerCase();
+          final orderId = (order.id ?? '').toLowerCase();
+          return orderNo.contains(query) || orderId.contains(query);
+        }).toList();
 
-        final orders = provider.orderListData?.data ?? [];
-
-        if (orders.isEmpty) {
-          return const Center(child: Text("No orders found"));
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.all(10),
-          itemCount: orders.length,
-          itemBuilder: (context, index) {
-            final order = orders[index];
-            return OrderItemCard(order: order);
-          },
+        return RefreshIndicator(
+          onRefresh: () => provider.fetchOrders(isRefresh: true),
+          color: const Color(0xFF7B2CBF),
+          child: _buildContent(provider, orders),
         );
+      },
+    );
+  }
+
+  Widget _buildContent(OrderListProvider provider, List<OrderData> orders) {
+    if (provider.errorMessage != null && provider.orders.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: 400,
+            child: Center(child: Text(provider.errorMessage!)),
+          ),
+        ],
+      );
+    }
+
+    if (orders.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(
+            height: 400,
+            child: Center(child: Text("No orders found")),
+          ),
+        ],
+      );
+    }
+
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(10),
+      itemCount: orders.length + 1,
+      itemBuilder: (context, index) {
+        if (index < orders.length) {
+          final order = orders[index];
+          return OrderItemCard(order: order);
+        } else {
+          // Load More Section
+          if (provider.isMoreLoading) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator(color: Color(0xFF7B2CBF))),
+            );
+          } else if (provider.hasMore) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: () => provider.fetchOrders(isRefresh: false),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7B2CBF),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  ),
+                  child: const Text("Load More"),
+                ),
+              ),
+            );
+          } else {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: Text(
+                  "No more orders",
+                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                ),
+              ),
+            );
+          }
+        }
       },
     );
   }
@@ -187,37 +254,37 @@ class OrderItemCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      firstItem?.image ?? 'https://via.placeholder.com/80',
-                      height: 80,
-                      width: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 80,
-                        width: 80,
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
+                  // ClipRRect(
+                  //   borderRadius: BorderRadius.circular(8),
+                  //   child: Image.network(
+                  //     firstItem?.image ?? 'https://via.placeholder.com/80',
+                  //     height: 80,
+                  //     width: 80,
+                  //     fit: BoxFit.cover,
+                  //     errorBuilder: (context, error, stackTrace) => Container(
+                  //       height: 80,
+                  //       width: 80,
+                  //       color: Colors.grey[200],
+                  //       child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          firstItem?.productName ?? 'Order #${order.orderNo}',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 5),
+                        // Text(
+                        //   firstItem?.productName ?? 'Order #${order.orderNo}',
+                        //   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        //   maxLines: 1,
+                        //   overflow: TextOverflow.ellipsis,
+                        // ),
+                        // const SizedBox(height: 5),
                         Text(
                           "Date: ${_formatDate(order.createdAt)}",
                           style: const TextStyle(color: Colors.grey, fontSize: 12),

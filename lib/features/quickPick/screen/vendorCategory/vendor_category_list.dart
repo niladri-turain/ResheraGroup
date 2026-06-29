@@ -25,6 +25,7 @@ import '../../widgets/standard_product_card.dart';
 import '../../widgets/cart_widgets.dart';
 import '../../widgets/main_vendor_slider_widget.dart';
 import '../../provider/promotional_vendor_banner_provider.dart';
+import 'food_beverages_widget/food_beverages_layout.dart';
 
 class VendorCategoryList extends StatefulWidget {
   final String categoryId;
@@ -90,6 +91,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
             businessCategoryId: widget.categoryId,
             businessSubCategoryId: widget.subCategoryId,
             categoryId: category.id,
+            vendorId: widget.vendorId
           );
         }
       });
@@ -271,17 +273,54 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
       ),
       body: Stack(
         children: [
-          Consumer<VendorCategoryProvider>(
-            builder: (context, catProvider, child) {
-              if (catProvider.isLoading) {
-                return _buildSkeletonLoader();
+          RefreshIndicator(
+            onRefresh: () async {
+              final catProvider = context.read<VendorCategoryProvider>();
+              await catProvider.fetchVendorCategories(
+                widget.categoryId,
+                widget.subCategoryId,
+                widget.vendorId,
+              );
+              
+              if (catProvider.categories.isNotEmpty) {
+                if (_selectedCategoryId == null) {
+                  setState(() {
+                    _selectedCategoryId = catProvider.categories.first.id;
+                  });
+                }
+                
+                // Refresh products for all categories
+                for (var category in catProvider.categories) {
+                  await context.read<ProductProvider>().fetchProducts(
+                    businessCategoryId: widget.categoryId,
+                    businessSubCategoryId: widget.subCategoryId,
+                    categoryId: category.id,
+                    vendorId: widget.vendorId,
+                  );
+                }
               }
-              if (catProvider.categories.isEmpty) {
-                return const Center(child: Text("No categories found"));
-              }
-
-              return _buildMainLayout(catProvider);
+              
+              // Refresh banners
+              await context.read<MainVendorBannerProvider>().fetchMainVendorBanners(businessId: widget.vendorId);
+              await context.read<PromotionalVendorBannerProvider>().fetchPromotionalBanners(businessId: widget.vendorId);
             },
+            child: Consumer<VendorCategoryProvider>(
+              builder: (context, catProvider, child) {
+                if (catProvider.isLoading) {
+                  return _buildSkeletonLoader();
+                }
+                if (catProvider.categories.isEmpty) {
+                  return ListView(
+                    children: [
+                      SizedBox(height: AppSize.height(0.4)),
+                      const Center(child: Text("No categories found")),
+                    ],
+                  );
+                }
+
+                return _buildMainLayout(catProvider);
+              },
+            ),
           ),
           Positioned(
             bottom: 30,
@@ -360,14 +399,28 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
   }
 
   Widget _buildMainLayout(VendorCategoryProvider catProvider) {
-    bool isFashion = widget.categoryName == "Fashion & Lifestyle" || 
-                     widget.categoryName.toLowerCase().contains("fashion");
+    bool isFashion = widget.categoryName == "Fashion & Lifestyle" ||
+        widget.categoryName.toLowerCase().contains("fashion");
+    bool isFood = widget.categoryName == "Food & Beverages" ||
+        widget.categoryName.toLowerCase().contains("food");
+
+    if (isFood) {
+      return FoodBeveragesLayout(
+        catProvider: catProvider,
+        businessCategoryId: widget.categoryId,
+        businessSubCategoryId: widget.subCategoryId,
+        vendorId: widget.vendorId,
+        itemQuantities: _itemQuantities,
+        onUpdateQuantity: _updateQuantity,
+      );
+    }
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         // show main banner slider
         const SizedBox(height: 10),
-        const MainVendorSliderWidget(),
+        MainVendorSliderWidget(businessId: widget.vendorId),
 
         // Horizontal circular categories
         Container(
@@ -437,10 +490,10 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.tune, color: Color(0xFF7B2CBF)),
-                onPressed: () => _showFilterBottomSheet(),
-              ),
+              // IconButton(
+              //   icon: const Icon(Icons.tune, color: Color(0xFF7B2CBF)),
+              //   onPressed: () => _showFilterBottomSheet(),
+              // ),
             ],
           ),
         ),
@@ -541,6 +594,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                             categoryId: _selectedCategoryId!,
                             businessCategoryId: widget.categoryId,
                             businessSubCategoryId: widget.subCategoryId,
+                            isFashion: isFashion,
                             onCountChanged: (count) {
                               _updateQuantity(productPair[0].productId,
                                   count - (_itemQuantities[productPair[0].productId] ?? 0));
@@ -562,6 +616,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                                   categoryId: _selectedCategoryId!,
                                   businessCategoryId: widget.categoryId,
                                   businessSubCategoryId: widget.subCategoryId,
+                                  isFashion: isFashion,
                                   onCountChanged: (count) {
                                     _updateQuantity(productPair[1].productId,
                                         count - (_itemQuantities[productPair[1].productId] ?? 0));
@@ -587,6 +642,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                     businessCategoryId: widget.categoryId,
                     businessSubCategoryId: widget.subCategoryId,
                     businessId: p.business?.businessId ?? "",
+                    isFashion: isFashion,
                     quantity: _itemQuantities[p.productId] ?? 0,
                     onAdd: () => _updateQuantity(p.productId, 1),
                     onRemove: () => _updateQuantity(p.productId, -1),

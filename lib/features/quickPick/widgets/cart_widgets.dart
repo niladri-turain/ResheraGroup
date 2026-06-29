@@ -5,6 +5,7 @@ class CartCounterWidget extends StatefulWidget {
   final Function(int) onCountChanged;
   final String initialLabel;
   final Color activeColor;
+  final bool isLoading;
 
   const CartCounterWidget({
     super.key,
@@ -12,6 +13,7 @@ class CartCounterWidget extends StatefulWidget {
     required this.onCountChanged,
     this.initialLabel = 'ADD',
     this.activeColor = const Color(0xFF7B2CBF),
+    this.isLoading = false,
   });
 
   @override
@@ -30,19 +32,30 @@ class _CartCounterWidgetState extends State<CartCounterWidget> {
   @override
   void didUpdateWidget(covariant CartCounterWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialCount != widget.initialCount) {
-      _count = widget.initialCount;
+    // Only sync with initialCount if it has actually changed from the parent side.
+    // This prevents the "jump back" effect (e.g. 2 -> 1 -> 2) during asynchronous API calls.
+    if (widget.initialCount != oldWidget.initialCount) {
+      setState(() {
+        _count = widget.initialCount;
+      });
     }
   }
 
   void _increment() {
-    setState(() {
-      _count++;
-      widget.onCountChanged(_count);
-    });
+    if (widget.isLoading) return;
+    if (_count == 0) {
+      // Don't update local state yet for the first add to handle vendor conflicts properly
+      widget.onCountChanged(1);
+    } else {
+      setState(() {
+        _count++;
+        widget.onCountChanged(_count);
+      });
+    }
   }
 
   void _decrement() {
+    if (widget.isLoading) return;
     if (_count > 0) {
       setState(() {
         _count--;
@@ -57,21 +70,27 @@ class _CartCounterWidgetState extends State<CartCounterWidget> {
       return SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: _increment,
+          onPressed: widget.isLoading ? null : _increment,
           style: ElevatedButton.styleFrom(
             backgroundColor: widget.activeColor,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
-          child: Text(
-            widget.initialLabel,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
+          child: widget.isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                )
+              : Text(
+                  widget.initialLabel,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
         ),
       );
     }
@@ -87,8 +106,10 @@ class _CartCounterWidgetState extends State<CartCounterWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.remove, color: Colors.white, size: 24),
-            onPressed: _decrement,
+            icon: widget.isLoading 
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : const Icon(Icons.remove, color: Colors.white, size: 24),
+            onPressed: widget.isLoading ? null : _decrement,
           ),
           Text(
             '$_count',
@@ -99,8 +120,10 @@ class _CartCounterWidgetState extends State<CartCounterWidget> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.white, size: 24),
-            onPressed: _increment,
+            icon: widget.isLoading 
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : const Icon(Icons.add, color: Colors.white, size: 24),
+            onPressed: widget.isLoading ? null : _increment,
           ),
         ],
       ),

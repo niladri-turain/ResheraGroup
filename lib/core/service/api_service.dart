@@ -150,30 +150,38 @@ class ApiService {
     print('Response Body: $responseBody');
     print('--------------------');
 
+    dynamic decoded;
+    try {
+      decoded = jsonDecode(responseBody);
+    } catch (_) {
+      // Not a JSON response
+    }
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      try {
-        return jsonDecode(responseBody);
-      } catch (e) {
-        throw Exception('Invalid JSON response');
-      }
+      if (decoded == null) throw Exception('Invalid JSON response');
+      return decoded;
     } else if (response.statusCode == 401) {
       String errorMessage = '';
-      try {
-        final Map<String, dynamic> errorData = jsonDecode(responseBody);
-        errorMessage = errorData['message'] ?? errorMessage;
-      } catch (_) {}
+      if (decoded is Map) {
+        errorMessage = decoded['message'] ?? errorMessage;
+      }
 
       // Handle Unauthorized error only for address endpoint
       if (response.request?.url.toString().contains(ApiEndPoints.address) ?? false) {
         _handleUnauthorized();
       }
-      throw Exception(errorMessage);
+      throw Exception(errorMessage.isEmpty ? 'Unauthorized' : errorMessage);
     } else {
+      // If it's a valid JSON with success/status/action_required field, return it instead of throwing
+      // This allows providers to handle structured errors (like vendor conflicts)
+      if (decoded is Map && (decoded.containsKey('success') || decoded.containsKey('status') || decoded.containsKey('action_required'))) {
+        return decoded;
+      }
+
       String errorMessage = 'Something went wrong';
-      try {
-        final Map<String, dynamic> errorData = jsonDecode(responseBody);
-        errorMessage = errorData['message'] ?? errorMessage;
-      } catch (_) {
+      if (decoded is Map && decoded.containsKey('message')) {
+        errorMessage = decoded['message'];
+      } else {
         errorMessage = 'Error ${response.statusCode}: $responseBody';
       }
       throw Exception(errorMessage);

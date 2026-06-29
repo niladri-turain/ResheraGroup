@@ -12,6 +12,7 @@ class FashionProductCard extends StatelessWidget {
   final String businessCategoryId;
   final String businessSubCategoryId;
   final String businessId;
+  final bool isFashion;
   final int initialCount;
   final Function(int) onCountChanged;
 
@@ -26,6 +27,7 @@ class FashionProductCard extends StatelessWidget {
     required this.businessCategoryId,
     required this.businessSubCategoryId,
     required this.businessId,
+    this.isFashion = false,
     this.initialCount = 0,
     required this.onCountChanged,
   });
@@ -43,6 +45,7 @@ class FashionProductCard extends StatelessWidget {
               categoryId: categoryId,
               productId: id,
               businessId: businessId,
+              isFashion: isFashion,
             ),
           ),
         );
@@ -130,6 +133,7 @@ class FashionProductCard extends StatelessWidget {
                             categoryId: categoryId,
                             productId: id,
                             businessId: businessId,
+                            isFashion: isFashion,
                           ),
                         ),
                       );

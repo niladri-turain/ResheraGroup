@@ -23,18 +23,23 @@ class ProductProvider with ChangeNotifier {
     required String businessCategoryId,
     required String businessSubCategoryId,
     required String categoryId,
+    required String vendorId,
+
   }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final endpoint = "${ApiEndPoints.productList}?business_category_id=$businessCategoryId&business_sub_category_id=$businessSubCategoryId&category_id=$categoryId";
+      final endpoint = "${ApiEndPoints.productList}?business_id=$vendorId";
       final response = await _apiService.get(endpoint);
 
       if (response['status'] == true) {
         final productResponse = ProductListResponse.fromJson(response);
-        _categoryProducts[categoryId] = productResponse.data;
+        // Filter products by categoryId to ensure correct mapping for Men's/Women's etc.
+        _categoryProducts[categoryId] = productResponse.data
+            .where((product) => product.categoryId == categoryId)
+            .toList();
       } else {
         _errorMessage = response['message'] ?? 'Failed to fetch products';
       }

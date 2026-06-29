@@ -130,7 +130,7 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
                     hintText: 'Search order ID or item...',
                   ),
                 ),
-                Expanded(child: ItemOrderList(),)
+                Expanded(child: ItemOrderList(searchQuery: _searchQuery),)
 
               ],
             ),
