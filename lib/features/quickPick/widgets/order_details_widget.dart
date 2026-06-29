@@ -561,7 +561,7 @@ class OrderDetailsWidget extends StatelessWidget {
           const Text("Order Summary", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 16),
           _summaryRow("Invoice No", order.invoiceNo ?? 'N/A'),
-          _summaryRow("Payment Method", order.paymentMethodLabel ?? 'N/A'),
+          _summaryRow("Payment Method", order.paymentMethodLabel=="COD" ? "By Hand" : 'N/A'),
           _summaryRow("Total Quantity", "${order.totalItems ?? 0}"),
           _summaryRow("Item Total", "₹${order.itemsTotal ?? 0}"),
           _summaryRow("Discount", "-₹${order.discountAmount ?? 0}", valueColor: Colors.green),

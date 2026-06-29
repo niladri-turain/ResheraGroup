@@ -341,7 +341,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         ),
                       ),
                       SizedBox(height: AppSize.height(0.01)),
-                      Container(
+                      cartData.vendorGstDetails?.gstNo!=null? Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
@@ -406,7 +406,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                             ),
                           ],
                         ),
-                      ),
+                      ):SizedBox(),
                       SizedBox(height: AppSize.height(0.01)),
                       Container(
                         decoration: BoxDecoration(
@@ -624,7 +624,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                       visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
                                     ),
                                     SizedBox(width: AppSize.width(0.02)),
-                                    const Text('Cash on Delivery (COD)'),
+                                    const Text('By Hand'),
                                   ],
                                 ),
                               ),
