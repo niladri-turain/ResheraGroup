@@ -12,38 +12,74 @@ class OrderListProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _isMoreLoading = false;
+  bool get isMoreLoading => _isMoreLoading;
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
   OrderListModel? _orderListData;
   OrderListModel? get orderListData => _orderListData;
 
-  Future<void> fetchOrders({bool showLoader = true}) async {
-    if (showLoader) {
+  List<OrderData> _orders = [];
+  List<OrderData> get orders => _orders;
+
+  int _currentPage = 1;
+  bool _hasMore = true;
+  bool get hasMore => _hasMore;
+
+  Future<void> fetchOrders({bool isRefresh = true}) async {
+    if (isRefresh) {
       _isLoading = true;
+      _currentPage = 1;
+      _orders = [];
+      _hasMore = true;
       _errorMessage = null;
+      notifyListeners();
+    } else {
+      if (!_hasMore || _isMoreLoading) return;
+      _isMoreLoading = true;
       notifyListeners();
     }
 
     try {
-      final token = await _prefService.getToken();
       final userId = await _prefService.getUserId();
 
-      // {{base_url}}/orders?user_id=userid
+      // {{base_url}}/orders?user_id=userid&page=page
       final response = await _apiService.get(
-        "${ApiEndPoints.createOrder}?user_id=${userId ?? ''}",
-        // token: token,
+        "${ApiEndPoints.createOrder}?user_id=${userId ?? ''}&page=$_currentPage",
       );
 
-      _orderListData = OrderListModel.fromJson(response);
+      final newData = OrderListModel.fromJson(response is Map<String, dynamic> ? response : {});
       
-      if (_orderListData?.success != true) {
+      // Check if we have data either in 'data' field or if the response is a list
+      List<OrderData> fetchedOrders = [];
+      if (response is List) {
+        fetchedOrders = response.map((e) => OrderData.fromJson(e)).toList();
+      } else if (response is Map && response['data'] != null) {
+        fetchedOrders = (response['data'] as List).map((e) => OrderData.fromJson(e)).toList();
+      }
+
+      if (fetchedOrders.isNotEmpty || (response is Map && response['success'] == true)) {
+        _errorMessage = null;
+        if (fetchedOrders.isNotEmpty) {
+          _orders.addAll(fetchedOrders);
+          _currentPage++;
+          if (fetchedOrders.length < 10) {
+            _hasMore = false;
+          }
+        } else {
+          _hasMore = false;
+        }
+        _orderListData = newData;
+      } else {
         _errorMessage = "Failed to fetch orders";
       }
     } catch (e) {
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {
       _isLoading = false;
+      _isMoreLoading = false;
       notifyListeners();
     }
   }

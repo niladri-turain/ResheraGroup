@@ -43,11 +43,11 @@ class ItemOrderList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading && provider.orderListData == null) {
+        if (provider.isLoading && provider.orders.isEmpty) {
           return _buildSkeletonList();
         }
 
-        final allOrders = provider.orderListData?.data ?? [];
+        final allOrders = provider.orders;
         final orders = allOrders.where((order) {
           final query = searchQuery.toLowerCase();
           final orderNo = (order.orderNo ?? '').toLowerCase();
@@ -56,7 +56,7 @@ class ItemOrderList extends StatelessWidget {
         }).toList();
 
         return RefreshIndicator(
-          onRefresh: () => provider.fetchOrders(showLoader: false),
+          onRefresh: () => provider.fetchOrders(isRefresh: true),
           color: const Color(0xFF7B2CBF),
           child: _buildContent(provider, orders),
         );
@@ -65,7 +65,7 @@ class ItemOrderList extends StatelessWidget {
   }
 
   Widget _buildContent(OrderListProvider provider, List<OrderData> orders) {
-    if (provider.errorMessage != null && provider.orderListData == null) {
+    if (provider.errorMessage != null && provider.orders.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
@@ -92,10 +92,45 @@ class ItemOrderList extends StatelessWidget {
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(10),
-      itemCount: orders.length,
+      itemCount: orders.length + 1,
       itemBuilder: (context, index) {
-        final order = orders[index];
-        return OrderItemCard(order: order);
+        if (index < orders.length) {
+          final order = orders[index];
+          return OrderItemCard(order: order);
+        } else {
+          // Load More Section
+          if (provider.isMoreLoading) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator(color: Color(0xFF7B2CBF))),
+            );
+          } else if (provider.hasMore) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: () => provider.fetchOrders(isRefresh: false),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7B2CBF),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  ),
+                  child: const Text("Load More"),
+                ),
+              ),
+            );
+          } else {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: Text(
+                  "No more orders",
+                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                ),
+              ),
+            );
+          }
+        }
       },
     );
   }
