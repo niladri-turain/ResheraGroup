@@ -22,7 +22,7 @@ class ApiEndPoints {
 
 
         //MAIN PANEL PART
-  static const String mainPanelUrl="https://test.resheragroup.in/api/member/v1/";
+  static const String mainPanelUrl="https://resheragroup.in/api/member/v1/";
   static const String loginApi = "login";
   static const String dashboardUrl="dashboard";
   static const String address="user-addresses";

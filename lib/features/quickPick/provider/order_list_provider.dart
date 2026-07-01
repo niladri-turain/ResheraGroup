@@ -50,31 +50,33 @@ class OrderListProvider with ChangeNotifier {
         "${ApiEndPoints.createOrder}?user_id=${userId ?? ''}&page=$_currentPage",
       );
 
-      final newData = OrderListModel.fromJson(response is Map<String, dynamic> ? response : {});
-      
-      // Check if we have data either in 'data' field or if the response is a list
-      List<OrderData> fetchedOrders = [];
+      // Reset error message as we got a successful response
+      _errorMessage = null;
+
+      List<OrderData> fetchedItems = [];
       if (response is List) {
-        fetchedOrders = response.map((e) => OrderData.fromJson(e)).toList();
-      } else if (response is Map && response['data'] != null) {
-        fetchedOrders = (response['data'] as List).map((e) => OrderData.fromJson(e)).toList();
+        fetchedItems = response.map((e) => OrderData.fromJson(e)).toList();
+      } else if (response is Map) {
+        if (response['data'] is List) {
+          fetchedItems = (response['data'] as List).map((e) => OrderData.fromJson(e)).toList();
+        }
+        _orderListData = OrderListModel.fromJson(response as Map<String, dynamic>);
       }
 
-      if (fetchedOrders.isNotEmpty || (response is Map && response['success'] == true)) {
-        _errorMessage = null;
-        if (fetchedOrders.isNotEmpty) {
-          _orders.addAll(fetchedOrders);
-          _currentPage++;
-          if (fetchedOrders.length < 10) {
-            _hasMore = false;
-          }
-        } else {
+      if (fetchedItems.isNotEmpty) {
+        _orders.addAll(fetchedItems);
+        _currentPage++;
+        if (fetchedItems.length < 10) {
           _hasMore = false;
         }
-        _orderListData = newData;
       } else {
-        _errorMessage = "Failed to fetch orders";
+        _hasMore = false;
       }
+      
+      if (_orderListData == null) {
+        _orderListData = OrderListModel(success: true, data: _orders);
+      }
+
     } catch (e) {
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {

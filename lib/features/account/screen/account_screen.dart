@@ -43,7 +43,7 @@ class _AccountScreenState extends State<AccountScreen> {
           },
         ),
       )
-      ..loadRequest(Uri.parse('https://resheragroup.in/menu'));
+      ..loadRequest(Uri.parse('https://resheragroup.in/menu?platform=app'));
   }
 
   @override

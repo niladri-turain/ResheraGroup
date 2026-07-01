@@ -39,13 +39,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     AppSize.init(context); // 👈 IMPORTANT
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.black,
       appBar: const CustomAppBar(),
       body: Stack(
         children: [
           Positioned.fill(
             child: Image.asset(
-              AppImagesPng.dashboardBackground,
+              AppImagesPng.wallpaper,
               fit: BoxFit.cover,
             ),
           ),

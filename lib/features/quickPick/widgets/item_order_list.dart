@@ -66,24 +66,42 @@ class ItemOrderList extends StatelessWidget {
 
   Widget _buildContent(OrderListProvider provider, List<OrderData> orders) {
     if (provider.errorMessage != null && provider.orders.isEmpty) {
-      return ListView(
+      return CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: 400,
-            child: Center(child: Text(provider.errorMessage!)),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  provider.errorMessage!,
+                  textAlign: TextAlign.center,
+                  style:  TextStyle(color:  Colors.grey.shade600,),
+                ),
+              ),
+            ),
           ),
         ],
       );
     }
 
     if (orders.isEmpty) {
-      return ListView(
+      return CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
-          SizedBox(
-            height: 400,
-            child: Center(child: Text("No orders found")),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Text(
+                "No orders found",
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           ),
         ],
       );
@@ -166,7 +184,7 @@ class OrderItemCard extends StatelessWidget {
       case 'Delivered':
         return Colors.green.shade600;
       default:
-        return Colors.blue.shade600;
+        return Colors.green.shade600;
     }
   }
 

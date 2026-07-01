@@ -24,6 +24,7 @@ class AppImagesPng {
   static const toy = "assets/images/toy.jpg";
   static const logo = "assets/images/logo.png";
   static const appLogo = "assets/images/appLogo.png";
+  static const wallpaper = "assets/images/wallpaper.png";
 
 
 
