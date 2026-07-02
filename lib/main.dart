@@ -28,6 +28,8 @@ import 'features/quickPick/provider/cancel_reason_provider.dart';
 import 'features/quickPick/provider/cancel_order_provider.dart';
 import 'core/service/api_service.dart';
 
+import 'features/dashboard/provider/banner_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
@@ -56,6 +58,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CancelAllCartProvider()),
         ChangeNotifierProvider(create: (_) => CancelReasonProvider(apiService: di.sl<ApiService>())),
         ChangeNotifierProvider(create: (_) => CancelOrderProvider(apiService: di.sl<ApiService>())),
+        ChangeNotifierProvider(create: (_) => BannerProvider()),
       ],
       child: const MyApp(),
     ),

@@ -26,4 +26,5 @@ class ApiEndPoints {
   static const String loginApi = "login";
   static const String dashboardUrl="dashboard";
   static const String address="user-addresses";
+  static const String banner ="reshera-banner";
 }

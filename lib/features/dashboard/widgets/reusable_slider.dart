@@ -45,7 +45,9 @@ class _ReusableImageSliderState extends State<ReusableImageSlider> {
                   AppSize.width(0.04),
                 ),
                 image: DecorationImage(
-                  image: AssetImage(img),
+                  image: img.startsWith('http')
+                      ? NetworkImage(img) as ImageProvider
+                      : AssetImage(img),
                   fit: BoxFit.fill,
                 ),
               ),
