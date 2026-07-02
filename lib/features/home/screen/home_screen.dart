@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../widgets/custom_skeleton_widget.dart';
-import '../../login/provider/login_provider.dart';
-import '../provider/home_provider.dart';
-import '../../../main_screen.dart';
+import '../../../core/di/injection_container.dart';
+import '../../../core/service/shared_pref_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,8 +14,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final WebViewController _controller;
-  bool _isPageLoading = true; // For WebView itself
-  bool _isApiLoading = true;  // For initial dashboard API check
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -29,58 +26,29 @@ class _HomeScreenState extends State<HomeScreen> {
         NavigationDelegate(
           onPageStarted: (String url) {
             setState(() {
-              _isPageLoading = true;
+              _isLoading = true;
             });
           },
           onPageFinished: (String url) {
             setState(() {
-              _isPageLoading = false;
+              _isLoading = false;
             });
+          },
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            return NavigationDecision.navigate;
           },
         ),
       );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeDashboard();
-    });
+    _loadPage();
   }
 
-  Future<void> _initializeDashboard() async {
-    final loginProvider = context.read<LoginProvider>();
-    final homeProvider = context.read<HomeProvider>();
-
-    // 1. Check if logged in
-    if (loginProvider.userName == null) {
-      // Redirect to Login (Account Tab)
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 3)),
-          (route) => false,
-        );
-      }
-      return;
-    }
-
-    // 2. Call Dashboard API
-    final success = await homeProvider.fetchDashboard();
-
-    if (success) {
-      // 3. If 200 OK, Load WebView
-      _controller.loadRequest(Uri.parse('https://resheragroup.in/dashboard?platform=app'));
-      if (mounted) {
-        setState(() {
-          _isApiLoading = false;
-        });
-      }
-    } else {
-      // Handle failure (maybe show error or redirect)
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(homeProvider.errorMessage ?? "Failed to initialize dashboard")),
-        );
-      }
-    }
+  Future<void> _loadPage() async {
+    // Keeping it consistent with OrderScreen structure
+    // final token = await sl<SharedPrefService>().getToken();
+    _controller.loadRequest(
+      Uri.parse('https://resheragroup.in/dashboard?platform=app'),
+    );
   }
 
   @override
@@ -91,12 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         body: Stack(
           children: [
-            if (!_isApiLoading) WebViewWidget(controller: _controller),
-            if (_isApiLoading || _isPageLoading)
+            WebViewWidget(controller: _controller),
+            if (_isLoading)
               const Center(child: CustomSkeletonWidget()),
-            // Center(
-            //   child: Text("Dashboard Coming Soon",style: TextStyle(fontSize: 18,color: Colors.black),),
-            // )
           ],
         ),
       ),
