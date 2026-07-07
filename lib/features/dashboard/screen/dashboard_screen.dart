@@ -19,6 +19,7 @@ import '../../../core/di/injection_container.dart';
 import '../../../core/constants/app_sizes.dart';
 
 import '../../../widgets/custom_pop_up.dart';
+import '../../../widgets/common_webview_screen.dart';
 import '../widgets/custom_animated_dashboard_card.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/custom_dashboard_items.dart';
@@ -141,10 +142,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             themeColor: Colors.orange,
 
                           ),
-                          const CustomAnimatedDashboardCard(
+                          CustomAnimatedDashboardCard(
                               title: "MAGIC TOUCH",
                               imagePath: AppImagesWebp.magic,
-                              themeColor: Colors.green),
+                              themeColor: Colors.green,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const CommonWebViewScreen(
+                                      url: 'https://magictouch.resheragroup.in/magic-touch',
+                                    ),
+                                  ),
+                                );
+                              }),
                           CustomAnimatedDashboardCard(
                               title: "QUICK PICK",
                               imagePath: AppImagesWebp.food,
@@ -366,7 +377,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     _initData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      showAnnouncementPopup(context);
+      // showAnnouncementPopup(context);
     });
   }
 

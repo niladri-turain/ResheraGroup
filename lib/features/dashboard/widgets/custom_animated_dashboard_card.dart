@@ -1,16 +1,19 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_sizes.dart';
 
 class CustomRotationAnimation extends StatefulWidget {
   final String title;
   final String imagePath;
   final Color themeColor;
+  final VoidCallback? onTap;
 
   const CustomRotationAnimation({
     super.key,
     required this.title,
     required this.imagePath,
     required this.themeColor,
+    this.onTap,
   });
 
   @override
@@ -38,117 +41,125 @@ class _CustomRotationAnimationState extends State<CustomRotationAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        // 1. Rotating Glow Border
-        AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return CustomPaint(
-              size: const Size(175, 190),
-              painter: GlowingBorderPainter(
-                animationValue: _controller.value,
-                baseColor: widget.themeColor,
-              ),
-            );
-          },
-        ),
-
-        // 2. Main Card Body
-        Container(
-          width: 175,
-          height: 190,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: const Color(0xFF121212),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Stack(
-            children: [
-
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      center: Alignment.center,
-                      radius: 1.0,
-                      colors: [
-                        widget.themeColor.withOpacity(0.08),
-                        widget.themeColor.withOpacity(0.18),
-                      ],
+    AppSize.init(context);
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // 1. Rotating Glow Border
+          Container(
+            width: AppSize.width(0.44),
+            height: AppSize.height(0.22),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A1212),
+              borderRadius: BorderRadius.circular(AppSize.width(0.03)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppSize.width(0.03)),
+              child: Stack(
+                children: [
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return Center(
+                        child: CustomPaint(
+                          size: Size(AppSize.width(0.60), AppSize.width(0.60)),
+                          painter: GlowingBorderPainter(
+                            animationValue: _controller.value,
+                            baseColor: widget.themeColor,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: widget.themeColor.withOpacity(0.2),
+                        width: 1.5,
+                      ),
+                      gradient: RadialGradient(
+                        colors: [
+                          widget.themeColor.withOpacity(0.2),
+                          widget.themeColor.withOpacity(0.2),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-
-
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: [
-                    // --- IMAGE SECTION ---
-
-                    Expanded(
-                      flex: 3,
-                      child: Center(
-                        child: Image.asset(
-                          widget.imagePath,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // --- TITLE SECTION ---
-
-                    Flexible(
-                      flex: 1,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: widget.themeColor.withOpacity(0.5),
-                              width: 0.2,
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.orange,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              )
-                            ],
-                          ),
-                          child: Text(
-                            widget.title.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ],
+
+          // 2. Main Content
+          SizedBox(
+            width: AppSize.width(0.39),
+            height: AppSize.height(0.21),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: AppSize.height(0.015),
+                horizontal: AppSize.width(0.025),
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Center(
+                      child: Image.asset(
+                        widget.imagePath,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: AppSize.height(0.01)),
+                  Flexible(
+                    flex: 1,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSize.width(0.04),
+                          vertical: AppSize.height(0.008),
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(AppSize.width(0.03)),
+                          border: Border.all(
+                            color: widget.themeColor.withOpacity(0.5),
+                            width: 0.2,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.orange,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: Text(
+                          widget.title.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: AppSize.width(0.03),
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-// Custom Painter (Kono change dorkar nei, height/width upore handle kora hoyeche)
 class GlowingBorderPainter extends CustomPainter {
   final double animationValue;
   final Color baseColor;
@@ -163,15 +174,17 @@ class GlowingBorderPainter extends CustomPainter {
     final Paint paint = Paint()
       ..shader = SweepGradient(
         colors: [
-          Colors.transparent,
           baseColor,
+          baseColor.withOpacity(0.8),
           Colors.transparent,
         ],
-        stops: const [0.0, 0.5, 1.0],
+        stops: const [0.0, 0.3, 0.6],
         transform: GradientRotation(animationValue * 2 * pi),
       ).createShader(rect)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.5;
+      ..strokeWidth = 3.8
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22);
 
     canvas.drawRRect(rRect, paint);
   }
