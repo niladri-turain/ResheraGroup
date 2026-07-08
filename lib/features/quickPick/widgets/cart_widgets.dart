@@ -149,15 +149,19 @@ class FloatingCartBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (itemCount == 0) return const SizedBox.shrink();
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomOffset),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: AppSize.width(0.4),
+          width: isTablet ? 300 : AppSize.width(0.4),
           margin: EdgeInsets.only(bottom: AppSize.height(0.02)),
-          padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04), vertical: AppSize.height(0.01)),
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? 24 : AppSize.width(0.04), 
+            vertical: isTablet ? 12 : AppSize.height(0.01)
+          ),
           decoration: BoxDecoration(
             color: const Color(0xFF7B2CBF), // Green color from image
             borderRadius: BorderRadius.circular(35),
@@ -181,20 +185,20 @@ class FloatingCartBar extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: AppSize.width(0.035),
+                        fontSize: isTablet ? 18 : AppSize.width(0.035),
                       ),
                     ),
                     Text(
                       '$itemCount Items',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: AppSize.width(0.03),
+                        fontSize: isTablet ? 14 : AppSize.width(0.03),
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, color: Colors.white, size: AppSize.width(0.035)),
+              Icon(Icons.arrow_forward_ios, color: Colors.white, size: isTablet ? 18 : AppSize.width(0.035)),
             ],
           ),
         ),

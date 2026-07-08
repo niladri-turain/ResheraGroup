@@ -307,6 +307,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     AppSize.init(context);
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -314,9 +316,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
-        toolbarHeight: AppSize.height(0.10),
+        toolbarHeight: isTablet ? 90 : 70,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white, size: AppSize.width(0.06)),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 26 : 24),
           onPressed: () => Navigator.pop(context),
         ),
         title: Consumer2<LoginProvider, UserAddressProvider>(
@@ -335,7 +337,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: AppSize.width(0.05),
+                    fontSize: isTablet ? 24 : 18,
                   ),
                 ),
                 GestureDetector(
@@ -346,7 +348,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       displayLocation,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: AppSize.width(0.035),
+                        fontSize: isTablet ? 20 : 14,
                         fontWeight: FontWeight.normal,
                       ),
                       maxLines: 1,
@@ -360,16 +362,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: AppSize.width(0.04)),
+            padding: EdgeInsets.only(right: isTablet ? 24 : 16),
             child: Container(
-              height: AppSize.width(0.12),
-              width: AppSize.width(0.12),
+              height: isTablet ? 50 : 40,
+              width: isTablet ? 50 : 40,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.shopping_cart_outlined, color: Colors.white, size: AppSize.width(0.05)),
+                icon: Icon(Icons.shopping_cart_outlined, color: Colors.white, size: isTablet ? 24 : 20),
                 onPressed: () async {
                   final cartListProvider = context.read<ViewCartListProvider>();
                   final localItems = Map.from(cartListProvider.localCart);
@@ -416,30 +418,32 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       ),
       body: Stack(
         children: [
-          Consumer<ProductDetailsProvider>(
-            builder: (context, provider, child) {
-              if (provider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          Positioned.fill(
+            child: Consumer<ProductDetailsProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              if (provider.errorMessage != null) {
-                return Center(child: Text(provider.errorMessage!));
-              }
+                if (provider.errorMessage != null) {
+                  return Center(child: Text(provider.errorMessage!));
+                }
 
-              if (provider.productDetails == null) {
-                return const Center(child: Text("Product not found"));
-              }
+                if (provider.productDetails == null) {
+                  return const Center(child: Text("Product not found"));
+                }
 
-              return ProductDetailsItemWidget(
-                product: provider.productDetails!,
-                isFashion: widget.isFashion,
-                onVariantChanged: (variant) {
-                  setState(() {
-                    _selectedVariant = variant;
-                  });
-                },
-              );
-            },
+                return ProductDetailsItemWidget(
+                  product: provider.productDetails!,
+                  isFashion: widget.isFashion,
+                  onVariantChanged: (variant) {
+                    setState(() {
+                      _selectedVariant = variant;
+                    });
+                  },
+                );
+              },
+            ),
           ),
           Positioned(
             left: 0,
@@ -469,68 +473,75 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (totalUniqueDisplay > 0)
-                            FloatingCartBar(
-                              itemCount: totalUniqueDisplay,
-                              label: "View cart",
-                              onTap: () async {
-                                if (loginProvider.userName == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Please login to proceed")),
-                                  );
-                                  Navigator.push(
+                            Center(
+                              child: FloatingCartBar(
+                                itemCount: totalUniqueDisplay,
+                                label: "View cart",
+                                onTap: () async {
+                                  if (loginProvider.userName == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Please login to proceed")),
+                                    );
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LoginScreen(
+                                          onLoginSuccess: () {
+                                            Navigator.pop(context);
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  final localItems = Map.from(cartListProvider.localCart);
+                                  if (localItems.isNotEmpty) {
+                                    final cartProvider = context.read<CartProvider>();
+                                    for (var entry in localItems.entries) {
+                                      final item = entry.value;
+                                      await cartProvider.addToCart(
+                                        businessId: widget.businessId,
+                                        productId: item['productId'],
+                                        businessCategoryId: item['businessCategoryId'],
+                                        variantId: item['variantId'],
+                                        quantity: item['quantity'],
+                                        attributes: (item['attributes'] as List).map((a) => Attribute(
+                                          attributeId: a['attribute_id'],
+                                          attributeName: a['attribute_name'],
+                                          valueId: a['value_id'],
+                                          value: a['value'],
+                                        )).toList(),
+                                      );
+                                    }
+                                    cartListProvider.clearLocalCart();
+                                  }
+
+                                  if (!mounted) return;
+
+                                  await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => LoginScreen(
-                                        onLoginSuccess: () {
-                                          Navigator.pop(context);
-                                        },
+                                      builder: (context) => CheckOutScreen(
+                                        vendorName: context.read<ProductDetailsProvider>().productDetails?.business?.businessName,
+                                        vendorKycId: context.read<ProductDetailsProvider>().productDetails?.business?.businessId,
                                       ),
                                     ),
                                   );
-                                  return;
-                                }
 
-                                final localItems = Map.from(cartListProvider.localCart);
-                                if (localItems.isNotEmpty) {
-                                  final cartProvider = context.read<CartProvider>();
-                                  for (var entry in localItems.entries) {
-                                    final item = entry.value;
-                                    await cartProvider.addToCart(
-                                      businessId: widget.businessId,
-                                      productId: item['productId'],
-                                      businessCategoryId: item['businessCategoryId'],
-                                      variantId: item['variantId'],
-                                      quantity: item['quantity'],
-                                      attributes: (item['attributes'] as List).map((a) => Attribute(
-                                        attributeId: a['attribute_id'],
-                                        attributeName: a['attribute_name'],
-                                        valueId: a['value_id'],
-                                        value: a['value'],
-                                      )).toList(),
-                                    );
+                                  if (mounted) {
+                                    context.read<ViewCartListProvider>().fetchCart(showLoader: false);
                                   }
-                                  cartListProvider.clearLocalCart();
-                                }
-
-                                if (!mounted) return;
-
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CheckOutScreen(
-                                      vendorName: context.read<ProductDetailsProvider>().productDetails?.business?.businessName,
-                                      vendorKycId: context.read<ProductDetailsProvider>().productDetails?.business?.businessId,
-                                    ),
-                                  ),
-                                );
-
-                                if (mounted) {
-                                  context.read<ViewCartListProvider>().fetchCart(showLoader: false);
-                                }
-                              },
+                                },
+                              ),
                             ),
                           Container(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                            padding: EdgeInsets.fromLTRB(
+                              isTablet ? 40 : 16, 
+                              8, 
+                              isTablet ? 40 : 16, 
+                              isTablet ? 40 : 24
+                            ),
                             color: Colors.white,
                             child: CartCounterWidget(
                               key: ValueKey(_getCartKey(widget.productId, _selectedVariant?.variantId)),
@@ -617,6 +628,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
         ],
       ),
+
     );
   }
 }

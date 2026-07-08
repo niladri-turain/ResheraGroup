@@ -196,14 +196,15 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
   @override
   Widget build(BuildContext context) {
     AppSize.init(context);
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
     final variant = widget.product.variants?[_selectedVariantIndex];
     final images = variant?.images ?? [];
-    final attributes = variant?.attributes ?? [];
 
     // Get all available attributes from all variants
     final groups = _getAttributeGroups();
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -211,7 +212,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
           Stack(
             children: [
               SizedBox(
-                height: AppSize.height(0.45),
+                height: isTablet ? AppSize.height(0.6) : AppSize.height(0.45),
                 child: images.isNotEmpty
                     ? PageView.builder(
                         controller: _pageController,
@@ -288,7 +289,10 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
           ),
 
           Container(
-            padding: EdgeInsets.all(AppSize.width(0.04)),
+            padding: EdgeInsets.symmetric(
+              horizontal: isTablet ? 40 : AppSize.width(0.04),
+              vertical: AppSize.width(0.04),
+            ),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -302,13 +306,13 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                   style: TextStyle(
                       color: const Color(0xFF7B2CBF), 
                       fontWeight: FontWeight.w500,
-                      fontSize: AppSize.width(0.035)),
+                      fontSize: isTablet ? 20 : 14),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   widget.product.name ?? "",
                   style: TextStyle(
-                      fontSize: AppSize.width(0.05), 
+                      fontSize: isTablet ? 28 : 20, 
                       fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
@@ -323,7 +327,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                     const SizedBox(width: 8),
                     Text(
                       "Delivery on Today",
-                      style: TextStyle(color: Colors.grey, fontSize: AppSize.width(0.03)),
+                      style: TextStyle(color: Colors.grey, fontSize: isTablet ? 16 : 12),
                     ),
                   ],
                 ),
@@ -333,14 +337,14 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                     Text(
                       "₹${variant?.finalPrice ?? widget.product.finalPrice}",
                       style: TextStyle(
-                          fontSize: AppSize.width(0.055), 
+                          fontSize: isTablet ? 32 : 22, 
                           fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 12),
                     Text(
                       "₹${variant?.mrp ?? widget.product.mrp}",
                       style: TextStyle(
-                        fontSize: AppSize.width(0.04),
+                        fontSize: isTablet ? 22 : 16,
                         color: Colors.grey,
                         decoration: TextDecoration.lineThrough,
                       ),
@@ -357,13 +361,13 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                         "${variant?.discount ?? widget.product.discount}% OFF",
                         style: TextStyle(
                             color: Colors.green,
-                            fontSize: AppSize.width(0.025),
+                            fontSize: isTablet ? 16 : 10,
                             fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
 
                 // Any attributes
                 ...groups.entries.map((entry) {
@@ -376,10 +380,10 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(attributeName,
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.04))),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: isTablet ? 20 : 16)),
                       const SizedBox(height: 12),
                       SizedBox(
-                        height: isColor ? AppSize.height(0.06) : AppSize.height(0.05),
+                        height: isColor ? (isTablet ? 70 : 50) : (isTablet ? 60 : 40),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: entry.value.length,
@@ -407,8 +411,8 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                                     ),
                                   ),
                                   child: Container(
-                                    width: AppSize.width(0.08),
-                                    height: AppSize.width(0.08),
+                                    width: isTablet ? 45 : 32,
+                                    height: isTablet ? 45 : 32,
                                     decoration: BoxDecoration(
                                       color: _getColorFromValue(val),
                                       shape: BoxShape.circle,
@@ -431,9 +435,9 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                                 child: Container(
                                   margin: const EdgeInsets.only(right: 12),
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: isCircle ? 0 : 16),
-                                  width: isCircle ? AppSize.width(0.1) : null,
-                                  height: AppSize.width(0.1),
+                                      horizontal: isCircle ? 0 : (isTablet ? 24 : 16)),
+                                  width: isCircle ? (isTablet ? 50 : 40) : null,
+                                  height: isTablet ? 50 : 40,
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? const Color(0xFF7B2CBF)
@@ -457,7 +461,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                                           ? Colors.white
                                           : Colors.black,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: AppSize.width(0.03),
+                                      fontSize: isTablet ? 16 : 12,
                                       decoration: isAvailable
                                           ? TextDecoration.none
                                           : TextDecoration.lineThrough,
@@ -476,16 +480,16 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
 
                 const Divider(height: 32),
                 Text("Product Description",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.04))),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: isTablet ? 20 : 16)),
                 const SizedBox(height: 8),
                 HtmlWidget(
                   variant?.longDescription ??
                       variant?.shortDescription ??
                       "No description available.",
                   textStyle: TextStyle(
-                      color: Colors.black54, height: 1.5, fontSize: AppSize.width(0.035)),
+                      color: Colors.black54, height: 1.5, fontSize: isTablet ? 18 : 14),
                 ),
-                const SizedBox(height: 100), // Spacing for bottom button
+                const SizedBox(height: 150), // Spacing for bottom button
               ],
             ),
           ),
@@ -493,4 +497,5 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
       ),
     );
   }
+
 }
