@@ -25,8 +25,9 @@ class _ReusableImageSliderState extends State<ReusableImageSlider> {
   Widget build(BuildContext context) {
 
     AppSize.init(context); // 👈 important
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
 
-    final sliderHeight = widget.height ?? AppSize.height(0.22);
+    final sliderHeight = widget.height ?? (isTablet ? AppSize.height(0.35) : AppSize.height(0.22));
 
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -38,11 +39,11 @@ class _ReusableImageSliderState extends State<ReusableImageSlider> {
             return Container(
               width: double.infinity,
               margin: EdgeInsets.symmetric(
-                horizontal: AppSize.width(0.01),
+                horizontal: isTablet ? 16 : AppSize.width(0.01),
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(
-                  AppSize.width(0.04),
+                  isTablet ? 20 : AppSize.width(0.04),
                 ),
                 image: DecorationImage(
                   image: img.startsWith('http')
@@ -69,7 +70,7 @@ class _ReusableImageSliderState extends State<ReusableImageSlider> {
 
         /// 2. Dots Indicator
         Positioned(
-          bottom: AppSize.height(0.015),
+          bottom: isTablet ? 20 : AppSize.height(0.015),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: widget.imagePaths.asMap().entries.map((entry) {
@@ -78,17 +79,17 @@ class _ReusableImageSliderState extends State<ReusableImageSlider> {
 
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                width: AppSize.width(0.015),
-                height: AppSize.width(0.015),
+                width: isTablet ? 12 : AppSize.width(0.015),
+                height: isTablet ? 12 : AppSize.width(0.015),
                 margin: EdgeInsets.symmetric(
-                  horizontal: AppSize.width(0.01),
+                  horizontal: isTablet ? 6 : AppSize.width(0.01),
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? Colors.orange
                       : Colors.white.withOpacity(0.6),
                   borderRadius: BorderRadius.circular(
-                    AppSize.width(0.02),
+                    isTablet ? 6 : AppSize.width(0.02),
                   ),
                 ),
               );
