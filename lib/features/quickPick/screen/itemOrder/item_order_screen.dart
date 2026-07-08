@@ -42,14 +42,16 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF7B2CBF),
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
+        toolbarHeight: isTablet ? 80 : 56,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 30 : 24),
           onPressed: () => Navigator.pop(context),
         ),
         title: Consumer2<LoginProvider, UserAddressProvider>(
@@ -59,12 +61,12 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Order Summary",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: isTablet ? 24 : 18,
                   ),
                 ),
                 GestureDetector(
@@ -75,7 +77,7 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
                       displayLocation,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: AppSize.width(0.032),
+                        fontSize: isTablet ? 20 : AppSize.width(0.032),
                         fontWeight: FontWeight.normal,
                       ),
                       maxLines: 1,
@@ -119,7 +121,11 @@ class _ItemOrderScreenState extends State<ItemOrderScreen> {
             body: Column(
               children: [
                 Container(
-                  padding: EdgeInsets.only(left: AppSize.width(0.04), right: AppSize.width(0.04), bottom: AppSize.width(0.02)),
+                  padding: EdgeInsets.only(
+                    left: isTablet ? 24 : AppSize.width(0.04), 
+                    right: isTablet ? 24 : AppSize.width(0.04), 
+                    bottom: isTablet ? 16 : AppSize.width(0.02)
+                  ),
                   color: const Color(0xFF7B2CBF),
                   child: CustomSearchWidget(
                     onSearch: (value) {

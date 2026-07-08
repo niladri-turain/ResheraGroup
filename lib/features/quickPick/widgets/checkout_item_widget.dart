@@ -23,9 +23,10 @@ class CheckoutItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
     return Container(
       padding: EdgeInsets.symmetric(
-          vertical: AppSize.height(0.015), horizontal: AppSize.width(0.02)),
+          vertical: isTablet ? 20 : 12, horizontal: isTablet ? 16 : 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -34,24 +35,24 @@ class CheckoutItemWidget extends StatelessWidget {
             child: image.startsWith('http')
                 ? Image.network(
                     image,
-                    width: AppSize.width(0.2),
-                    height: AppSize.width(0.2),
+                    width: isTablet ? 100 : 80,
+                    height: isTablet ? 100 : 80,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
-                      width: AppSize.width(0.2),
-                      height: AppSize.width(0.2),
+                      width: isTablet ? 100 : 80,
+                      height: isTablet ? 100 : 80,
                       color: Colors.grey[200],
                       child: const Icon(Icons.image_not_supported),
                     ),
                   )
                 : Image.asset(
                     image,
-                    width: AppSize.width(0.2),
-                    height: AppSize.width(0.2),
+                    width: isTablet ? 100 : 80,
+                    height: isTablet ? 100 : 80,
                     fit: BoxFit.cover,
                   ),
           ),
-          SizedBox(width: AppSize.width(0.03)),
+          SizedBox(width: isTablet ? 20 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,7 +61,7 @@ class CheckoutItemWidget extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: AppSize.width(0.045),
+                    fontSize: isTablet ? 24 : 16,
                   ),
                 ),
                 if (subtitle.isNotEmpty)
@@ -68,18 +69,18 @@ class CheckoutItemWidget extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       color: Colors.grey.shade600,
-                      fontSize: AppSize.width(0.035),
+                      fontSize: isTablet ? 20 : 14,
                     ),
                   ),
               ],
             ),
           ),
-          SizedBox(width: AppSize.width(0.02)),
+          SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                height: AppSize.height(0.045),
+                height: isTablet ? 45 : 35,
                 decoration: BoxDecoration(
                   color: const Color(0XFF9333ea),
                   borderRadius: BorderRadius.circular(20),
@@ -89,11 +90,11 @@ class CheckoutItemWidget extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: Icon(Icons.remove,
-                          color: Colors.white, size: AppSize.width(0.045)),
+                          color: Colors.white, size: isTablet ? 24 : 18),
                       onPressed: onDecrease,
                       constraints: BoxConstraints(
-                        minWidth: AppSize.width(0.09),
-                        minHeight: AppSize.height(0.045),
+                        minWidth: isTablet ? 45 : 35,
+                        minHeight: isTablet ? 45 : 35,
                       ),
                       padding: EdgeInsets.zero,
                     ),
@@ -102,22 +103,22 @@ class CheckoutItemWidget extends StatelessWidget {
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: AppSize.width(0.035)),
+                          fontSize: isTablet ? 18 : 14),
                     ),
                     IconButton(
                       icon: Icon(Icons.add,
-                          color: Colors.white, size: AppSize.width(0.045)),
+                          color: Colors.white, size: isTablet ? 24 : 18),
                       onPressed: onIncrease,
                       constraints: BoxConstraints(
-                        minWidth: AppSize.width(0.09),
-                        minHeight: AppSize.height(0.045),
+                        minWidth: isTablet ? 45 : 35,
+                        minHeight: isTablet ? 45 : 35,
                       ),
                       padding: EdgeInsets.zero,
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: AppSize.height(0.01)),
+              SizedBox(height: 8),
               RichText(
                 text: TextSpan(
                   children: [
@@ -126,7 +127,7 @@ class CheckoutItemWidget extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
-                        fontSize: AppSize.width(0.04),
+                        fontSize: isTablet ? 16 : 14,
                       ),
                     ),
                     TextSpan(
@@ -134,7 +135,7 @@ class CheckoutItemWidget extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
-                        fontSize: AppSize.width(0.04),
+                        fontSize: isTablet ? 18 : 14,
                       ),
                     ),
                   ],
@@ -148,7 +149,7 @@ class CheckoutItemWidget extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
-                        fontSize: AppSize.width(0.04),
+                        fontSize: isTablet ? 18 : 14,
                       ),
                     ),
                     TextSpan(
@@ -157,7 +158,7 @@ class CheckoutItemWidget extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
-                        fontSize: AppSize.width(0.04),
+                        fontSize: isTablet ? 16 : 14,
                       ),
                     ),
                   ],

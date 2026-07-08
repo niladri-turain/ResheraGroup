@@ -48,6 +48,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     AppSize.init(context);
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
@@ -55,8 +56,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
+        toolbarHeight: isTablet ? 80 : 56,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 30 : 24),
           onPressed: () => Navigator.pop(context),
         ),
         title: Consumer2<LoginProvider, UserAddressProvider>(
@@ -66,12 +68,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Order Details",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: isTablet ? 24 : 18,
                   ),
                 ),
                 GestureDetector(
@@ -82,7 +84,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       displayLocation,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: AppSize.width(0.032),
+                        fontSize: isTablet ? 20 : AppSize.width(0.032),
                         fontWeight: FontWeight.normal,
                       ),
                       maxLines: 1,
@@ -102,13 +104,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           }
 
           if (provider.errorMessage != null) {
-            return Center(child: Text(provider.errorMessage!));
+            return Center(child: Text(provider.errorMessage!, style: TextStyle(fontSize: isTablet ? 18 : 14)));
           }
 
           final order = provider.orderDetailsData?.data;
 
           if (order == null) {
-            return const Center(child: Text("Order not found"));
+            return Center(child: Text("Order not found", style: TextStyle(fontSize: isTablet ? 18 : 14)));
           }
 
           return SingleChildScrollView(
@@ -135,13 +137,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                           );
                         },
                       child: Container(
-                        width: AppSize.screenWidth * 0.5,
+                        width: isTablet ? 300 : AppSize.screenWidth * 0.5,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
+                          padding: EdgeInsets.symmetric(horizontal: isTablet ? 16.0 : 8.0, vertical: isTablet ? 12 : 6),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -149,16 +151,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                 downloadProvider.isDownloading 
                                   ? "Downloading... ${(downloadProvider.downloadProgress * 100).toStringAsFixed(0)}%" 
                                   : "Download Invoice",
-                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                style: TextStyle(fontSize: isTablet ? 18 : 14, fontWeight: FontWeight.w500),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: isTablet ? 12 : 8),
                               downloadProvider.isDownloading
-                                ? const SizedBox(
-                                    width: 15,
-                                    height: 15,
+                                ? SizedBox(
+                                    width: isTablet ? 20 : 15,
+                                    height: isTablet ? 20 : 15,
                                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange),
                                   )
-                                : const Icon(Icons.download_outlined, color: Colors.orange),
+                                : Icon(Icons.download_outlined, color: Colors.orange, size: isTablet ? 28 : 24),
                             ],
                           ),
                         ),
@@ -174,4 +176,5 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
+
 }

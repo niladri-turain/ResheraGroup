@@ -83,6 +83,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -90,13 +91,13 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF7B2CBF),
         elevation: 0,
-        toolbarHeight: AppSize.height(0.10),
+        toolbarHeight: isTablet ? 90 : 70,
         leading: Padding(
-          padding: EdgeInsets.all(AppSize.width(0.02)),
+          padding: EdgeInsets.all(isTablet ? 12 : 8),
           child: CircleAvatar(
             backgroundColor: const Color(0XFF9333ea),
             child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white, size: AppSize.width(0.06)),
+              icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 28 : 24),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -127,7 +128,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: AppSize.width(0.05),
+                      fontSize: isTablet ? 24 : 18,
                     ),
                   ),
 
@@ -136,7 +137,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       displayAddress,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: AppSize.width(0.035),
+                        fontSize: isTablet ? 18 : 13,
                         fontWeight: FontWeight.normal,
                       ),
                       maxLines: 1,
@@ -301,9 +302,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                           children: [
                             Text(
                               'Order Summary',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize:isTablet ? 28 : AppSize.width(0.045)),
                             ),
-                            SizedBox(height: AppSize.height(0.02)),
+                            SizedBox(height: isTablet ? 26 :AppSize.height(0.02)),
                             _buildBillRow(
                               icon: Icons.receipt_long_outlined,
                               label: 'Items total',
@@ -354,7 +355,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                           children: [
                             Text(
                               'Vendor Details',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize:isTablet ? 28 : AppSize.width(0.045)),
                             ),
                             SizedBox(height: AppSize.height(0.02)),
                             Row(
@@ -421,7 +422,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                           children: [
                             Text(
                               'Billing Address',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize:isTablet ? 28 : AppSize.width(0.045)),
                             ),
                             SizedBox(height: AppSize.height(0.02)),
                             Consumer<LoginProvider>(
@@ -503,7 +504,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                   children: [
                                     Text(
                                       'Shipping Address',
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize:isTablet ? 28 : AppSize.width(0.045)),
                                     ),
                                     InkWell(
                                       onTap: () {
@@ -604,7 +605,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                           children: [
                             Text(
                               'Payment Method',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize:isTablet ? 28 : AppSize.width(0.045)),
                             ),
                             SizedBox(height: AppSize.height(0.005)),
                             InkWell(
@@ -674,7 +675,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                           children: [
                             Text(
                               'Enable GST',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.04)),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize:isTablet ? 28 : AppSize.width(0.04)),
                             ),
                             Switch(
                               value: _isGstEnabled,
@@ -739,8 +740,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                 right: 0,
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: AppSize.width(0.04),
-                    vertical: AppSize.height(0.02),
+                    horizontal: isTablet ? 40 : 16,
+                    vertical: isTablet ? 20 : 16,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -752,142 +753,147 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSize.height(0.06),
-                          child: Consumer<CancelAllCartProvider>(
-                            builder: (context, cancelProvider, child) {
-                              return OutlinedButton(
-                                onPressed: cancelProvider.isLoading
-                                    ? null
-                                    : () async {
-                                        final success = await cancelProvider.cancelCart();
-                                        if (success) {
-                                          if (mounted) {
-                                            context.read<ViewCartListProvider>().clearCartLocal();
-                                            context.read<ViewCartListProvider>().fetchCart();
-                                          }
-                                        } else {
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text(cancelProvider.errorMessage ?? "Failed to cancel cart")),
-                                            );
-                                          }
-                                        }
-                                      },
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: Color(0xFF7B2CBF)),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  backgroundColor: Colors.white,
-                                ),
-                                child: cancelProvider.isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7B2CBF)),
-                                      )
-                                    : const FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(
-                                          "Cancel Cart",
-                                          maxLines: 1,
-                                          softWrap: false,
-                                          style: TextStyle(
-                                            color: Color(0xFF7B2CBF),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                        ),
+                  child: Center(
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: isTablet ? 800 : double.infinity),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: isTablet ? 60 : 50,
+                              child: Consumer<CancelAllCartProvider>(
+                                builder: (context, cancelProvider, child) {
+                                  return OutlinedButton(
+                                    onPressed: cancelProvider.isLoading
+                                        ? null
+                                        : () async {
+                                            final success = await cancelProvider.cancelCart();
+                                            if (success) {
+                                              if (mounted) {
+                                                context.read<ViewCartListProvider>().clearCartLocal();
+                                                context.read<ViewCartListProvider>().fetchCart();
+                                              }
+                                            } else {
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(content: Text(cancelProvider.errorMessage ?? "Failed to cancel cart")),
+                                                );
+                                              }
+                                            }
+                                          },
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(color: Color(0xFF7B2CBF)),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: AppSize.width(0.03)),
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSize.height(0.06),
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              final addressProvider = context.read<UserAddressProvider>();
-                              final orderProvider = context.read<OrderProvider>();
-
-                              double currentTotal = 0;
-                              if (cartData != null && cartData.data != null) {
-                                for (var item in cartData.data!) {
-                                  final price = double.tryParse(item.product?.finalPrice.toString() ?? '0') ?? 0;
-                                  currentTotal += price * (item.quantity ?? 0);
-                                }
-                              }
-
-                              final success = await orderProvider.placeOrder(
-                                itemsTotal: currentTotal,
-                                grandTotal: currentTotal,
-                                discountAmount: 0,
-                                paymentMethod: selectedPayment,
-                                billing: addressProvider.addressModel?.data?.billing,
-                                shipping: addressProvider.selectedAddress,
-                                isGstBill: _isGstEnabled,
-                                gstNumber: _isGstEnabled ? _gstNumberController.text : null,
-                                gstName: _isGstEnabled ? _gstNameController.text : null,
-                                gstAddress: _isGstEnabled ? _gstAddressController.text : null,
-                              );
-
-                              if (success) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Order placed successfully")),
-                                  );
-
-                                  context.read<ViewCartListProvider>().clearCartLocal();
-
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const ItemOrderScreen(),
+                                      backgroundColor: Colors.white,
                                     ),
+                                    child: cancelProvider.isLoading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7B2CBF)),
+                                          )
+                                        : FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              "Cancel Cart",
+                                              maxLines: 1,
+                                              softWrap: false,
+                                              style: TextStyle(
+                                                color: const Color(0xFF7B2CBF),
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: isTablet ? 18 : 14,
+                                              ),
+                                            ),
+                                          ),
                                   );
-                                  if (mounted) {
-                                    context.read<ViewCartListProvider>().fetchCart();
-                                  }
-                                }
-                              } else {
-                                if (mounted) {
-                                  final error = context.read<OrderProvider>().errorMessage;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(error ?? "Failed to place order")),
-                                  );
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF7B2CBF),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                },
                               ),
                             ),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                "Proceed (${cartData.totalItems ?? 0} Items)",
-                                maxLines: 1,
-                                softWrap: false,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                          ),
+                          SizedBox(width: isTablet ? 20 : 12),
+                          Expanded(
+                            child: SizedBox(
+                              height: isTablet ? 60 : 50,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  final addressProvider = context.read<UserAddressProvider>();
+                                  final orderProvider = context.read<OrderProvider>();
+
+                                  double currentTotal = 0;
+                                  if (cartData != null && cartData.data != null) {
+                                    for (var item in cartData.data!) {
+                                      final price = double.tryParse(item.product?.finalPrice.toString() ?? '0') ?? 0;
+                                      currentTotal += price * (item.quantity ?? 0);
+                                    }
+                                  }
+
+                                  final success = await orderProvider.placeOrder(
+                                    itemsTotal: currentTotal,
+                                    grandTotal: currentTotal,
+                                    discountAmount: 0,
+                                    paymentMethod: selectedPayment,
+                                    billing: addressProvider.addressModel?.data?.billing,
+                                    shipping: addressProvider.selectedAddress,
+                                    isGstBill: _isGstEnabled,
+                                    gstNumber: _isGstEnabled ? _gstNumberController.text : null,
+                                    gstName: _isGstEnabled ? _gstNameController.text : null,
+                                    gstAddress: _isGstEnabled ? _gstAddressController.text : null,
+                                  );
+
+                                  if (success) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text("Order placed successfully")),
+                                      );
+
+                                      context.read<ViewCartListProvider>().clearCartLocal();
+
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const ItemOrderScreen(),
+                                        ),
+                                      );
+                                      if (mounted) {
+                                        context.read<ViewCartListProvider>().fetchCart();
+                                      }
+                                    }
+                                  } else {
+                                    if (mounted) {
+                                      final error = context.read<OrderProvider>().errorMessage;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(error ?? "Failed to place order")),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF7B2CBF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    "Proceed (${cartData.totalItems ?? 0} Items)",
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: isTablet ? 18 : 14,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

@@ -41,10 +41,11 @@ class ItemOrderList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading && provider.orders.isEmpty) {
-          return _buildSkeletonList();
+          return _buildSkeletonList(isTablet);
         }
 
         final allOrders = provider.orders;
@@ -58,13 +59,13 @@ class ItemOrderList extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: () => provider.fetchOrders(isRefresh: true),
           color: const Color(0xFF7B2CBF),
-          child: _buildContent(provider, orders),
+          child: _buildContent(provider, orders, isTablet),
         );
       },
     );
   }
 
-  Widget _buildContent(OrderListProvider provider, List<OrderData> orders) {
+  Widget _buildContent(OrderListProvider provider, List<OrderData> orders, bool isTablet) {
     if (provider.errorMessage != null && provider.orders.isEmpty) {
       return CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -77,7 +78,7 @@ class ItemOrderList extends StatelessWidget {
                 child: Text(
                   provider.errorMessage!,
                   textAlign: TextAlign.center,
-                  style:  TextStyle(color:  Colors.grey.shade600,),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: isTablet ? 18 : 14),
                 ),
               ),
             ),
@@ -97,7 +98,7 @@ class ItemOrderList extends StatelessWidget {
                 "No orders found",
                 style: TextStyle(
                   color: Colors.grey.shade600,
-                  fontSize: 16,
+                  fontSize: isTablet ? 20 : 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -109,7 +110,7 @@ class ItemOrderList extends StatelessWidget {
 
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(isTablet ? 20 : 10),
       itemCount: orders.length + 1,
       itemBuilder: (context, index) {
         if (index < orders.length) {
@@ -118,9 +119,9 @@ class ItemOrderList extends StatelessWidget {
         } else {
           // Load More Section
           if (provider.isMoreLoading) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(child: CircularProgressIndicator(color: Color(0xFF7B2CBF))),
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator(color: const Color(0xFF7B2CBF), strokeWidth: isTablet ? 4 : 2)),
             );
           } else if (provider.hasMore) {
             return Padding(
@@ -131,19 +132,20 @@ class ItemOrderList extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7B2CBF),
                     foregroundColor: Colors.white,
+                    padding: isTablet ? const EdgeInsets.symmetric(horizontal: 40, vertical: 16) : null,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
-                  child: const Text("Load More"),
+                  child: Text("Load More", style: TextStyle(fontSize: isTablet ? 18 : 14)),
                 ),
               ),
             );
           } else {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text(
                   "No more orders",
-                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: isTablet ? 16 : 12),
                 ),
               ),
             );
@@ -153,9 +155,9 @@ class ItemOrderList extends StatelessWidget {
     );
   }
 
-  Widget _buildSkeletonList() {
+  Widget _buildSkeletonList(bool isTablet) {
     return ListView.builder(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(isTablet ? 20 : 10),
       itemCount: 5,
       itemBuilder: (context, index) => Shimmer.fromColors(
         baseColor: Colors.grey[300]!,
@@ -163,11 +165,12 @@ class ItemOrderList extends StatelessWidget {
         child: Card(
           margin: const EdgeInsets.only(bottom: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: Container(height: 120, width: double.infinity),
+          child: Container(height: isTablet ? 180 : 120, width: double.infinity),
         ),
       ),
     );
   }
+
 }
 
 class OrderItemCard extends StatelessWidget {
@@ -219,6 +222,7 @@ class OrderItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
     final firstItem = order.items?.isNotEmpty == true ? order.items![0] : null;
 
     return GestureDetector(
@@ -232,87 +236,64 @@ class OrderItemCard extends StatelessWidget {
       },
       child: Card(
         elevation: 2,
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: EdgeInsets.only(bottom: isTablet ? 20 : 12),
         color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 10, vertical: isTablet ? 12 : 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: EdgeInsets.symmetric(horizontal: isTablet ? 12 : 8, vertical: isTablet ? 6 : 4),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text(
                         order.orderNo ?? order.id ?? '',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: isTablet ? 18 : 12, fontWeight: FontWeight.bold),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                    Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 12, vertical: isTablet ? 6 : 4),
                     decoration: BoxDecoration(
                       color: _getStatusColor(order.orderStatusLabel),
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: Text(
                       order.orderStatusLabel ?? 'Unknown',
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontSize: isTablet ? 18 : 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 10, vertical: isTablet ? 12 : 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ClipRRect(
-                  //   borderRadius: BorderRadius.circular(8),
-                  //   child: Image.network(
-                  //     firstItem?.image ?? 'https://via.placeholder.com/80',
-                  //     height: 80,
-                  //     width: 80,
-                  //     fit: BoxFit.cover,
-                  //     errorBuilder: (context, error, stackTrace) => Container(
-                  //       height: 80,
-                  //       width: 80,
-                  //       color: Colors.grey[200],
-                  //       child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Text(
-                        //   firstItem?.productName ?? 'Order #${order.orderNo}',
-                        //   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        //   maxLines: 1,
-                        //   overflow: TextOverflow.ellipsis,
-                        // ),
-                        // const SizedBox(height: 5),
                         Text(
                           "Date: ${_formatDate(order.createdAt)}",
-                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                          style: TextStyle(color: Colors.grey, fontSize: isTablet ? 18 : 12),
                         ),
-                        const SizedBox(height: 5),
+                        SizedBox(height: isTablet ? 10 : 5),
                         Row(
                           children: [
-                            const Text("Qty: ", style: TextStyle(color: Colors.grey)),
+                            Text("Qty: ", style: TextStyle(color: Colors.grey, fontSize: isTablet ? 18 : 14)),
                             Text("${order.totalItems ?? 0}",
-                                style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                                style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: isTablet ? 18 : 14)),
                             const Spacer(),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -321,23 +302,24 @@ class OrderItemCard extends StatelessWidget {
                                   children: [
                                     Text(
                                       "Item Price ",
-                                      style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 12),
+                                      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: isTablet ? 18 : 12),
                                     ),
                                     Text(
                                       "₹${firstItem?.finalPrice ?? 0}",
-                                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 16),
+                                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: isTablet ? 20 : 16),
                                     ),
                                   ],
                                 ),
+                                SizedBox(height: isTablet ? 8 : 4),
                                 Row(
                                   children: [
                                     Text(
                                       "Total Price ",
-                                      style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 12),
+                                      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: isTablet ? 18 : 12),
                                     ),
                                     Text(
                                       "₹${order.grandTotal ?? 0}",
-                                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 16),
+                                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: isTablet ? 20 : 16),
                                     ),
                                   ],
                                 ),
@@ -346,7 +328,6 @@ class OrderItemCard extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 8),
-
                       ],
                     ),
                   ),
@@ -358,4 +339,5 @@ class OrderItemCard extends StatelessWidget {
       ),
     );
   }
+
 }
