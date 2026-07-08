@@ -314,8 +314,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
+        toolbarHeight: AppSize.height(0.10),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: AppSize.width(0.06)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Consumer2<LoginProvider, UserAddressProvider>(
@@ -327,13 +328,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   "Product Details",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: AppSize.width(0.045),
+                    fontSize: AppSize.width(0.05),
                   ),
                 ),
                 GestureDetector(
@@ -344,7 +346,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       displayLocation,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: AppSize.width(0.032),
+                        fontSize: AppSize.width(0.035),
                         fontWeight: FontWeight.normal,
                       ),
                       maxLines: 1,
@@ -360,14 +362,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           Padding(
             padding: EdgeInsets.only(right: AppSize.width(0.04)),
             child: Container(
-              height: AppSize.width(0.10),
-              width: AppSize.width(0.10),
+              height: AppSize.width(0.12),
+              width: AppSize.width(0.12),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+                icon: Icon(Icons.shopping_cart_outlined, color: Colors.white, size: AppSize.width(0.05)),
                 onPressed: () async {
                   final cartListProvider = context.read<ViewCartListProvider>();
                   final localItems = Map.from(cartListProvider.localCart);

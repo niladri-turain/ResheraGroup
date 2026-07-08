@@ -288,7 +288,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
           ),
 
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(AppSize.width(0.04)),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -299,14 +299,17 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
               children: [
                 Text(
                   widget.product.business?.businessName ?? "",
-                  style: const TextStyle(
-                      color: Color(0xFF7B2CBF), fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: const Color(0xFF7B2CBF), 
+                      fontWeight: FontWeight.w500,
+                      fontSize: AppSize.width(0.035)),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   widget.product.name ?? "",
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: AppSize.width(0.05), 
+                      fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -318,9 +321,9 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                           color: Color(0xFF7B2CBF), shape: BoxShape.circle),
                     ),
                     const SizedBox(width: 8),
-                    const Text(
+                    Text(
                       "Delivery on Today",
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                      style: TextStyle(color: Colors.grey, fontSize: AppSize.width(0.03)),
                     ),
                   ],
                 ),
@@ -329,14 +332,15 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                   children: [
                     Text(
                       "₹${variant?.finalPrice ?? widget.product.finalPrice}",
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: AppSize.width(0.055), 
+                          fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 12),
                     Text(
                       "₹${variant?.mrp ?? widget.product.mrp}",
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: AppSize.width(0.04),
                         color: Colors.grey,
                         decoration: TextDecoration.lineThrough,
                       ),
@@ -351,9 +355,9 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                       ),
                       child: Text(
                         "${variant?.discount ?? widget.product.discount}% OFF",
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: Colors.green,
-                            fontSize: 10,
+                            fontSize: AppSize.width(0.025),
                             fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -372,10 +376,10 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(attributeName,
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.04))),
                       const SizedBox(height: 12),
                       SizedBox(
-                        height: isColor ? 45 : 40,
+                        height: isColor ? AppSize.height(0.06) : AppSize.height(0.05),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: entry.value.length,
@@ -403,8 +407,8 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                                     ),
                                   ),
                                   child: Container(
-                                    width: 34,
-                                    height: 34,
+                                    width: AppSize.width(0.08),
+                                    height: AppSize.width(0.08),
                                     decoration: BoxDecoration(
                                       color: _getColorFromValue(val),
                                       shape: BoxShape.circle,
@@ -428,8 +432,8 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                                   margin: const EdgeInsets.only(right: 12),
                                   padding: EdgeInsets.symmetric(
                                       horizontal: isCircle ? 0 : 16),
-                                  width: isCircle ? 40 : null,
-                                  height: 40,
+                                  width: isCircle ? AppSize.width(0.1) : null,
+                                  height: AppSize.width(0.1),
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? const Color(0xFF7B2CBF)
@@ -453,7 +457,7 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                                           ? Colors.white
                                           : Colors.black,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppSize.width(0.03),
                                       decoration: isAvailable
                                           ? TextDecoration.none
                                           : TextDecoration.lineThrough,
@@ -471,15 +475,15 @@ class _ProductDetailsItemWidgetState extends State<ProductDetailsItemWidget> {
                 }),
 
                 const Divider(height: 32),
-                const Text("Product Description",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("Product Description",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.04))),
                 const SizedBox(height: 8),
                 HtmlWidget(
                   variant?.longDescription ??
                       variant?.shortDescription ??
                       "No description available.",
-                  textStyle: const TextStyle(
-                      color: Colors.black54, height: 1.5, fontSize: 14),
+                  textStyle: TextStyle(
+                      color: Colors.black54, height: 1.5, fontSize: AppSize.width(0.035)),
                 ),
                 const SizedBox(height: 100), // Spacing for bottom button
               ],

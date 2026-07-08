@@ -19,7 +19,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: 0,
-      toolbarHeight: AppSize.height(0.07), // 👈 responsive height
+      toolbarHeight: AppSize.height(0.10), // Increased for tablet safety
 
       title: Padding(
         padding: EdgeInsets.symmetric(
@@ -29,32 +29,35 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           children: [
             /// Profile Icon
             CircleAvatar(
-              radius: AppSize.width(0.045),
+              radius: AppSize.height(0.03),
               backgroundColor: AppColors.grey,
               child: Icon(
                 Icons.person,
                 color: AppColors.white,
-                size: AppSize.width(0.05),
+                size: AppSize.height(0.035),
               ),
             ),
 
             SizedBox(width: AppSize.width(0.02)),
 
             /// Username
-            Consumer<LoginProvider>(
-              builder: (context, loginProvider, child) {
-                return Text(
-                  loginProvider.userName ?? AppStrings.guestUser,
-                  style: TextStyle(
-                    color: AppColors.white,
-                    fontSize: AppSize.width(0.04),
-                    fontWeight: FontWeight.w500,
-                  ),
-                );
-              },
+            Expanded(
+              child: Consumer<LoginProvider>(
+                builder: (context, loginProvider, child) {
+                  return Text(
+                    loginProvider.userName ?? AppStrings.guestUser,
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: AppSize.height(0.025),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  );
+                },
+              ),
             ),
 
-            const Spacer(),
+            SizedBox(width: AppSize.width(0.02)),
 
             /// Logout Icon
             Consumer<LoginProvider>(
@@ -66,7 +69,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   onTap: () => _handleLogout(context),
                   child: Container(
                     padding: EdgeInsets.all(
-                      AppSize.width(0.02),
+                      AppSize.height(0.01),
                     ),
                     decoration: const BoxDecoration(
                       color: Colors.orange,
@@ -75,7 +78,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     child: Icon(
                       Icons.logout,
                       color: AppColors.white,
-                      size: AppSize.width(0.05),
+                      size: AppSize.height(0.03),
                     ),
                   ),
                 );
@@ -167,5 +170,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize =>
-      Size.fromHeight(kToolbarHeight); // keep default (safe)
+      Size.fromHeight(AppSize.height(0.10));
 }

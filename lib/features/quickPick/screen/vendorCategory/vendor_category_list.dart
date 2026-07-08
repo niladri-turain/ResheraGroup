@@ -174,6 +174,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
+        toolbarHeight: AppSize.height(0.10), // Increased height for tablet compatibility
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -196,13 +197,13 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 radius: AppSize.width(0.05),
                 backgroundColor: Colors.white,
                 child: CircleAvatar(
-                  radius: AppSize.width(0.09) - 3,
+                  radius: AppSize.width(0.05) - 2, // Adjusted to fit better
                   backgroundColor: Colors.grey[100],
                   backgroundImage: NetworkImage(widget.bannerLogo),
                 ),
               ),
             ),
-            const SizedBox(width: 10,),
+            SizedBox(width: AppSize.width(0.02)),
             Expanded(
               child: Consumer2<LoginProvider, UserAddressProvider>(
                 builder: (context, loginProvider, addressProvider, child) {
@@ -213,9 +214,10 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        widget.vendorName??"Vendor Categories",
+                        widget.vendorName ?? "Vendor Categories",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -227,7 +229,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                       GestureDetector(
                         onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
                         child: Padding(
-                          padding: const EdgeInsets.only(right: 18.0),
+                          padding: EdgeInsets.only(right: AppSize.width(0.04)),
                           child: Text(
                             displayLocation,
                             style: TextStyle(

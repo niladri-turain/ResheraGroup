@@ -90,12 +90,13 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF7B2CBF),
         elevation: 0,
+        toolbarHeight: AppSize.height(0.10),
         leading: Padding(
           padding: EdgeInsets.all(AppSize.width(0.02)),
           child: CircleAvatar(
             backgroundColor: const Color(0XFF9333ea),
             child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white, size: AppSize.width(0.05)),
+              icon: Icon(Icons.arrow_back, color: Colors.white, size: AppSize.width(0.06)),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -119,13 +120,14 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     "Checkout",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: AppSize.width(0.045),
+                      fontSize: AppSize.width(0.05),
                     ),
                   ),
 
@@ -134,7 +136,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       displayAddress,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: AppSize.width(0.032),
+                        fontSize: AppSize.width(0.035),
                         fontWeight: FontWeight.normal,
                       ),
                       maxLines: 1,
@@ -297,9 +299,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Order Summary',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
                             ),
                             SizedBox(height: AppSize.height(0.02)),
                             _buildBillRow(
@@ -350,9 +352,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Vendor Details',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
                             ),
                             SizedBox(height: AppSize.height(0.02)),
                             Row(
@@ -378,24 +380,24 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                     children: [
                                       Text(
                                         "GST No: ${cartData.vendorGstDetails?.gstNo ?? ''}",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.black87,
-                                          fontSize: 12,
+                                          fontSize: AppSize.width(0.03),
                                         ),
                                       ),
                                       SizedBox(height: AppSize.height(0.001)),
                                       Text(
                                         "GST State Code: ${cartData.vendorGstDetails?.gstStateCode ?? ''}",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.black87,
-                                          fontSize: 12,
+                                          fontSize: AppSize.width(0.03),
                                         ),
                                       ),
                                       Text(
                                         cartData.vendorGstDetails?.gstAddress ?? "",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.black87,
-                                          fontSize: 12,
+                                          fontSize: AppSize.width(0.03),
                                         ),
                                       ),
                                       SizedBox(height: AppSize.height(0.001)),
@@ -417,9 +419,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Billing Address',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
                             ),
                             SizedBox(height: AppSize.height(0.02)),
                             Consumer<LoginProvider>(
@@ -447,26 +449,26 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                         children: [
                                           Text(
                                             billAddress ?? "",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: Colors.black87,
-                                              fontSize: 14,
+                                              fontSize: AppSize.width(0.035),
                                             ),
                                           ),
                                           SizedBox(height: AppSize.height(0.005)),
 
                                           Text(
                                             "Phone: ${loginProvider.userPhone ?? ''}",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: Colors.black87,
-                                              fontSize: 12,
+                                              fontSize: AppSize.width(0.03),
                                             ),
                                           ),
                                           SizedBox(height: AppSize.height(0.005)),
                                           Text(
                                             "Email: ${loginProvider.userEmail ?? ''}",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: Colors.black87,
-                                              fontSize: 12,
+                                              fontSize: AppSize.width(0.03),
                                             ),
                                           ),
                                         ],
@@ -499,9 +501,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Shipping Address',
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
                                     ),
                                     InkWell(
                                       onTap: () {
@@ -522,11 +524,11 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                           borderRadius: BorderRadius.circular(16),
                                           color: Colors.green,
                                         ),
-                                        child: const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
                                           child: Text(
                                             "Change Address",
-                                            style: TextStyle(color: Colors.white, fontSize: 12),
+                                            style: TextStyle(color: Colors.white, fontSize: AppSize.width(0.03)),
                                           ),
                                         ),
                                       ),
@@ -557,26 +559,26 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                         children: [
                                           Text(
                                             displayShippingAddress,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: Colors.black87,
-                                              fontSize: 14,
+                                              fontSize: AppSize.width(0.035),
                                             ),
                                           ),
                                           SizedBox(height: AppSize.height(0.005)),
                                           Text(
                                             "Phone: $phone",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: Colors.black87,
-                                              fontSize: 12,
+                                              fontSize: AppSize.width(0.03),
                                             ),
                                           ),
                                           if (email.isNotEmpty) ...[
                                             SizedBox(height: AppSize.height(0.005)),
                                             Text(
                                               "Email: $email",
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 color: Colors.black87,
-                                                fontSize: 12,
+                                                fontSize: AppSize.width(0.03),
                                               ),
                                             ),
                                           ],
@@ -600,15 +602,15 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Payment Method',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
                             ),
                             SizedBox(height: AppSize.height(0.005)),
                             InkWell(
                               onTap: () => setState(() => selectedPayment = 'COD'),
                               child: SizedBox(
-                                height: AppSize.height(0.04),
+                                height: AppSize.height(0.045),
                                 child: Row(
                                   children: [
                                     Radio<String>(
@@ -624,7 +626,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                       visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
                                     ),
                                     SizedBox(width: AppSize.width(0.02)),
-                                    const Text('By Hand'),
+                                    Text('By Hand', style: TextStyle(fontSize: AppSize.width(0.035))),
                                   ],
                                 ),
                               ),
@@ -632,7 +634,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                             InkWell(
                               onTap: () => setState(() => selectedPayment = 'Online'),
                               child: SizedBox(
-                                height: AppSize.height(0.04),
+                                height: AppSize.height(0.045),
                                 child: Row(
                                   children: [
                                     Radio<String>(
@@ -648,7 +650,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                       visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
                                     ),
                                     SizedBox(width: AppSize.width(0.02)),
-                                    const Text('Online Payment'),
+                                    Text('Online Payment', style: TextStyle(fontSize: AppSize.width(0.035))),
                                   ],
                                 ),
                               ),
@@ -670,9 +672,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Enable GST',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.04)),
                             ),
                             Switch(
                               value: _isGstEnabled,
@@ -697,9 +699,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'GST Details',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.045)),
                               ),
                               SizedBox(height: AppSize.height(0.015)),
                               _buildTextField(
@@ -1000,21 +1002,21 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       children: [
         Icon(icon, size: AppSize.width(0.045), color: Colors.grey),
         SizedBox(width: AppSize.width(0.02)),
-        Text(label, style: const TextStyle(color: Colors.black87)),
+        Text(label, style: TextStyle(color: Colors.black87, fontSize: AppSize.width(0.035))),
         const Spacer(),
         if (oldPrice != null)
           Text(
             oldPrice,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.grey,
               decoration: TextDecoration.lineThrough,
-              fontSize: 12,
+              fontSize: AppSize.width(0.03),
             ),
           ),
         if (oldPrice != null) SizedBox(width: AppSize.width(0.01)),
         Text(
           price,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSize.width(0.035)),
         ),
       ],
     );
@@ -1033,8 +1035,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: AppSize.width(0.035),
             fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
@@ -1045,10 +1047,11 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           maxLines: maxLines,
           maxLength: maxLength,
           textCapitalization: textCapitalization,
+          style: TextStyle(fontSize: AppSize.width(0.035)),
           decoration: InputDecoration(
             counterText: "",
             hintText: hint,
-            hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+            hintStyle: TextStyle(color: Colors.grey, fontSize: AppSize.width(0.035)),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             filled: true,
             fillColor: Colors.grey[50],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_sizes.dart';
 
 class CartCounterWidget extends StatefulWidget {
   final int initialCount;
@@ -73,22 +74,22 @@ class _CartCounterWidgetState extends State<CartCounterWidget> {
           onPressed: widget.isLoading ? null : _increment,
           style: ElevatedButton.styleFrom(
             backgroundColor: widget.activeColor,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: AppSize.height(0.015)),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
           child: widget.isLoading
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+              ? SizedBox(
+                  height: AppSize.width(0.05),
+                  width: AppSize.width(0.05),
+                  child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                 )
               : Text(
                   widget.initialLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: AppSize.width(0.04),
                   ),
                 ),
         ),
@@ -97,7 +98,7 @@ class _CartCounterWidgetState extends State<CartCounterWidget> {
 
     return Container(
       width: double.infinity,
-      height: 55,
+      height: AppSize.height(0.06),
       decoration: BoxDecoration(
         color: widget.activeColor,
         borderRadius: BorderRadius.circular(30),
@@ -107,22 +108,22 @@ class _CartCounterWidgetState extends State<CartCounterWidget> {
         children: [
           IconButton(
             icon: widget.isLoading 
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : const Icon(Icons.remove, color: Colors.white, size: 24),
+              ? SizedBox(width: AppSize.width(0.06), height: AppSize.width(0.06), child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : Icon(Icons.remove, color: Colors.white, size: AppSize.width(0.06)),
             onPressed: widget.isLoading ? null : _decrement,
           ),
           Text(
             '$_count',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: AppSize.width(0.05),
               fontWeight: FontWeight.bold,
             ),
           ),
           IconButton(
             icon: widget.isLoading 
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : const Icon(Icons.add, color: Colors.white, size: 24),
+              ? SizedBox(width: AppSize.width(0.06), height: AppSize.width(0.06), child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : Icon(Icons.add, color: Colors.white, size: AppSize.width(0.06)),
             onPressed: widget.isLoading ? null : _increment,
           ),
         ],
@@ -154,9 +155,9 @@ class FloatingCartBar extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 150,
-          margin: const EdgeInsets.only(bottom: 20),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          width: AppSize.width(0.4),
+          margin: EdgeInsets.only(bottom: AppSize.height(0.02)),
+          padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04), vertical: AppSize.height(0.01)),
           decoration: BoxDecoration(
             color: const Color(0xFF7B2CBF), // Green color from image
             borderRadius: BorderRadius.circular(35),
@@ -177,23 +178,23 @@ class FloatingCartBar extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: AppSize.width(0.035),
                       ),
                     ),
                     Text(
                       '$itemCount Items',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: AppSize.width(0.03),
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+              Icon(Icons.arrow_forward_ios, color: Colors.white, size: AppSize.width(0.035)),
             ],
           ),
         ),

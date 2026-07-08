@@ -40,7 +40,7 @@ class CustomSearchWidget extends StatelessWidget {
         ),
         decoration: InputDecoration(
           isDense: true,
-          contentPadding: EdgeInsets.zero,
+          contentPadding: EdgeInsets.symmetric(vertical: AppSize.height(0.01)),
           border: InputBorder.none,
           hintText: hintText,
           hintStyle: TextStyle(

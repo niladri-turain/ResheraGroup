@@ -24,9 +24,9 @@ class VendorCard extends StatelessWidget {
     AppSize.init(context);
 
     // ডায়নামিক ভ্যালু ক্যালকুলেশন
-    final double logoRadius = AppSize.width(0.09);
-    final double logoOverlapOffset = -AppSize.width(0.13);
-    final double leftPadding = AppSize.width(0.24);
+    final double logoRadius = AppSize.width(0.1);
+    final double logoOverlapOffset = -AppSize.width(0.05);
+    final double leftPadding = AppSize.width(0.28);
 
     return GestureDetector(
       onTap: onTap,
@@ -90,31 +90,33 @@ class VendorCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: AppSize.width(0.045),
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: AppSize.width(0.045),
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       if (vendorId.isNotEmpty)
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 4.0),
-                            child: Text(
-                              "($vendorId)",
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: AppSize.width(0.030),
-                                fontWeight: FontWeight.w400,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4.0),
+                          child: Text(
+                            "($vendorId)",
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: AppSize.width(0.030),
+                              fontWeight: FontWeight.w400,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                     ],

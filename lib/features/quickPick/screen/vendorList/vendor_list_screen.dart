@@ -104,6 +104,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
+        toolbarHeight: AppSize.height(0.08), // Added responsive height
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -115,21 +116,22 @@ class _VendorListScreenState extends State<VendorListScreen> {
               displayLocation = addressProvider.selectedAddress!.address ?? "";
             }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Vendor List",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+            return Padding(
+              padding: EdgeInsets.only(right: AppSize.width(0.04)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min, // Ensure it doesn't take extra space
+                children: [
+                  Text(
+                    "Vendor List",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppSize.width(0.045), // Responsive font size
+                    ),
                   ),
-                ),
-                GestureDetector(
-                  onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 18.0),
+                  GestureDetector(
+                    onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
                     child: Text(
                       displayLocation,
                       style: TextStyle(
@@ -141,8 +143,8 @@ class _VendorListScreenState extends State<VendorListScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),

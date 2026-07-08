@@ -24,28 +24,30 @@ class CheckoutItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: AppSize.height(0.015)),
+      padding: EdgeInsets.symmetric(
+          vertical: AppSize.height(0.015), horizontal: AppSize.width(0.02)),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: image.startsWith('http')
                 ? Image.network(
                     image,
-                    width: AppSize.width(0.15),
-                    height: AppSize.width(0.15),
+                    width: AppSize.width(0.2),
+                    height: AppSize.width(0.2),
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
-                      width: AppSize.width(0.15),
-                      height: AppSize.width(0.15),
+                      width: AppSize.width(0.2),
+                      height: AppSize.width(0.2),
                       color: Colors.grey[200],
                       child: const Icon(Icons.image_not_supported),
                     ),
                   )
                 : Image.asset(
                     image,
-                    width: AppSize.width(0.15),
-                    height: AppSize.width(0.15),
+                    width: AppSize.width(0.2),
+                    height: AppSize.width(0.2),
                     fit: BoxFit.cover,
                   ),
           ),
@@ -58,25 +60,26 @@ class CheckoutItemWidget extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: AppSize.width(0.04),
+                    fontSize: AppSize.width(0.045),
                   ),
                 ),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: AppSize.width(0.03),
+                if (subtitle.isNotEmpty)
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: AppSize.width(0.035),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
+          SizedBox(width: AppSize.width(0.02)),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                height: AppSize.height(0.038),
-
+                height: AppSize.height(0.045),
                 decoration: BoxDecoration(
                   color: const Color(0XFF9333ea),
                   borderRadius: BorderRadius.circular(20),
@@ -85,37 +88,41 @@ class CheckoutItemWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.remove, color: Colors.white, size: AppSize.width(0.04)),
+                      icon: Icon(Icons.remove,
+                          color: Colors.white, size: AppSize.width(0.045)),
                       onPressed: onDecrease,
                       constraints: BoxConstraints(
-                        minWidth: AppSize.width(0.08),
-                        minHeight: AppSize.height(0.04),
+                        minWidth: AppSize.width(0.09),
+                        minHeight: AppSize.height(0.045),
                       ),
                       padding: EdgeInsets.zero,
                     ),
                     Text(
                       '$quantity',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: AppSize.width(0.035)),
                     ),
-
                     IconButton(
-                      icon: Icon(Icons.add, color: Colors.white, size: AppSize.width(0.04)),
+                      icon: Icon(Icons.add,
+                          color: Colors.white, size: AppSize.width(0.045)),
                       onPressed: onIncrease,
                       constraints: BoxConstraints(
-                        minWidth: AppSize.width(0.08),
-                        minHeight: AppSize.height(0.04),
+                        minWidth: AppSize.width(0.09),
+                        minHeight: AppSize.height(0.045),
                       ),
                       padding: EdgeInsets.zero,
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: AppSize.height(0.005)),
+              SizedBox(height: AppSize.height(0.01)),
               RichText(
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: 'Price :',
+                      text: 'Price : ',
                       style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
@@ -145,7 +152,8 @@ class CheckoutItemWidget extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: '₹${((double.tryParse(price) ?? 0) * quantity).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')}',
+                      text:
+                          '₹${((double.tryParse(price) ?? 0) * quantity).toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')}',
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
