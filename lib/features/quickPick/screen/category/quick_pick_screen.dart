@@ -91,133 +91,74 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
   Widget build(BuildContext context) {
     AppSize.init(context);
 
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.white,
+    return Scaffold(
+      backgroundColor: Colors.white,
 
-        /// 🔻 Bottom Navigation Bar
-        bottomNavigationBar: CustomTopNavigationBar(
-          selectedIndex: selectedIndex,
-          onItemSelected: _onNavTap,
-        ),
+      /// 🔻 Bottom Navigation Bar
+      bottomNavigationBar: CustomTopNavigationBar(
+        selectedIndex: selectedIndex,
+        onItemSelected: _onNavTap,
+      ),
 
-        /// 🔹 Main Content
-        body: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Consumer2<LoginProvider, UserAddressProvider>(
-                    builder: (context, loginProvider, addressProvider, child) {
-                      String displayLocation = addressProvider.selectedAddress?.address ?? addressProvider.guestLocation ?? "Fetching location...";
+      /// 🔹 Main Content
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Consumer2<LoginProvider, UserAddressProvider>(
+                  builder: (context, loginProvider, addressProvider, child) {
+                    String displayLocation = addressProvider.selectedAddress?.address ?? addressProvider.guestLocation ?? "Fetching location...";
 
-                      return CustomHeaderWidget(
-                        userName: loginProvider.userName ?? AppStrings.guestUser,
-                        location: displayLocation,
-                        onNotificationTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const CheckOutScreen()),
-                          );
-                        },
-                        onLocationTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
-                        onProfileTap: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MainScreen(initialIndex: 3),
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        onSearch: (value) {},
-                      );
-                    },
-                  ),
-    
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSize.width(0.04),
-                      vertical: AppSize.height(0.02),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppStrings.searchBycate,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: AppSize.width(0.045),
-                            fontWeight: FontWeight.w600,
+                    return CustomHeaderWidget(
+                      userName: loginProvider.userName ?? AppStrings.guestUser,
+                      location: displayLocation,
+                      onNotificationTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                        );
+                      },
+                      onLocationTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
+                      onProfileTap: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MainScreen(initialIndex: 3),
                           ),
+                          (route) => false,
+                        );
+                      },
+                      onSearch: (value) {},
+                    );
+                  },
+                ),
+
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSize.width(0.04),
+                    vertical: AppSize.height(0.02),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppStrings.searchBycate,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: AppSize.width(0.045),
+                          fontWeight: FontWeight.w600,
                         ),
-                        SizedBox(height: AppSize.height(0.015)),
-                        Consumer<CategoryProvider>(
-                          builder: (context, provider, child) {
-                            if (provider.isLoading) {
-                              return GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: 8,
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: AppSize.width(0.03),
-                                  mainAxisSpacing: AppSize.height(0.015),
-                                  childAspectRatio: 1.25,
-                                ),
-                                itemBuilder: (context, index) {
-                                  return Shimmer.fromColors(
-                                    baseColor: Colors.grey[300]!,
-                                    highlightColor: Colors.grey[100]!,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(AppSize.width(0.04)),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }
-    
-                            if (provider.errorMessage != null) {
-                              return SizedBox(
-                                height: AppSize.height(0.4),
-                                width: double.infinity,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      provider.errorMessage!,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    ElevatedButton(
-                                      onPressed: () => provider.fetchCategories(),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF7B2CBF),
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      child: const Text("Retry"),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-    
-                            if (provider.categories.isEmpty) {
-                              return const Center(child: Text("No categories found"));
-                            }
-    
+                      ),
+                      SizedBox(height: AppSize.height(0.015)),
+                      Consumer<CategoryProvider>(
+                        builder: (context, provider, child) {
+                          if (provider.isLoading) {
                             return GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: provider.categories.length,
+                              itemCount: 8,
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                                 crossAxisSpacing: AppSize.width(0.03),
@@ -225,55 +166,112 @@ class _QuickPickScreenState extends State<QuickPickScreen> {
                                 childAspectRatio: 1.25,
                               ),
                               itemBuilder: (context, index) {
-                                final category = provider.categories[index];
-                                return CategoryCard(
-                                  title: category.name,
-                                  imagePath: category.image,
-                                  isNetworkImage: true,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => SubCategoryScreen(
-                                          categoryTitle: category.name,
-                                          categoryId: category.id,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                return Shimmer.fromColors(
+                                  baseColor: Colors.grey[300]!,
+                                  highlightColor: Colors.grey[100]!,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(AppSize.width(0.04)),
+                                    ),
+                                  ),
                                 );
                               },
                             );
-                          },
-                        ),
-                      ],
-                    ),
+                          }
+
+                          if (provider.errorMessage != null) {
+                            return SizedBox(
+                              height: AppSize.height(0.4),
+                              width: double.infinity,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    provider.errorMessage!,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ElevatedButton(
+                                    onPressed: () => provider.fetchCategories(),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF7B2CBF),
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: const Text("Retry"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          if (provider.categories.isEmpty) {
+                            return const Center(child: Text("No categories found"));
+                          }
+
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: provider.categories.length,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: AppSize.width(0.03),
+                              mainAxisSpacing: AppSize.height(0.015),
+                              childAspectRatio: 1.25,
+                            ),
+                            itemBuilder: (context, index) {
+                              final category = provider.categories[index];
+                              return CategoryCard(
+                                title: category.name,
+                                imagePath: category.image,
+                                isNetworkImage: true,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => SubCategoryScreen(
+                                        categoryTitle: category.name,
+                                        categoryId: category.id,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Consumer<ViewCartListProvider>(
-                  builder: (context, cartProvider, child) {
-                    return FloatingCartBar(
-                      itemCount: cartProvider.totalItems,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const CheckOutScreen()),
-                        );
-                      },
-                    );
-                  },
                 ),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Consumer<ViewCartListProvider>(
+                builder: (context, cartProvider, child) {
+                  return FloatingCartBar(
+                    itemCount: cartProvider.totalItems,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CheckOutScreen()),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

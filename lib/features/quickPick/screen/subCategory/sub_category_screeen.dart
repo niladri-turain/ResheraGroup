@@ -16,6 +16,7 @@ import '../../widgets/cart_widgets.dart';
 import '../../widgets/category_card_widget.dart';
 import '../checkout/check_out_screen.dart';
 import '../groceryItems/grocery_items_screens.dart';
+import 'package:resheragroup/main_screen.dart';
 
 import '../../../../widgets/custom_search_widget.dart';
 
@@ -90,9 +91,39 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
     );
   }
 
+  Widget _circleIcon({
+    required IconData icon,
+    required VoidCallback onTap,
+    bool showDot = false,
+    required bool isTablet,
+  }) {
+    double size = isTablet ? 50 : 35;
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: size,
+            width: size,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: isTablet ? 28 : 20,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     AppSize.init(context);
+    bool isTablet = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -101,8 +132,9 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
+        toolbarHeight: isTablet ? 85 : 65,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 25 : 24),
           onPressed: () => Navigator.pop(context),
         ),
         title: Consumer2<LoginProvider, UserAddressProvider>(
@@ -114,29 +146,40 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   widget.categoryTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: isTablet ? 24 : 18,
                   ),
                 ),
+                const SizedBox(height: 4),
                 GestureDetector(
                   onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 18.0),
-                    child: Text(
-                      displayLocation,
-                      style: TextStyle(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
                         color: Colors.white70,
-                        fontSize: AppSize.width(0.032),
-                        fontWeight: FontWeight.normal,
+                        size: isTablet ? 25 : 12,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          displayLocation,
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: isTablet ? 20 : 12,
+                            fontWeight: FontWeight.normal,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -144,27 +187,22 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
           },
         ),
         actions: [
-          // Padding(
-          //   padding:  EdgeInsets.only(right:AppSize.width(0.04)),
-          //   child: Container(
-          //     height: AppSize.width(0.10),
-          //     width: AppSize.width(0.10),
-          //     decoration: BoxDecoration(
-          //       color: Colors.white.withOpacity(0.2),
-          //       shape: BoxShape.circle,
-          //     ),
-          //
-          //     child: IconButton(
-          //       icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-          //       onPressed: () {
-          //         Navigator.push(
-          //           context,
-          //           MaterialPageRoute(builder: (context) => const CheckOutScreen()),
-          //         );
-          //       },
-          //     ),
-          //   ),
-          // ),
+          Padding(
+            padding: EdgeInsets.only(right: isTablet ? 20 : 12),
+            child: _circleIcon(
+              icon: Icons.person_outline,
+              onTap: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MainScreen(initialIndex: 3),
+                  ),
+                  (route) => false,
+                );
+              },
+              isTablet: isTablet,
+            ),
+          ),
         ],
       ),
       body: Stack(
@@ -172,9 +210,14 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
           Column(
             children: [
               Container(
-                padding: EdgeInsets.only(left: AppSize.width(0.04),right:AppSize.width(0.04),bottom: AppSize.width(0.02) ),
+                padding: EdgeInsets.only(
+                  left: isTablet ? 24 : 16,
+                  right: isTablet ? 24 : 16,
+                  bottom: isTablet ? 16 : 10,
+                ),
                 color: const Color(0xFF7B2CBF),
                 child: CustomSearchWidget(
+                  height: isTablet ? 60 : 45,
                   onSearch: (value) {
                     setState(() {
                       _searchQuery = value.toLowerCase();

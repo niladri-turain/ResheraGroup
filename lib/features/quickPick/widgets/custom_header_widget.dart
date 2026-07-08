@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/constants/app_sizes.dart';
-
 import '../../../widgets/custom_search_widget.dart';
 
 class CustomHeaderWidget extends StatelessWidget {
@@ -24,15 +22,14 @@ class CustomHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppSize.init(context);
-    bool isTablet = AppSize.screenWidth > 600;
+    bool isTablet = MediaQuery.of(context).size.width > 600;
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        AppSize.width(0.03),
-        isTablet ? AppSize.height(0.04) : AppSize.height(0.02),
-        AppSize.width(0.03),
-        AppSize.height(0.02),
+        isTablet ? 24 : 16,
+        isTablet ? 30 : 20,
+        isTablet ? 24 : 16,
+        isTablet ? 24 : 16,
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -58,37 +55,50 @@ class CustomHeaderWidget extends StatelessWidget {
                       userName,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: isTablet ? AppSize.width(0.03) : AppSize.width(0.045),
+                        fontSize: isTablet ? 28 : 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: AppSize.height(0.008)),
+                    const SizedBox(height: 6),
                     GestureDetector(
                       onTap: onLocationTap,
-                      child: Text(
-                        location,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: isTablet ? AppSize.width(0.02) : AppSize.width(0.032),
-                        ),
-                        maxLines: 1,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            color: Colors.white70,
+                            size: isTablet ? 25 : 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              location,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: isTablet ? 20 : 13,
+                              ),
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
                       ),
                     )
                   ],
                 ),
               ),
-              Row(
-                children: [
-                  SizedBox(width: AppSize.width(0.03)),
-                  _circleIcon(
-                    icon: Icons.person_outline,
-                    onTap: onProfileTap,
-                    isTablet: isTablet,
-                  ),
-                ],
-              )
+              const SizedBox(width: 16),
+              _circleIcon(
+                icon: Icons.person_outline,
+                onTap: onProfileTap,
+                isTablet: isTablet,
+              ),
             ],
+          ),
+          const SizedBox(height: 20),
+          CustomSearchWidget(
+            onSearch: onSearch,
+            hintText: "Search categories...",
           ),
         ],
       ),
@@ -101,7 +111,7 @@ class CustomHeaderWidget extends StatelessWidget {
     bool showDot = false,
     required bool isTablet,
   }) {
-    double size = isTablet ? AppSize.width(0.07) : AppSize.width(0.10);
+    double size = isTablet ? 55 : 40;
     return Stack(
       children: [
         GestureDetector(
@@ -116,17 +126,17 @@ class CustomHeaderWidget extends StatelessWidget {
             child: Icon(
               icon,
               color: Colors.white,
-              size: isTablet ? AppSize.width(0.035) : AppSize.width(0.05),
+              size: isTablet ? 30 : 22,
             ),
           ),
         ),
         if (showDot)
           Positioned(
-            right: AppSize.width(0.02),
-            top: AppSize.width(0.02),
+            right: 2,
+            top: 2,
             child: Container(
-              height: AppSize.width(0.02),
-              width: AppSize.width(0.02),
+              height: 10,
+              width: 10,
               decoration: const BoxDecoration(
                 color: Colors.red,
                 shape: BoxShape.circle,
