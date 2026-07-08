@@ -27,6 +27,8 @@ class FoodProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isTablet = MediaQuery.of(context).size.width > 600;
+
     // Determine if it's Veg or Non-Veg based on description or name
     bool isVeg = true; // Default to Veg
     final desc = product.description?.toLowerCase() ?? "";
@@ -60,7 +62,7 @@ class FoodProductCard extends StatelessWidget {
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: EdgeInsets.symmetric(vertical: isTablet ? 24 : 16),
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
         ),
@@ -79,7 +81,7 @@ class FoodProductCard extends StatelessWidget {
                     ),
                     child: Icon(
                       Icons.circle,
-                      size: 8,
+                      size: isTablet ? 12 : 8,
                       color: isVeg ? Colors.green : Colors.red,
                     ),
                   ),
@@ -87,27 +89,27 @@ class FoodProductCard extends StatelessWidget {
                   Text(
                     product.name,
                     style: TextStyle(
-                      fontSize: AppSize.width(0.04),
+                      fontSize: isTablet ? 20 : 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   if (product.description != null && product.description!.isNotEmpty)
                     Text(
                       product.description!,
                       style: TextStyle(
                         color: Colors.grey.shade600,
-                        fontSize: AppSize.width(0.032),
+                        fontSize: isTablet ? 16 : 13,
                       ),
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                   const SizedBox(height: 12),
                   Text(
                     "₹${product.finalPrice}",
                     style: TextStyle(
-                      fontSize: AppSize.width(0.04),
+                      fontSize: isTablet ? 20 : 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -124,79 +126,17 @@ class FoodProductCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
                     product.image ?? "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                    height: 110,
-                    width: 110,
+                    height: isTablet ? 150 : 110,
+                    width: isTablet ? 150 : 110,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: 110,
-                      width: 110,
+                      height: isTablet ? 150 : 110,
+                      width: isTablet ? 150 : 110,
                       color: Colors.grey[200],
-                      child: const Icon(Icons.image, color: Colors.grey),
+                      child: Icon(Icons.image, size: isTablet ? 40 : 24, color: Colors.grey),
                     ),
                   ),
                 ),
-                // Positioned(
-                //   bottom: -15,
-                //   child: quantity == 0
-                //       ? Container(
-                //           decoration: BoxDecoration(
-                //             boxShadow: [
-                //               BoxShadow(
-                //                 color: Colors.black.withValues(alpha: 0.1),
-                //                 blurRadius: 4,
-                //                 offset: const Offset(0, 2),
-                //               ),
-                //             ],
-                //           ),
-                //           child: ElevatedButton(
-                //             onPressed: onAdd,
-                //             style: ElevatedButton.styleFrom(
-                //               backgroundColor: Colors.white,
-                //               foregroundColor: const Color(0xFF7B2CBF),
-                //               elevation: 0,
-                //               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                //               shape: RoundedRectangleBorder(
-                //                 borderRadius: BorderRadius.circular(8),
-                //                 side: BorderSide(color: Colors.grey.shade300),
-                //               ),
-                //             ),
-                //             child: const Text("ADD", style: TextStyle(fontWeight: FontWeight.bold)),
-                //           ),
-                //         )
-                //       : Container(
-                //           height: 36,
-                //           width: 90,
-                //           decoration: BoxDecoration(
-                //             color: Colors.white,
-                //             borderRadius: BorderRadius.circular(8),
-                //             border: Border.all(color: Colors.grey.shade300),
-                //             boxShadow: const [
-                //               BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-                //             ],
-                //           ),
-                //           child: Row(
-                //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //             children: [
-                //               IconButton(
-                //                 icon: const Icon(Icons.remove, size: 16, color: Color(0xFF7B2CBF)),
-                //                 onPressed: onRemove,
-                //                 padding: EdgeInsets.zero,
-                //                 constraints: const BoxConstraints(),
-                //               ),
-                //               Text(
-                //                 quantity.toString(),
-                //                 style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF7B2CBF)),
-                //               ),
-                //               IconButton(
-                //                 icon: const Icon(Icons.add, size: 16, color: Color(0xFF7B2CBF)),
-                //                 onPressed: onAdd,
-                //                 padding: EdgeInsets.zero,
-                //                 constraints: const BoxConstraints(),
-                //               ),
-                //             ],
-                //           ),
-                //         ),
-                // ),
               ],
             ),
           ],

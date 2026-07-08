@@ -166,7 +166,8 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    AppSize.init(context);
+    bool isTablet = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -174,9 +175,9 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
-        toolbarHeight: AppSize.height(0.10), // Increased height for tablet compatibility
+        toolbarHeight: isTablet ? 90 : 70,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 25 : 24),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -194,16 +195,16 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                 ],
               ),
               child: CircleAvatar(
-                radius: AppSize.width(0.05),
+                radius: isTablet ? 28 : 20,
                 backgroundColor: Colors.white,
                 child: CircleAvatar(
-                  radius: AppSize.width(0.05) - 2, // Adjusted to fit better
+                  radius: isTablet ? 28 : 18,
                   backgroundColor: Colors.grey[100],
                   backgroundImage: NetworkImage(widget.bannerLogo),
                 ),
               ),
             ),
-            SizedBox(width: AppSize.width(0.02)),
+            const SizedBox(width: 12),
             Expanded(
               child: Consumer2<LoginProvider, UserAddressProvider>(
                 builder: (context, loginProvider, addressProvider, child) {
@@ -221,7 +222,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: AppSize.width(0.045),
+                          fontSize: isTablet ? 24 : 18,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -229,12 +230,12 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                       GestureDetector(
                         onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
                         child: Padding(
-                          padding: EdgeInsets.only(right: AppSize.width(0.04)),
+                          padding: const EdgeInsets.only(right: 16),
                           child: Text(
                             displayLocation,
                             style: TextStyle(
                               color: Colors.white70,
-                              fontSize: AppSize.width(0.032),
+                              fontSize: isTablet ? 20 : 13,
                               fontWeight: FontWeight.normal,
                             ),
                             maxLines: 1,
@@ -249,29 +250,6 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
             ),
           ],
         ),
-        actions: [
-          // Padding(
-          //   padding:  EdgeInsets.only(right:AppSize.width(0.04)),
-          //   child: Container(
-          //     height: AppSize.width(0.10),
-          //     width: AppSize.width(0.10),
-          //     decoration: BoxDecoration(
-          //       color: Colors.white.withOpacity(0.2),
-          //       shape: BoxShape.circle,
-          //     ),
-          //
-          //     child: IconButton(
-          //       icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-          //       onPressed: () {
-          //         Navigator.push(
-          //           context,
-          //           MaterialPageRoute(builder: (context) => const CheckOutScreen()),
-          //         );
-          //       },
-          //     ),
-          //   ),
-          // ),
-        ],
       ),
       body: Stack(
         children: [
@@ -401,6 +379,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
   }
 
   Widget _buildMainLayout(VendorCategoryProvider catProvider) {
+    bool isTablet = MediaQuery.of(context).size.width > 600;
     bool isFashion = widget.categoryName == "Fashion & Lifestyle" ||
         widget.categoryName.toLowerCase().contains("fashion");
     bool isFood = widget.categoryName == "Food & Beverages" ||
@@ -426,12 +405,12 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
 
         // Horizontal circular categories
         Container(
-          height: AppSize.height(0.12),
-          padding: EdgeInsets.symmetric(vertical: AppSize.height(0.01)),
+          height: isTablet ? 150 : 100,
+          padding: EdgeInsets.symmetric(vertical: isTablet ? 16 : 8),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: catProvider.categories.length,
-            padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.02)),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             itemBuilder: (context, index) {
               final category = catProvider.categories[index];
               final isSelected = _selectedCategoryId == category.id;
@@ -442,12 +421,12 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                   });
                 },
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.02)),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Column(
                     children: [
                       Container(
-                        width: AppSize.width(0.14),
-                        height: AppSize.width(0.14),
+                        width: isTablet ? 80 : 56,
+                        height: isTablet ? 80 : 56,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
@@ -461,11 +440,11 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                           ),
                         ),
                       ),
-                      SizedBox(height: AppSize.height(0.005)),
+                      const SizedBox(height: 8),
                       Text(
                         category.name,
                         style: TextStyle(
-                          fontSize: AppSize.width(0.03),
+                          fontSize: isTablet ? 16 : 12,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           color: isSelected ? const Color(0xFF7B2CBF) : Colors.black,
                         ),
@@ -481,21 +460,20 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
         ),
         // Filter and Sort row
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04), vertical: AppSize.height(0.01)),
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? 24 : 16,
+            vertical: isTablet ? 16 : 8,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 "Products",
                 style: TextStyle(
-                  fontSize: AppSize.width(0.045),
+                  fontSize: isTablet ? 22 : 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              // IconButton(
-              //   icon: const Icon(Icons.tune, color: Color(0xFF7B2CBF)),
-              //   onPressed: () => _showFilterBottomSheet(),
-              // ),
             ],
           ),
         ),
@@ -524,17 +502,23 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
 
             // logic to interleave products and banners
             List<dynamic> uiItems = [];
+            int columnCount = isTablet ? 3 : 2;
+
             if (isFashion) {
-              // Grid logic: every 2 products (one row), 1 banner (full width)
-              for (int i = 0; i < products.length; i += 2) {
-                if (i + 1 < products.length) {
-                  uiItems.add([products[i], products[i + 1]]);
-                  if (banners.isNotEmpty) {
-                    int bannerIndex = (i ~/ 2) % banners.length;
-                    uiItems.add(banners[bannerIndex]);
+              // Grid logic
+              for (int i = 0; i < products.length; i += columnCount) {
+                List<dynamic> row = [];
+                for (int j = 0; j < columnCount; j++) {
+                  if (i + j < products.length) {
+                    row.add(products[i + j]);
                   }
-                } else {
-                  uiItems.add([products[i]]);
+                }
+                uiItems.add(row);
+                
+                // Add banner after every 2 rows
+                if ((i + columnCount) % (columnCount * 2) == 0 && banners.isNotEmpty) {
+                  int bannerIndex = ((i + columnCount) ~/ (columnCount * 2) - 1) % banners.length;
+                  uiItems.add(banners[bannerIndex]);
                 }
               }
             } else {
@@ -551,7 +535,7 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
             return ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: AppSize.width(0.04)),
+              padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
               itemCount: uiItems.length,
               itemBuilder: (context, index) {
                 final item = uiItems[index];
@@ -564,10 +548,10 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
                       child: Image.network(
                         item.image ?? "",
                         width: double.infinity,
-                        height: 200,
+                        height: isTablet ? 250 : 200,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
-                          height: 200,
+                          height: isTablet ? 250 : 200,
                           color: Colors.grey[200],
                           child: const Icon(Icons.image, color: Colors.grey),
                         ),
@@ -578,56 +562,42 @@ class _VendorCategoryListState extends State<VendorCategoryList> {
 
                 if (isFashion && item is List<dynamic>) {
                   // It's a row of products for Fashion grid
-                  final productPair = item;
+                  final productRow = item;
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: FashionProductCard(
-                            businessId: productPair[0].business?.businessId ?? "",
-                            id: productPair[0].productId,
-                            title: productPair[0].name,
-                            price: "₹${productPair[0].finalPrice}",
-                            imageUrl: productPair[0].image ??
-                                "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                            description: productPair[0].description ?? "",
-                            categoryId: _selectedCategoryId!,
-                            businessCategoryId: widget.categoryId,
-                            businessSubCategoryId: widget.subCategoryId,
-                            isFashion: isFashion,
-                            onCountChanged: (count) {
-                              _updateQuantity(productPair[0].productId,
-                                  count - (_itemQuantities[productPair[0].productId] ?? 0));
-                            },
-                            initialCount: _itemQuantities[productPair[0].productId] ?? 0,
-                          ),
-                        ),
-                        SizedBox(width: AppSize.width(0.04)),
-                        Expanded(
-                          child: productPair.length > 1
-                              ? FashionProductCard(
-                                  businessId: productPair[1].business?.businessId ?? "",
-                                  id: productPair[1].productId,
-                                  title: productPair[1].name,
-                                  price: "₹${productPair[1].finalPrice}",
-                                  imageUrl: productPair[1].image ??
-                                      "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
-                                  description: productPair[1].description ?? "",
-                                  categoryId: _selectedCategoryId!,
-                                  businessCategoryId: widget.categoryId,
-                                  businessSubCategoryId: widget.subCategoryId,
-                                  isFashion: isFashion,
-                                  onCountChanged: (count) {
-                                    _updateQuantity(productPair[1].productId,
-                                        count - (_itemQuantities[productPair[1].productId] ?? 0));
-                                  },
-                                  initialCount: _itemQuantities[productPair[1].productId] ?? 0,
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
+                      children: List.generate(columnCount, (colIndex) {
+                        if (colIndex < productRow.length) {
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                right: colIndex < columnCount - 1 ? (isTablet ? 16.0 : 8.0) : 0,
+                              ),
+                              child: FashionProductCard(
+                                businessId: productRow[colIndex].business?.businessId ?? "",
+                                id: productRow[colIndex].productId,
+                                title: productRow[colIndex].name,
+                                price: "₹${productRow[colIndex].finalPrice}",
+                                imageUrl: productRow[colIndex].image ??
+                                    "https://bazaar.resheragroup.in/storage/business_sub_category/Restuarant.webp",
+                                description: productRow[colIndex].description ?? "",
+                                categoryId: _selectedCategoryId!,
+                                businessCategoryId: widget.categoryId,
+                                businessSubCategoryId: widget.subCategoryId,
+                                isFashion: isFashion,
+                                onCountChanged: (count) {
+                                  _updateQuantity(productRow[colIndex].productId,
+                                      count - (_itemQuantities[productRow[colIndex].productId] ?? 0));
+                                },
+                                initialCount: _itemQuantities[productRow[colIndex].productId] ?? 0,
+                              ),
+                            ),
+                          );
+                        } else {
+                          return const Expanded(child: SizedBox.shrink());
+                        }
+                      }),
                     ),
                   );
                 } else if (!isFashion) {

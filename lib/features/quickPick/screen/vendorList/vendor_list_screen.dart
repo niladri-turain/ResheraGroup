@@ -15,6 +15,7 @@ import '../../../../widgets/custom_search_widget.dart';
 import '../../provider/vendor_category_provider.dart';
 import '../../provider/vendor_provider.dart';
 import '../../widgets/vender_card_component.dart';
+import 'package:resheragroup/main_screen.dart';
 
 import '../checkout/check_out_screen.dart';
 import '../vendorCategory/vendor_category_list.dart';
@@ -93,9 +94,39 @@ class _VendorListScreenState extends State<VendorListScreen> {
     );
   }
 
+  Widget _circleIcon({
+    required IconData icon,
+    required VoidCallback onTap,
+    bool showDot = false,
+    required bool isTablet,
+  }) {
+    double size = isTablet ? 55 : 40;
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: size,
+            width: size,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: isTablet ? 30 : 22,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     AppSize.init(context);
+    bool isTablet = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -104,9 +135,9 @@ class _VendorListScreenState extends State<VendorListScreen> {
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
-        toolbarHeight: AppSize.height(0.08), // Added responsive height
+        toolbarHeight: isTablet ? 90 : 70,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: isTablet ? 25 : 24),
           onPressed: () => Navigator.pop(context),
         ),
         title: Consumer2<LoginProvider, UserAddressProvider>(
@@ -116,60 +147,65 @@ class _VendorListScreenState extends State<VendorListScreen> {
               displayLocation = addressProvider.selectedAddress!.address ?? "";
             }
 
-            return Padding(
-              padding: EdgeInsets.only(right: AppSize.width(0.04)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min, // Ensure it doesn't take extra space
-                children: [
-                  Text(
-                    "Vendor List",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: AppSize.width(0.045), // Responsive font size
-                    ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Vendor List",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: isTablet ? 24 : 18,
                   ),
-                  GestureDetector(
-                    onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
-                    child: Text(
-                      displayLocation,
-                      style: TextStyle(
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: loginProvider.userName != null ? _showAddressBottomSheet : null,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
                         color: Colors.white70,
-                        fontSize: AppSize.width(0.032),
-                        fontWeight: FontWeight.normal,
+                        size: isTablet ? 20 : 14,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          displayLocation,
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: isTablet ? 20 : 12,
+                            fontWeight: FontWeight.normal,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),
         actions: [
-          // Padding(
-          //   padding:  EdgeInsets.only(right:AppSize.width(0.04)),
-          //   child: Container(
-          //     height: AppSize.width(0.10),
-          //     width: AppSize.width(0.10),
-          //     decoration: BoxDecoration(
-          //       color: Colors.white.withOpacity(0.2),
-          //       shape: BoxShape.circle,
-          //     ),
-          //
-          //     child: IconButton(
-          //       icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-          //       onPressed: () {
-          //         Navigator.push(
-          //           context,
-          //           MaterialPageRoute(builder: (context) => const CheckOutScreen()),
-          //         );
-          //       },
-          //     ),
-          //   ),
-          // ),
+          Padding(
+            padding: EdgeInsets.only(right: isTablet ? 24 : 16),
+            child: _circleIcon(
+              icon: Icons.person_outline,
+              onTap: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MainScreen(initialIndex: 3),
+                  ),
+                  (route) => false,
+                );
+              },
+              isTablet: isTablet,
+            ),
+          ),
         ],
       ),
       body: Stack(
@@ -177,9 +213,15 @@ class _VendorListScreenState extends State<VendorListScreen> {
           Column(
             children: [
               Container(
-                padding: EdgeInsets.only(left: AppSize.width(0.04), right: AppSize.width(0.04), bottom: AppSize.width(0.02)),
+                padding: EdgeInsets.fromLTRB(
+                  isTablet ? 24 : 16,
+                  isTablet ? 4 : 0,
+                  isTablet ? 24 : 16,
+                  isTablet ? 20 : 12,
+                ),
                 color: const Color(0xFF7B2CBF),
                 child: CustomSearchWidget(
+                  height: isTablet ? 60 : 45,
                   onSearch: (value) {
                     setState(() {
                       _searchQuery = value.toLowerCase();
@@ -293,31 +335,37 @@ class _VendorListScreenState extends State<VendorListScreen> {
 
                       return ListView.builder(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.all(AppSize.width(0.04)),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 24 : AppSize.width(0.04),
+                          vertical: isTablet ? 20 : AppSize.width(0.04),
+                        ),
                         itemCount: filteredVendors.length,
                         itemBuilder: (context, index) {
                           final vendor = filteredVendors[index];
-                          return VendorCard(
-                            logo: vendor.kycDetail?.shopPhoto?.url ?? "",
-                            title: vendor.businessName,
-                            vendorId: vendor.user?.vendorId ?? "",
-                            backgroundImage: vendor.kycDetail?.shopPhoto?.url ?? "",
-                            address: vendor.user?.mobile ?? "",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => VendorCategoryList(
-                                    categoryId: widget.categoryId,
-                                    subCategoryId: widget.subCategoryId,
-                                    vendorId: vendor.id,
-                                    categoryName: widget.categoryName,
-                                    bannerLogo: vendor.kycDetail?.shopPhoto?.url ?? "",
-                                    vendorName: vendor.businessName,
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: isTablet ? 24 : 16),
+                            child: VendorCard(
+                              logo: vendor.kycDetail?.shopPhoto?.url ?? "",
+                              title: vendor.businessName,
+                              vendorId: vendor.user?.vendorId ?? "",
+                              backgroundImage: vendor.kycDetail?.shopPhoto?.url ?? "",
+                              address: vendor.user?.mobile ?? "",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VendorCategoryList(
+                                      categoryId: widget.categoryId,
+                                      subCategoryId: widget.subCategoryId,
+                                      vendorId: vendor.id,
+                                      categoryName: widget.categoryName,
+                                      bannerLogo: vendor.kycDetail?.shopPhoto?.url ?? "",
+                                      vendorName: vendor.businessName,
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           );
                         },
                       );
